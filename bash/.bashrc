@@ -119,7 +119,7 @@ set -o vi
 
 command -v bat &>/dev/null && alias cat=bat
 command -v dust &>/dev/null && alias du=dust
-command -v exa &>/dev/null && alias ls="exa -agl" && alias tree="exa -T --git-ignore"
+command -v exa &>/dev/null && alias ls="exa -agl" && alias tree="exa -aT --git-ignore"
 command -v fd &>/dev/null && alias find=fd
 command -v git &>/dev/null && alias gl="git log --decorate --graph --oneline"
 command -v rg &>/dev/null && alias grep=rg
@@ -146,3 +146,6 @@ export PATH="/usr/local/opt/binutils/bin:$PATH"
 
 export DENO_INSTALL="$HOME/.deno"
 export PATH="$DENO_INSTALL/bin:$PATH"
+
+export PATH="$HOME/.jenv/bin:$PATH"
+eval "$(jenv init -)"

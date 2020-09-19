@@ -1,0 +1,62 @@
+{
+  "clangd.path": "/usr/local/opt/llvm/bin/clangd",
+  "coc.preferences.formatOnSaveFiletypes": [
+    "css",
+    "c",
+    "cpp",
+    "javascript",
+    "javascriptreact",
+    "json",
+    "jsonc",
+    "python",
+    "rust",
+    "typescript",
+    "typescriptreact",
+    "xml",
+    "yaml"
+  ],
+  "diagnostic.virtualText": true,
+  "diagnostic.virtualTextPrefix": "// ",
+  "diagnostic.virtualTextLines": 10,
+  "diagnostic.virtualTextLineSeparator": " | ",
+  "diagnostic.errorSign": ">>",
+  "diagnostic.warningSign": "--",
+  "diagnostic.infoSign": "i",
+  "diagnostic.hintSign": "h",
+  "languageserver": {
+    "bash": {
+      "command": "bash-language-server",
+      "args": ["start"],
+      "filetypes": ["sh"],
+      "ignoredRootPaths": ["~"]
+    },
+    "dockerfile": {
+      "command": "docker-langserver",
+      "filetypes": ["dockerfile"],
+      "args": ["--stdio"]
+    },
+    "golang": {
+      "command": "gopls",
+      "args": ["serve", "-debug", "0.0.0.0:8484", "-rpc.trace"],
+      "rootPatterns": ["go.mod"],
+      "filetypes": ["go"]
+    }
+  },
+  "prettier.eslintIntegration": true,
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "es5",
+  "python.formatting.provider": "black",
+  "python.formatting.blackArgs": ["-S", "--line-length=79"],
+  "python.linting.lintOnSave": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.mypyEnabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.venvPath": "~/.virtualenvs",
+  "rust-analyzer.checkOnSave.allFeatures": true,
+  "rust-analyzer.cargo.allFeatures": true,
+  "rust-analyzer.serverPath": "/Users/bcmyers/.cargo/bin/rust-analyzer",
+  "yaml.completion": true,
+  "yaml.format.enable": true,
+  "yaml.hover": true,
+  "yaml.validate": true
+}
