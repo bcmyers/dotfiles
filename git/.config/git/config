@@ -1,0 +1,33 @@
+# Default
+
+[core]
+    editor = nvim
+[commit]
+    gpgsign = true
+[diff]
+    algorithm = patience
+[filter "lfs"]
+    process = git-lfs filter-process
+    required = true
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+[github]
+    user = bcmyers
+[merge]
+    tool = vimdiff
+[mergetool]
+    path = nvim
+[pull]
+    ff = only
+    rebase = true
+[push]
+    default = simple
+[user]
+    name = Brian Myers
+    email = brian.carl.myers@gmail.com
+    signingkey = B86678B99457460F
+
+# Robinhood
+
+[includeIf "gitdir:~/robinhood/"]
+    path = ~/.config/git/robinhood

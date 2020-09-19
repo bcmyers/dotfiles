@@ -1,0 +1,8 @@
+black; python_version > '3.5'
+flake8
+isort; python_version > '3.5'
+mypy; python_version > '3.5'
+pynvim
+setuptools
+setuptools-rust; python_version > '3.5'
+wheel
