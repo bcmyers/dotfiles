@@ -32,6 +32,10 @@ def main():
     bash("brew upgrade --cask")
     bash("brew cleanup")
     bash("deno upgrade", allow_fail=True)
+    bash("pip2 install --upgrade -r /Users/bcmyers/.pyenv/requirements.txt")
+    bash("pip3 install --upgrade -r /Users/bcmyers/.pyenv/requirements.txt")
+    bash("npm update -g")
+    bash("yarn global upgrade")
     bash("rustup update")
     bash("rustup self update")
     bash("cargo install-update --all")
@@ -45,7 +49,6 @@ def main():
     )
     bash("nvim +'PlugInstall' +qall")
     bash("nvim +CocUpdateSync +qall")
-    # bash("sudo /usr/libexec/locate.updatedb")
 
 
 if __name__ == "__main__":
