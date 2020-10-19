@@ -34,21 +34,25 @@ def main():
     bash("deno upgrade", allow_fail=True)
     bash("pip2 install --upgrade -r /Users/bcmyers/.pyenv/requirements.txt")
     bash("pip3 install --upgrade -r /Users/bcmyers/.pyenv/requirements.txt")
-    bash("npm update -g")
+    # bash("npm update -g")
     bash("yarn global upgrade")
     bash("rustup update")
     bash("rustup self update")
     bash("cargo install-update --all")
     bash(
+        "git checkout master",
+        cwd="/Users/bcmyers/opt/rust-analyzer",
+    )
+    bash(
         "git pull",
         cwd="/Users/bcmyers/opt/rust-analyzer",
     )
     bash(
-        "cargo xtask install",
+        "cargo +nightly xtask install",
         cwd="/Users/bcmyers/opt/rust-analyzer",
     )
-    bash("nvim +'PlugInstall' +qall")
-    bash("nvim +CocUpdateSync +qall")
+    # bash("nvim +'PlugInstall' +qall")
+    # bash("nvim +CocUpdateSync +qall")
 
 
 if __name__ == "__main__":

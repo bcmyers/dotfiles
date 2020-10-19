@@ -1,41 +1,32 @@
 "*****************************************************************************
 " Plugins
 "*****************************************************************************
-
 call plug#begin(expand('~/.vim/plugged'))
-" base-16-vim: Base16 color scheme
-Plug 'chriskempson/base16-vim'
-" coc.nvim: Intellisense engine for vim8 & neovim
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" Dockerfile.vim: Vim syntax file & snippets for Docker's Dockerfile
-Plug 'ekalinin/Dockerfile.vim'
-" fzf: Fuzzy finder
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
-" lightline: A light and configurable statusline / tabline plugin
-Plug 'itchyny/lightline.vim'
-" nerdtree: Tree explorer plugin
-Plug 'scrooloose/nerdtree'
-" vim-better-whitespace: Color / remove whitespace at the end of lines
-Plug 'ntpeters/vim-better-whitespace'
-" vim-clang-format: Vim plugin for clang-format, a formatter for C, C++
-Plug 'rhysd/vim-clang-format'
-" vim-commentary: Comment stuff out
-Plug 'tpope/vim-commentary'
-" vim-go: Go development plugin for Vim
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
-" vim-highlightedyank: Make the yanked region apparent!
-Plug 'machakann/vim-highlightedyank'
-" vim-polyglot: A solid language pack (syntax highlighting for many languages)
-Plug 'sheerun/vim-polyglot'
-" A Vim plugin that enhances Rust syntax highlighting
+
+" Plug 'airblade/vim-rooter'
 " Plug 'arzg/vim-rust-syntax-ext'
-" vim-shellcheck: Vim wrapper for ShellCheck, a static analysis tool for shell scripts
 Plug 'itspriddle/vim-shellcheck'
-" vim-tmux-navigator: Seamless navigation between tmux panes and vim splits
-Plug 'christoomey/vim-tmux-navigator'
-" bazel
-Plug 'google/vim-maktaba'
 Plug 'bazelbuild/vim-bazel'
+Plug 'chriskempson/base16-vim'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'ekalinin/Dockerfile.vim'
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+Plug 'google/vim-maktaba'
+Plug 'itchyny/lightline.vim'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'machakann/vim-highlightedyank'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'ntpeters/vim-better-whitespace'
+Plug 'rhysd/vim-clang-format'
+Plug 'scrooloose/nerdtree'
+Plug 'sheerun/vim-polyglot'
+Plug 'tpope/vim-commentary'
+Plug 'Yggdroot/indentLine'
+
+" TODO
+Plug 'tjdevries/colorbuddy.nvim'
+Plug 'rhysd/git-messenger.vim'
 
 call plug#end()
 
@@ -95,6 +86,8 @@ set fileencodings=utf-8
 set fileformats=unix,dos,mac
 set hidden " Enable hidden buffers
 set ignorecase
+set iskeyword-=_
+set list
 set modeline
 set modelines=10
 set mouse=a " Mouse
@@ -111,6 +104,12 @@ set tabstop=4 " Tabs are 4 spaces
 "    on	         on		    delete old backup, backup current file
 set nobackup
 set nowritebackup
+
+" filetypes
+augroup filetypes
+    autocmd!
+    autocmd BufNewFile,BufRead CMakeLists.txt setlocal filetype=cmake
+augroup END
 
 " Remember cursor position
 augroup rememberCursorPosition
@@ -141,6 +140,8 @@ augroup END
 " Undos
 set undofile
 set undodir=/tmp
+
+au! BufWritePost $MYVIMRC source %
 
 "*****************************************************************************
 " Visual
@@ -251,6 +252,10 @@ vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
 vnoremap H <gv
 vnoremap L >gv
+
+" Better tabbing
+vnoremap < <gv
+vnoremap > >gv
 
 "*****************************************************************************
 " coc.nvim
@@ -368,15 +373,24 @@ let g:coc_disable_startup_warning = 1
 "*****************************************************************************
 
 " fzf
-nnoremap <C-p> :FZF<cr>
+nnoremap <Leader>f :FZF<cr>
+nnoremap <Leader>r :Rg<cr>
+
 set wildmode=list:longest,full
 set wildignore+=*.o,*.obj,.git,*.rbc,*.pyc,__pycache__
-let $FZF_DEFAULT_COMMAND =  "find * -path '*/\.*' -prune -o -path 'node_modules/**' -prune -o -path 'target/**' -prune -o -path 'dist/**' -prune -o  -type f -print -o -type l -print 2> /dev/null"
-if executable('rg')
-  let $FZF_DEFAULT_COMMAND = 'rg --files --hidden --follow --glob "!.git/*"'
-  set grepprg=rg\ --vimgrep
-  command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>).'| tr -d "\017"', 1, <bang>0)
-endif
+
+let $FZF_DEFAULT_COMMAND = 'rg --files --hidden --follow --glob "!.git/*"'
+
+set grepprg=rg\ --vimgrep
+
+command! -bang -nargs=* Find
+    \ call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>).'| tr -d "\017"', 1, <bang>0)
+
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep('rg --column --line-number --no-heading --color=always --smart-case -- '.shellescape(<q-args>), 1, fzf#vim#with_preview(), <bang>0)
+
+" indentLine
+let g:indentLine_enabled = 1
 
 " lightline
 set noshowmode
@@ -433,49 +447,3 @@ let g:javascript_enable_domhtmlcss = 1
 
 " vim-markdown
 let g:markdown_enable_spell_checking = 0
-
-"*****************************************************************************
-" File types
-"*****************************************************************************
-
-augroup filetypes
-    autocmd!
-
-    autocmd BufNewFile,BufRead CMakeLists.txt setlocal filetype=cmake
-
-    autocmd FileType c,cpp setlocal colorcolumn=80
-
-    autocmd FileType cmake setlocal colorcolumn=80
-
-    autocmd FileType html setlocal colorcolumn=80
-    autocmd FileType html setlocal shiftwidth=2
-    autocmd FileType html setlocal tabstop=2
-
-    autocmd FileType javascript,typescript setlocal colorcolumn=80
-    autocmd FileType javascript,typescript setlocal shiftwidth=2
-    autocmd FileType javascript,typescript setlocal tabstop=2
-
-    autocmd FileType json setlocal shiftwidth=2
-    autocmd FileType json setlocal tabstop=2
-
-    autocmd FileType mail let g:strip_whitespace_on_save=0
-    autocmd FileType mail setlocal colorcolumn=76
-    autocmd FileType mail setlocal textwidth=76
-    autocmd FileType mail setlocal formatoptions=tcqjaw
-
-    autocmd FileType make setlocal colorcolumn=80
-    autocmd FileType make setlocal noexpandtab
-
-    autocmd FileType python setlocal colorcolumn=80
-    autocmd FileType python setlocal cinwords=if,elif,else,for,while,try,except,finally,def,class,with
-
-    autocmd FileType rust setlocal colorcolumn=80,110
-
-    autocmd FileType sh setlocal colorcolumn=80
-
-    autocmd FileType sql setlocal colorcolumn=80
-    autocmd FileType sql setlocal shiftwidth=2
-    autocmd FileType sql setlocal tabstop=2
-
-    autocmd FileType gitcommit setlocal spell cc=80 tw=79
-augroup END

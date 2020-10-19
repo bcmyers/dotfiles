@@ -88,6 +88,10 @@ else
 	export VISUAL=vi
 fi
 
+if [[ -f "$HOME/local/nvim/bin/nvim" ]]; then
+    PATH="$HOME/local/nvim/bin:$PATH"
+fi
+
 # nvm
 if [[ -d $HOME/.nvm ]]; then
     export NVM_DIR="$HOME/.nvm"
@@ -120,16 +124,16 @@ set -o vi
 command -v bat &>/dev/null && alias cat=bat
 command -v dust &>/dev/null && alias du=dust
 command -v exa &>/dev/null && alias ls="exa -agl" && alias tree="exa -aT --git-ignore"
-command -v fd &>/dev/null && alias find=fd
-command -v git &>/dev/null && alias gl="git log --decorate --graph --oneline"
+# command -v git &>/dev/null && alias gl="git log --decorate --graph --oneline"
+command -v git &>/dev/null && alias gl="git log"
 command -v rg &>/dev/null && alias grep=rg
+command -v terraform &>/dev/null && alias tf=terraform
 
 # rust
-if command -v rustc &>/dev/null; then
-	RUST_SRC_PATH=$(rustc --print sysroot)/lib/rustlib/src/rust/src
-    # TODO: CARGO_BUILD_JOBS
-	export RUST_SRC_PATH
-fi
+# if command -v rustc &>/dev/null; then
+	# RUST_SRC_PATH=$(rustc --print sysroot)/lib/rustlib/src/rust/src
+	# export RUST_SRC_PATH
+# fi
 
 # vault
 if command -v vault &>/dev/null; then
@@ -149,3 +153,16 @@ export PATH="$DENO_INSTALL/bin:$PATH"
 
 export PATH="$HOME/.jenv/bin:$PATH"
 eval "$(jenv init -)"
+
+alias dports='docker container ls --format "table {{.ID}}\t{{.Names}}\t{{.Ports}}" -a'
+
+bind '"\C-f":"cd_with_fzf\n"'
+# bind '"\C-f":"open_with_fzf\n"'
+
+open_with_fzf() {
+    cd $HOME/robinhood && fd -t f -H -I | fzf --preview="less {}" --preview-window=:nohidden | xargs nvim
+}
+
+cd_with_fzf() {
+    cd $HOME/robinhood && cd "$(fd -t d -H -I | fzf --preview="tree -L 2 {}" --preview-window=:nohidden)" && echo "$PWD"
+}
