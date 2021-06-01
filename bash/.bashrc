@@ -135,14 +135,18 @@ is_in_path pipenv
 if [[ -d "$HOME/.pyenv" ]]; then
     export PYENV_ROOT="$HOME/.pyenv"
     export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
     source $(pyenv root)/completions/pyenv.bash
     mkdir -p $(pyenv root)/cache
-    eval "$(pyenv virtualenv-init -)";
+    # eval "$(pyenv virtualenv-init -)";
 fi
 
 # ripgrep
 is_in_path rg && alias grep=rg
+
+# yarn
+is_in_path yarn
+[[ "$?" -eq 0 ]] && export PATH="$(yarn global bin):$PATH"
 
 # Other
 set -o vi
