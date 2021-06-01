@@ -12,7 +12,7 @@ local_path="/tmp/$filename"
     tar -cz --exclude=".git*" -f "$local_path" .password-store
 )
 
-aws --profile bcmyers s3 cp "$local_path" "s3://bcmyers-pass/$filename"
+aws --profile bcmyers s3 cp "$local_path" "s3://bcmyers/pass/$filename"
 
 rm "$local_path"
 
