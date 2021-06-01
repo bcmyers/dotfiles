@@ -8,9 +8,11 @@ mkdir -p ~/log
 platform=$(uname)
 if [[ $platform == "Darwin" ]] ; then
     stow -v --target ~ --no-folding gpg-macos
+    stow -v --target ~ --no-folding nvim-macos
     stow -v --target ~ --no-folding scripts-macos
 else
     stow -v --target ~ --no-folding gpg-linux
+    stow -v --target ~ --no-folding nvim-linux
     stow -v --target ~ --no-folding scripts-linux
 fi
 
