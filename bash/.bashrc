@@ -136,7 +136,8 @@ if [[ -d "$HOME/.pyenv" ]]; then
     export PYENV_ROOT="$HOME/.pyenv"
     export PATH="$PYENV_ROOT/bin:$PATH"
     eval "$(pyenv init --path)"
-    source $(pyenv root)/completions/pyenv.bash
+    completions="$(pyenv root)/completions/pyenv.bash"
+    [[ -r $completions ]] && source $completions
     mkdir -p $(pyenv root)/cache
     # eval "$(pyenv virtualenv-init -)";
 fi
