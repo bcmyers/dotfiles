@@ -392,6 +392,9 @@ command! -bang -nargs=* Rg
 " indentLine
 let g:indentLine_enabled = 1
 
+" go
+let g:go_version_warning = 0
+
 " lightline
 set noshowmode
 let g:lightline = {
