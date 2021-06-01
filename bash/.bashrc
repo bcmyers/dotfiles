@@ -135,7 +135,7 @@ is_in_path pipenv
 if [[ -d "$HOME/.pyenv" ]]; then
     export PYENV_ROOT="$HOME/.pyenv"
     export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init -)"
+    eval "$(pyenv init --path)"
     source $(pyenv root)/completions/pyenv.bash
     mkdir -p $(pyenv root)/cache
     # eval "$(pyenv virtualenv-init -)";
