@@ -13,6 +13,8 @@
     smudge = git-lfs smudge -- %f
 [github]
     user = bcmyers
+[init]
+    defaultBranch = main
 [merge]
     tool = vimdiff
 [mergetool]

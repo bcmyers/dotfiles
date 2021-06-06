@@ -34,9 +34,10 @@ call plug#end()
 " Neovim defaults
 "*****************************************************************************
 
+filetype plugin indent on
+
 if !has('nvim')
     syntax on
-    filetype plugin indent on
     set autoindent
     set autoread
     set background=dark
@@ -437,6 +438,7 @@ augroup vimClangFormat
     autocmd!
     autocmd FileType c ClangFormatAutoEnable
     autocmd FileType cpp ClangFormatAutoEnable
+    autocmd FileType proto ClangFormatAutoEnable
 augroup END
 
 " vim-gitgutter
