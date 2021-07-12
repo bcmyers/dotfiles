@@ -32,7 +32,6 @@ export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
 # rust
 if [[ -d "$HOME/.cargo" ]]; then
     source "$HOME/.cargo/env"
-    export CARGO_TARGET_DIR="$HOME/target"
     alias cb="cargo build"
     alias cc="cargo check"
     alias cr="cargo run"
@@ -89,14 +88,14 @@ if [[ -d "$HOME/go" ]]; then
 fi
 
 # gpg
-is_in_path gpg
-if [[ "$?" -eq 0 ]]; then
-    GPT_TTY=$(tty)
-    export GPG_TTY
-    SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-    export SSH_AUTH_SOCK
-    gpgconf --launch gpg-agent
-fi
+# is_in_path gpg
+# if [[ "$?" -eq 0 ]]; then
+#     GPT_TTY=$(tty)
+#     export GPG_TTY
+#     SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+#     export SSH_AUTH_SOCK
+#     gpgconf --launch gpg-agent
+# fi
 
 # jenv
 if [[ -d "$HOME/.jenv" ]]; then
@@ -110,8 +109,6 @@ is_in_path kubectl && alias k=kubectl
 # nvim
 is_in_path nvim
 if [[ "$?" -eq 0 ]]; then
-    alias nano=nvim
-    alias vi=nvim
     export EDITOR=nvim
     export VISUAL=nvim
     # export PATH="$HOME/local/nvim/bin:$PATH"
@@ -131,15 +128,17 @@ export MANPATH="${MANPATH-$(manpath)}:$NPM_PACKAGES/share/man"
 is_in_path pipenv
 [[ "$?" -eq 0 ]] && eval "$(pipenv --completion)"
 
+# pipx
+eval "$(register-python-argcomplete pipx)"
+export PATH="$PATH:$HOME/.local/bin"
+
 # pyenv and pyenv-virtualenv
 if [[ -d "$HOME/.pyenv" ]]; then
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)" > /dev/null 2>&1
     completions="$(pyenv root)/completions/pyenv.bash"
     [[ -r $completions ]] && source $completions
     mkdir -p $(pyenv root)/cache
-    # eval "$(pyenv virtualenv-init -)";
+    eval "$(pyenv virtualenv-init -)"
 fi
 
 # ripgrep
@@ -153,3 +152,12 @@ is_in_path yarn
 set -o vi
 [[ -d $HOME/bin ]] && export PATH=$HOME/bin:$PATH
 [[ -r ~/.bash_secret ]] && source ~/.bash_secret
+
+export FZF_TMUX_OPTS="-p"
+export FZF_CTRL_R_OPTS="--reverse --preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+source <(kubectl completion bash)
+
+alias luamake=/Users/bcmyers/opt/lua-language-server/3rd/luamake/luamake

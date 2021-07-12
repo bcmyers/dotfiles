@@ -1,16 +1,26 @@
 # Default
 
+[alias]
+    pulls = !git pull --rebase origin master && git submodule update --init --recursive
+    sub = !git submodule update --init --recursive
 [core]
     editor = nvim
+    excludesfile = /Users/bcmyers/.config/git/ignore
+    fsmonitor = rs-git-fsmonitor
 [commit]
     gpgsign = true
+[credential]
+    helper = ""
+    helper = manager-core
+[credential "https://dev.azure.com"]
+    useHttpPath = true
 [diff]
     algorithm = patience
 [filter "lfs"]
-    process = git-lfs filter-process
-    required = true
     clean = git-lfs clean -- %f
     smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
 [github]
     user = bcmyers
 [init]
@@ -33,3 +43,4 @@
 
 [includeIf "gitdir:~/robinhood/"]
     path = ~/.config/git/robinhood
+

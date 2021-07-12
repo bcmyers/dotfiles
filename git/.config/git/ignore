@@ -12,3 +12,5 @@ dmypy.json
 .env
 .venv
 venv/
+
+.python-version

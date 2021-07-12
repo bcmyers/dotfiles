@@ -2,18 +2,18 @@ background_opacity: 1
 
 font:
   normal:
-    family: Menlo
+    family: Inconsolata Nerd Font Mono
     style: Regular
   bold:
-    family: Menlo
+    family: Inconsolata Nerd Font Mono
     style: Bold
   italic:
-    family: Menlo
+    family: Inconsolata Nerd Font Mono
     style: Italic
   bold_italic:
-    family: Menlo
+    family: Inconsolata Nerd Font Mono
     style: Bold Italic
-  size: 14.0
+  size: 16.0
 
 live_config_reload: true
 
