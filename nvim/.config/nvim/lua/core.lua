@@ -71,6 +71,9 @@ vim.api.nvim_exec(
   [[
 set shortmess+=c
 
+au ColorScheme * hi! Normal ctermbg=NONE guibg=NONE
+au ColorScheme * hi! NonText ctermbg=NONE guibg=NONE guifg=NONE ctermfg=NONE
+
 augroup highlight_yank
     autocmd!
     au TextYankPost * silent! lua vim.highlight.on_yank{higroup="IncSearch", timeout=1000}
