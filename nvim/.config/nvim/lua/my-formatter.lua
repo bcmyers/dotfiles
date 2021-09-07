@@ -37,6 +37,7 @@ require("formatter").setup(
       html = {prettier},
       javascript = {prettier},
       json = {prettier},
+      json5 = {prettier},
       lua = {luafmt},
       markdown = {prettier},
       python = {black},

@@ -71,8 +71,10 @@ vim.api.nvim_exec(
   [[
 set shortmess+=c
 
-au ColorScheme * hi! Normal ctermbg=NONE guibg=NONE
-au ColorScheme * hi! NonText ctermbg=NONE guibg=NONE guifg=NONE ctermfg=NONE
+augroup jenkinsfile
+    autocmd!
+    au BufNewFile,BufRead Jenkinsfile* setf groovy
+augroup END
 
 augroup highlight_yank
     autocmd!

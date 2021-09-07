@@ -28,16 +28,28 @@ require("packer").startup(
     use "Yggdroot/indentLine"
 
     -- lightline
-    use "itchyny/lightline.vim"
+    -- use "itchyny/lightline.vim"
 
     -- lspconfig
     use "neovim/nvim-lspconfig"
+
+    -- lspsaga
+    use "glepnir/lspsaga.nvim"
 
     -- lsp-signature
     use "ray-x/lsp_signature.nvim"
 
     -- lsp-utils
     use {"RishabhRD/nvim-lsputils", requires = {"RishabhRD/popfix"}}
+
+    -- lualine
+    use {"hoob3rt/lualine.nvim", requires = {"kyazdani42/nvim-web-devicons", opt = true}}
+
+    -- nerdtree
+    use {"preservim/nerdtree"}
+
+    -- nvim-tree
+    -- use {"kyazdani42/nvim-tree.lua", requires = {"kyazdani42/nvim-web-devicons"}}
 
     -- popup
     use {"nvim-lua/popup.nvim", requires = {"nvim-lua/plenary.nvim"}}
@@ -53,9 +65,6 @@ require("packer").startup(
 
     -- tmux-navigator
     use "christoomey/vim-tmux-navigator"
-
-    -- tree
-    use {"kyazdani42/nvim-tree.lua", requires = {"kyazdani42/nvim-web-devicons"}}
 
     -- treesitter
     use {"nvim-treesitter/nvim-treesitter", run = ":TSUpdate"}
@@ -82,11 +91,13 @@ require("my-compe")
 require("my-formatter")
 require("my-gitsigns")
 require("my-indentline")
-require("my-lightline")
+require("my-lsp-saga")
 require("my-lsp-signature")
 require("my-lsp-utils")
+require("my-lualine")
+require("my-nerdtree")
+-- require("my-nvim-tree")
 require("my-rust-tools")
 require("my-telescope")
 require("my-tmux-navigator")
-require("my-tree")
 require("my-treesitter")

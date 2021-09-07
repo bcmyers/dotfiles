@@ -16,6 +16,8 @@
     useHttpPath = true
 [diff]
     algorithm = patience
+[diff "nodiff"]
+    command = /usr/bin/true
 [filter "lfs"]
     clean = git-lfs clean -- %f
     smudge = git-lfs smudge -- %f
@@ -43,4 +45,5 @@
 
 [includeIf "gitdir:~/robinhood/"]
     path = ~/.config/git/robinhood
+
 

@@ -23,8 +23,10 @@ fi
 # basic
 alias c=clear
 alias ls="ls -al"
+export CPPFLAGS=-I/usr/local/opt/openssl@1.1/include
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
+export LDFLAGS=-L/usr/local/opt/openssl@1.1/lib
 export LC_ALL=en_US.UTF-8
 export PAGER=less
 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
@@ -33,7 +35,7 @@ export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
 if [[ -d "$HOME/.cargo" ]]; then
     source "$HOME/.cargo/env"
     alias cb="cargo build"
-    alias cc="cargo check"
+    alias cc="cargo clippy"
     alias cr="cargo run"
     alias ct="cargo test"
 fi
@@ -55,16 +57,16 @@ prompt_command() {
 PROMPT_COMMAND=prompt_command
 
 # bat
-is_in_path bat && alias cat=bat
+alias cat=bat
 
 # bazelisk
-is_in_path bazelisk && alias bazel=bazelisk
+alias bazel=bazelisk
 
 # exa
 is_in_path exa
 if [[ "$?" -eq 0 ]]; then
-    alias ls="exa -agl --color=always"
-    alias tree="exa -aT --color=always --git-ignore"
+    ls="exa -agl --color=always"
+    tree="exa -aT --color=always --git-ignore"
 fi
 
 # deno
@@ -88,14 +90,19 @@ if [[ -d "$HOME/go" ]]; then
 fi
 
 # gpg
-# is_in_path gpg
-# if [[ "$?" -eq 0 ]]; then
-#     GPT_TTY=$(tty)
-#     export GPG_TTY
-#     SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-#     export SSH_AUTH_SOCK
-#     gpgconf --launch gpg-agent
-# fi
+is_in_path gpg
+if [[ "$?" -eq 0 ]]; then
+    gpg-connect-agent /bye > /dev/null 2>&1
+    GPG_TTY=$(tty)
+    export GPG_TTY
+fi
+
+# fzf
+[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
+export FZF_TMUX_OPTS="-p"
+export FZF_CTRL_R_OPTS="--reverse --preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
+
+
 
 # jenv
 if [[ -d "$HOME/.jenv" ]]; then
@@ -103,15 +110,36 @@ if [[ -d "$HOME/.jenv" ]]; then
     eval "$(jenv init -)"
 fi
 
-# kubetl
-is_in_path kubectl && alias k=kubectl
+# k8s
+alias k="kubectl"
+alias kg="k get all"
+alias kgp="k get pods"
+alias kdp="k describe pods"
+alias klogs="k logs -c app"
+alias kc="k config"
+alias kcontext="kc use-context"
+alias knamespace="kc set-context --current --namespace"
+alias kaf="k apply -f"
+
+source <(kubectl completion bash)
+
+function kgetcontext() {
+    kubectl config get-contexts
+}
+
+function kusecontext() {
+    kubectl config use-context "$1"
+}
+
+function kusenamespace() {
+    kubectl config set-context --current "--namespace=$1"
+}
 
 # nvim
 is_in_path nvim
 if [[ "$?" -eq 0 ]]; then
     export EDITOR=nvim
     export VISUAL=nvim
-    # export PATH="$HOME/local/nvim/bin:$PATH"
 fi
 
 # nvm
@@ -126,38 +154,37 @@ export MANPATH="${MANPATH-$(manpath)}:$NPM_PACKAGES/share/man"
 
 # pipenv
 is_in_path pipenv
-[[ "$?" -eq 0 ]] && eval "$(pipenv --completion)"
+if [[ "$?" -eq 0 ]]; then
+    eval "$(pipenv --completion)"
+fi
 
 # pipx
 eval "$(register-python-argcomplete pipx)"
 export PATH="$PATH:$HOME/.local/bin"
 
-# pyenv and pyenv-virtualenv
+# pyenv, pyenv-virtualenv, and pyenv-virtualenvwrapper
 if [[ -d "$HOME/.pyenv" ]]; then
-    eval "$(pyenv init -)" > /dev/null 2>&1
-    completions="$(pyenv root)/completions/pyenv.bash"
-    [[ -r $completions ]] && source $completions
-    mkdir -p $(pyenv root)/cache
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PYENV_SHELL=bash
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+    eval "$(pyenv init --path)"
     eval "$(pyenv virtualenv-init -)"
+    export PYENV_VIRTUALENVWRAPPER_PREFER_PYVENV="true"
+    export WORKON_HOME="$HOME/.virtualenvs"
+    pyenv virtualenvwrapper_lazy
 fi
 
 # ripgrep
-is_in_path rg && alias grep=rg
+alias grep=rg
 
 # yarn
 is_in_path yarn
-[[ "$?" -eq 0 ]] && export PATH="$(yarn global bin):$PATH"
+if [[ "$?" -eq 0 ]]; then
+    export PATH="$(yarn global bin):$PATH"
+fi
 
 # Other
 set -o vi
 [[ -d $HOME/bin ]] && export PATH=$HOME/bin:$PATH
 [[ -r ~/.bash_secret ]] && source ~/.bash_secret
-
-export FZF_TMUX_OPTS="-p"
-export FZF_CTRL_R_OPTS="--reverse --preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-source <(kubectl completion bash)
-
-alias luamake=/Users/bcmyers/opt/lua-language-server/3rd/luamake/luamake
