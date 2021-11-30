@@ -22,7 +22,7 @@ require("packer").startup(
     use "mhartington/formatter.nvim"
 
     -- gitsigns
-    use {"lewis6991/gitsigns.nvim", requires = {"nvim-lua/plenary.nvim"}}
+    -- use {"lewis6991/gitsigns.nvim", requires = {"nvim-lua/plenary.nvim"}}
 
     -- indentLine
     use "Yggdroot/indentLine"
@@ -34,7 +34,7 @@ require("packer").startup(
     use "neovim/nvim-lspconfig"
 
     -- lspsaga
-    use "glepnir/lspsaga.nvim"
+    -- use "glepnir/lspsaga.nvim"
 
     -- lsp-signature
     use "ray-x/lsp_signature.nvim"
@@ -47,6 +47,9 @@ require("packer").startup(
 
     -- nerdtree
     use {"preservim/nerdtree"}
+
+    -- nvim-startup
+    use {"henriquehbr/nvim-startup.lua"}
 
     -- nvim-tree
     -- use {"kyazdani42/nvim-tree.lua", requires = {"kyazdani42/nvim-web-devicons"}}
@@ -71,11 +74,11 @@ require("packer").startup(
 
     -- colorschemes
     use "chriskempson/base16-vim"
-    use "fcpg/vim-fahrenheit"
-    use "gustavo-hms/garbo"
-    use "morhetz/gruvbox"
-    use "pineapplegiant/spaceduck"
-    use "tomasr/molokai"
+    -- use "fcpg/vim-fahrenheit"
+    -- use "gustavo-hms/garbo"
+    -- use "morhetz/gruvbox"
+    -- use "pineapplegiant/spaceduck"
+    -- use "tomasr/molokai"
   end
 )
 
@@ -89,9 +92,9 @@ require("my-better-whitespace")
 require("my-commentary")
 require("my-compe")
 require("my-formatter")
-require("my-gitsigns")
+-- require("my-gitsigns")
 require("my-indentline")
-require("my-lsp-saga")
+-- require("my-lsp-saga")
 require("my-lsp-signature")
 require("my-lsp-utils")
 require("my-lualine")
@@ -101,3 +104,6 @@ require("my-rust-tools")
 require("my-telescope")
 require("my-tmux-navigator")
 require("my-treesitter")
+
+
+require 'nvim-startup'.setup()

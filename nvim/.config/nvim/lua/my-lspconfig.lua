@@ -246,6 +246,12 @@ require("rust-tools").setup(
     -- these override the defaults set by rust-tools.nvim
     -- see https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md#rust_analyzer
     server = {
+      -- ["rust-analyzer"] = {
+      --   cargo = {
+      --     allFeatures = true,
+      --   },
+      -- },
+      -- ["rust-analyzer.checkOnSave.allFeatures"] = true,
       on_attach = function(client, bufnr)
         local opts = {noremap = true, silent = true}
         vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>f", ":lua vim.lsp.buf.formatting()<CR>", opts)
@@ -255,12 +261,12 @@ require("rust-tools").setup(
   }
 )
 
-vim.api.nvim_exec(
-  [[
-augroup FormatSyncAutogroup
-  autocmd!
-  autocmd BufWritePre *.py,*.rs lua vim.lsp.buf.formatting_sync(nil, 2000)
-augroup END
-]],
-  true
-)
+-- vim.api.nvim_exec(
+--   [[
+-- augroup FormatSyncAutogroup
+--   autocmd!
+--   autocmd BufWritePre *.py,*.rs lua vim.lsp.buf.formatting_sync(nil, 2000)
+-- augroup END
+-- ]],
+--   true
+-- )

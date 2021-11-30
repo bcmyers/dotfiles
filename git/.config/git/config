@@ -6,7 +6,6 @@
 [core]
     editor = nvim
     excludesfile = /Users/bcmyers/.config/git/ignore
-    fsmonitor = rs-git-fsmonitor
 [commit]
     gpgsign = true
 [credential]
@@ -36,6 +35,8 @@
     rebase = true
 [push]
     default = simple
+# [status]
+#     showUntrackedFiles = no
 [user]
     name = Brian Myers
     email = brian.carl.myers@gmail.com
@@ -45,5 +46,3 @@
 
 [includeIf "gitdir:~/robinhood/"]
     path = ~/.config/git/robinhood
-
-

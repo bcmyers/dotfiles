@@ -35,7 +35,7 @@ export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
 if [[ -d "$HOME/.cargo" ]]; then
     source "$HOME/.cargo/env"
     alias cb="cargo build"
-    alias cc="cargo clippy"
+    alias cc="cargo clippy --all-features --all"
     alias cr="cargo run"
     alias ct="cargo test"
 fi
@@ -56,6 +56,9 @@ prompt_command() {
 }
 PROMPT_COMMAND=prompt_command
 
+# bash-completion
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+
 # bat
 alias cat=bat
 
@@ -65,8 +68,8 @@ alias bazel=bazelisk
 # exa
 is_in_path exa
 if [[ "$?" -eq 0 ]]; then
-    ls="exa -agl --color=always"
-    tree="exa -aT --color=always --git-ignore"
+    alias ls="exa -agl --color=always"
+    alias tree="exa -aT --color=always --git-ignore"
 fi
 
 # deno
@@ -89,20 +92,10 @@ if [[ -d "$HOME/go" ]]; then
     export PATH=$GOBIN:$PATH
 fi
 
-# gpg
-is_in_path gpg
-if [[ "$?" -eq 0 ]]; then
-    gpg-connect-agent /bye > /dev/null 2>&1
-    GPG_TTY=$(tty)
-    export GPG_TTY
-fi
-
 # fzf
 [[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
 export FZF_TMUX_OPTS="-p"
 export FZF_CTRL_R_OPTS="--reverse --preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
-
-
 
 # jenv
 if [[ -d "$HOME/.jenv" ]]; then
@@ -136,6 +129,7 @@ function kusenamespace() {
 }
 
 # nvim
+export PATH="$PATH:$HOME/bin/nvim/bin"
 is_in_path nvim
 if [[ "$?" -eq 0 ]]; then
     export EDITOR=nvim
@@ -178,6 +172,9 @@ fi
 # ripgrep
 alias grep=rg
 
+# solana
+export PATH="$PATH:$HOME/.local/share/solana/install/active_release/bin"
+
 # yarn
 is_in_path yarn
 if [[ "$?" -eq 0 ]]; then
@@ -188,3 +185,8 @@ fi
 set -o vi
 [[ -d $HOME/bin ]] && export PATH=$HOME/bin:$PATH
 [[ -r ~/.bash_secret ]] && source ~/.bash_secret
+
+alias nvim="nvim --startuptime /tmp/nvim-startuptime"
+
+export PATH="/usr/local/opt/php@7.4/bin:$PATH"
+export PATH="/usr/local/opt/php@7.4/sbin:$PATH"

@@ -39,8 +39,8 @@ def main():
     bash("rustup update")
     bash("rustup self update")
     bash("cargo install-update --all")
-    bash("cargo cache --autoclean")
-    # bash("cargo cache --autoclean-expensive")
+    # bash("cargo cache --autoclean")
+    bash("cargo cache --autoclean-expensive")
     bash(
         "git checkout master",
         cwd="/Users/bcmyers/opt/rust-analyzer",
@@ -53,6 +53,7 @@ def main():
         "cargo +nightly xtask install",
         cwd="/Users/bcmyers/opt/rust-analyzer",
     )
+    bash("solana-install update")
     # bash("nvim +'PlugInstall' +qall")
     # bash("nvim +CocUpdateSync +qall")
 
