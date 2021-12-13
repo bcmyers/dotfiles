@@ -103,6 +103,11 @@ if [[ -d "$HOME/.jenv" ]]; then
     eval "$(jenv init -)"
 fi
 
+# just
+alias j=just
+source <(just --completions bash)
+complete -F _just -o bashdefault -o default j
+
 # k8s
 alias k="kubectl"
 alias kg="k get all"

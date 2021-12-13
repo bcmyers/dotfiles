@@ -196,17 +196,20 @@ require("rust-tools").setup(
       -- this overrides the default hover handler so something like lspsaga.nvim's hover would be overriden by this
       -- default: true
       hover_with_actions = true,
-      -- These apply to the default RustRunnables command
-      runnables = {
-        -- whether to use telescope for selection menu or not
-        -- default: true
-        use_telescope = true
-
-        -- rest of the opts are forwarded to telescope
-      },
+      -- how to execute terminal commands
+      -- options right now: termopen / quickfix
+      executor = require("rust-tools/executors").termopen,
       -- These apply to the default RustSetInlayHints command
       inlay_hints = {
-        -- wheter to show parameter hints with the inlay hints or not
+        -- Only show inlay hints for the current line
+        only_current_line = false,
+        -- Event which triggers a refersh of the inlay hints.
+        -- You can make this "CursorMoved" or "CursorMoved,CursorMovedI" but
+        -- not that this may cause  higher CPU usage.
+        -- This option is only respected when only_current_line and
+        -- autoSetHints both are true.
+        only_current_line_autocmd = "CursorHold",
+        -- whether to show parameter hints with the inlay hints or not
         -- default: true
         show_parameter_hints = true,
         -- prefix for parameter hints
@@ -222,7 +225,9 @@ require("rust-tools").setup(
         -- whether to align to the extreme right or not
         right_align = false,
         -- padding from the right if right_align is true
-        right_align_padding = 7
+        right_align_padding = 7,
+        -- The color of the hints
+        highlight = "Comment"
       },
       hover_actions = {
         -- the border that is used for the hover window
@@ -240,18 +245,40 @@ require("rust-tools").setup(
         -- whether the hover action window gets automatically focused
         -- default: false
         auto_focus = false
+      },
+      -- settings for showing the crate graph based on graphviz and the dot
+      -- command
+      crate_graph = {
+        -- Backend used for displaying the graph
+        -- see: https://graphviz.org/docs/outputs/
+        -- default: x11
+        backend = "x11",
+        -- where to store the output, nil for no output stored (relative
+        -- path from pwd)
+        -- default: nil
+        output = nil,
+        -- true for all crates.io and external crates, false only the local
+        -- crates
+        -- default: true
+        full = true
       }
     },
     -- all the opts to send to nvim-lspconfig
     -- these override the defaults set by rust-tools.nvim
     -- see https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md#rust_analyzer
     server = {
-      -- ["rust-analyzer"] = {
-      --   cargo = {
-      --     allFeatures = true,
-      --   },
-      -- },
-      -- ["rust-analyzer.checkOnSave.allFeatures"] = true,
+      settings = {
+        ["rust-analyzer"] = {
+          cargo = {
+            allFeatures = true
+          },
+          checkOnSave = {
+            allTargets = true,
+            command = "clippy",
+            enable = true
+          }
+        }
+      },
       on_attach = function(client, bufnr)
         local opts = {noremap = true, silent = true}
         vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>f", ":lua vim.lsp.buf.formatting()<CR>", opts)
@@ -261,12 +288,12 @@ require("rust-tools").setup(
   }
 )
 
--- vim.api.nvim_exec(
---   [[
--- augroup FormatSyncAutogroup
---   autocmd!
---   autocmd BufWritePre *.py,*.rs lua vim.lsp.buf.formatting_sync(nil, 2000)
--- augroup END
--- ]],
---   true
--- )
+vim.api.nvim_exec(
+  [[
+augroup FormatSyncAutogroup
+  autocmd!
+  autocmd BufWritePre *.go,*.py,*.rs lua vim.lsp.buf.formatting_sync(nil, 2000)
+augroup END
+]],
+  true
+)

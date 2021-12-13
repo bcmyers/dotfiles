@@ -18,6 +18,16 @@ require("packer").startup(
     -- compe
     use {"hrsh7th/nvim-compe", requires = {"hrsh7th/vim-vsnip"}}
 
+    -- crates
+    use {
+        'Saecki/crates.nvim',
+        event = { "BufRead Cargo.toml" },
+        requires = { { 'nvim-lua/plenary.nvim' } },
+        config = function()
+            require('crates').setup()
+        end,
+    }
+
     -- formatter
     use "mhartington/formatter.nvim"
 
@@ -71,6 +81,9 @@ require("packer").startup(
 
     -- treesitter
     use {"nvim-treesitter/nvim-treesitter", run = ":TSUpdate"}
+
+    --- vim-just
+    use "NoahTheDuke/vim-just"
 
     -- colorschemes
     use "chriskempson/base16-vim"
