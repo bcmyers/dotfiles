@@ -30,6 +30,7 @@ export LDFLAGS=-L/usr/local/opt/openssl@1.1/lib
 export LC_ALL=en_US.UTF-8
 export PAGER=less
 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
+export OPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1
 
 # rust
 if [[ -d "$HOME/.cargo" ]]; then
@@ -195,3 +196,5 @@ alias nvim="nvim --startuptime /tmp/nvim-startuptime"
 
 export PATH="/usr/local/opt/php@7.4/bin:$PATH"
 export PATH="/usr/local/opt/php@7.4/sbin:$PATH"
+
+export PATH="/usr/local/opt/kubectl@1.23/bin:$PATH"

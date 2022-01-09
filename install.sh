@@ -7,8 +7,10 @@ mkdir -p ~/log
 
 platform=$(uname)
 if [[ $platform == "Darwin" ]] ; then
+    stow -v --target ~ --no-folding bash-macos
     stow -v --target ~ --no-folding gpg-macos
     stow -v --target ~ --no-folding scripts-macos
+    stow -v --target ~ --no-folding spotifyd-macos
 else
     stow -v --target ~ --no-folding gpg-linux
     stow -v --target ~ --no-folding scripts-linux

@@ -17,7 +17,7 @@ require "lualine".setup {
     },
     lualine_c = {},
     lualine_x = {},
-    lualine_y = {{"diagnostics", sources = {"nvim_lsp"}}, "branch", "encoding", "fileformat", "location"},
+    lualine_y = {{"diagnostics", sources = {"nvim_diagnostic"}}, "branch", "encoding", "fileformat", "location"},
     lualine_z = {"filetype"}
   },
   inactive_sections = {
