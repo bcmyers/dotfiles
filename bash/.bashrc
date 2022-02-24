@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# if not running interactively, return
-[[ $- != *i* ]] && return
-
 function error() {
   if [[ ! -z $1 ]]; then
     echo -e "$1"
@@ -144,16 +141,6 @@ if [[ "$?" -eq 0 ]]; then
   alias gd="git diff -- :/ ':(exclude,top)*Cargo.lock'"
   alias gf="git log --follow --date=short --pretty=format:'%C(bold blue)%ad%C(reset) %C(bold yellow)%p %h%C(reset) %s %C(bold red)%an%C(reset)' -- ."
   alias gl="git log --decorate --graph --oneline"
-fi
-
-# gpg
-is_in_path gpgconf
-if [[ "$?" -eq 0 ]]; then
-  export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-  gpgconf --kill gpg-agent
-  gpgconf --launch gpg-agent
-  GPG_TTY=$(tty)
-  export GPG_TTY
 fi
 
 # go
