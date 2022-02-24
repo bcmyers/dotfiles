@@ -163,12 +163,6 @@ if [[ "$?" -eq 0 ]]; then
   fi
   export GPG_TTY=$(tty)
   gpg-connect-agent updatestartuptty /bye >/dev/null
-  # echo "I ran"
-  # gpgconf --kill gpg-agent
-  # gpgconf --launch gpg-agent
-  # export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-  # GPG_TTY=$(tty)
-  # export GPG_TTY
 fi
 
 # jenv
