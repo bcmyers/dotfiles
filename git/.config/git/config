@@ -1,48 +1,46 @@
-# Default
+# vi: ft=gitconfig:expandtab:shiftwidth=2:softtabstop=0:tabstop=2
 
 [alias]
-    pulls = !git pull --rebase origin master && git submodule update --init --recursive
-    sub = !git submodule update --init --recursive
+  pulls = !git pull --rebase origin master && git submodule update --init --recursive
+  sub = !git submodule update --init --recursive
 [core]
-    editor = nvim
-    excludesfile = /Users/bcmyers/.config/git/ignore
+  editor = nvim
+  excludesfile = /Users/bcmyers/.config/git/ignore
 [commit]
-    gpgsign = true
+  gpgsign = true
 [credential]
-    helper = ""
-    helper = manager-core
+  helper = ""
+  helper = manager-core
 [credential "https://dev.azure.com"]
-    useHttpPath = true
+  useHttpPath = true
 [diff]
-    algorithm = patience
+  algorithm = patience
 [diff "nodiff"]
-    command = /usr/bin/true
+  command = /usr/bin/true
 [filter "lfs"]
-    clean = git-lfs clean -- %f
-    smudge = git-lfs smudge -- %f
-    process = git-lfs filter-process
-    required = true
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
 [github]
-    user = bcmyers
+  user = bcmyers
 [init]
-    defaultBranch = main
+  defaultBranch = main
 [merge]
-    tool = vimdiff
+  tool = vimdiff
 [mergetool]
-    path = nvim
+  path = nvim
 [pull]
-    ff = only
-    rebase = true
+  ff = only
+  rebase = true
 [push]
-    default = simple
-# [status]
-#     showUntrackedFiles = no
+  default = simple
 [user]
-    name = Brian Myers
-    email = brian.carl.myers@gmail.com
-    signingkey = B86678B99457460F
+  name = Brian Myers
+  email = brian.carl.myers@gmail.com
+  signingkey = B86678B99457460F
 
 # Robinhood
 
-[includeIf "gitdir:~/robinhood/"]
-    path = ~/.config/git/robinhood
+[includeIf "gitdir:~/robinhood/rh"]
+  path = ~/.config/git/robinhood

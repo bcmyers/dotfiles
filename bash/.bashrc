@@ -3,198 +3,267 @@
 # if not running interactively, return
 [[ $- != *i* ]] && return
 
+function error() {
+  if [[ ! -z $1 ]]; then
+    echo -e "$1"
+  fi
+  exit 1
+}
+
 function is_in_path {
   builtin type -P "$1" &> /dev/null
 }
 
+export EDITOR=vi
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export PAGER=less
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
+export VISUAL=vi
+
+mkdir -p $HOME/.local/bin
+mkdir -p $HOME/.local/sbin
+
 # platform-specific
-platform=$(uname)
-prompt_color="yellow"
-if [[ $platform == "Darwin" ]] ; then
+case $(uname) in
+  Darwin)
+    case $(uname -p) in
+      i386)
+        local="/usr/local"
+        prompt_color="blue"
+        ;;
+      arm)
+        prompt_color="green"
+        if [[ $(sysctl -n sysctl.proc_translated) = "1" ]]; then
+          local="/usr/local"
+        else
+          local="/opt/homebrew"
+        fi
+        ;;
+      *)
+        error "unreachable"
+        ;;
+    esac
+    export PATH="${HOME}/.local/bin:${local}/bin:/usr/bin:/bin:${HOME}/.local/sbin:${local}/sbin:/usr/sbin:/sbin"
+    if [[ -d "${local}/opt/diffutils" ]]; then
+      export PATH="/usr/local/opt/diffutils/bin:$PATH"
+    fi
+    if [[ -d "${local}/opt/kubectl@1.23" ]]; then
+      export PATH="/usr/local/opt/kubectl@1.23/bin:$PATH"
+    fi
+    if [[ -d "${local}/opt/openssl@1.1" ]]; then
+      export CPPFLAGS="-I${local}/opt/openssl@1.1/include"
+      export LDFLAGS="-L/${local}/opt/openssl@1.1/lib"
+      export OPENSSL_ROOT_DIR="${local}/opt/openssl@1.1"
+    fi
+    if [[ -d "${local}/opt/php@7.4" ]]; then
+      export PATH="/usr/local/opt/php@7.4/bin:$PATH"
+      export PATH="/usr/local/opt/php@7.4/sbin:$PATH"
+    fi
+    export SHELL="${local}/opt/bin/bash"
     alias hide="defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app"
     alias show="defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app"
-    [ -r "/usr/local/etc/profile.d/bash_completion.sh" ] && source "/usr/local/etc/profile.d/bash_completion.sh"
-    export SHELL=/usr/local/bin/bash
-    prompt_color="blue"
-else
+    ;;
+  *)
+    local="/usr/local"
+    export PATH="${HOME}/.local/bin:${local}/bin:/usr/bin:/bin:${HOME}/.local/sbin:${local}/sbin:/usr/sbin:/sbin"
+    prompt_color="yellow"
     alias open="xdg-open"
-fi
+    ;;
+esac
+
+# bash completion
+[[ -r "${local}/etc/profile.d/bash_completion.sh" ]] && source "${local}/etc/profile.d/bash_completion.sh"
 
 # basic
 alias c=clear
 alias ls="ls -al"
-export CPPFLAGS=-I/usr/local/opt/openssl@1.1/include
-export LANG=en_US.UTF-8
-export LANGUAGE=en_US.UTF-8
-export LDFLAGS=-L/usr/local/opt/openssl@1.1/lib
-export LC_ALL=en_US.UTF-8
-export PAGER=less
-export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
-export OPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1
 
 # rust
 if [[ -d "$HOME/.cargo" ]]; then
-    source "$HOME/.cargo/env"
-    alias cb="cargo build"
-    alias cc="cargo clippy --all-features --all"
-    alias cr="cargo run"
-    alias ct="cargo test"
+  source "$HOME/.cargo/env"
+  alias cb="cargo build"
+  alias cc="cargo clippy --all-features --all"
+  alias cr="cargo run"
+  alias ct="cargo test"
 fi
 
 # prompt
 prompt_command() {
-    local exit="$?"
-    is_in_path prompt
-    if [[ "$?" -eq 0 ]]; then
-        if [[ $exit == "0" ]]; then
-            PS1="$(prompt --color="bright $prompt_color")\n$ "
-        else
-            PS1="$(prompt --color="bright red")\n$ "
-        fi
+  local exit="$?"
+  is_in_path prompt
+  if [[ "$?" -eq 0 ]]; then
+    if [[ $exit == "0" ]]; then
+        PS1="$(prompt --color="bright $prompt_color")\n$ "
     else
-        PS1="$exit \u@\H \w\n$ "
+        PS1="$(prompt --color="bright red")\n$ "
     fi
+  else
+    PS1="$exit \u@\H \w\n$ "
+  fi
 }
 PROMPT_COMMAND=prompt_command
 
-# bash-completion
-[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
-
 # bat
-alias cat=bat
+is_in_path bat
+if [[ "$?" -eq 0 ]]; then
+  alias cat=bat
+fi
 
 # bazelisk
-alias bazel=bazelisk
+is_in_path bazelisk
+if [[ "$?" -eq 0 ]]; then
+  alias bazel=bazelisk
+fi
 
 # exa
 is_in_path exa
 if [[ "$?" -eq 0 ]]; then
-    alias ls="exa -agl --color=always"
-    alias tree="exa -aT --color=always --git-ignore"
+  alias ls="exa -agl --color=always"
+  alias tree="exa -aT --color=always --git-ignore"
 fi
 
 # deno
 if [[ -d "$HOME/.deno" ]]; then
-    export DENO_INSTALL="$HOME/.deno"
-    export PATH="$DENO_INSTALL/bin:$PATH"
+  export DENO_INSTALL="$HOME/.deno"
+  export PATH="$PATH:$DENO_INSTALL/bin"
+fi
+
+# fzf
+is_in_path fzf
+if [[ "$?" -eq 0 ]]; then
+  [[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
+  export FZF_TMUX_OPTS="-p"
+  export FZF_CTRL_R_OPTS="--reverse --preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
 fi
 
 # git
 is_in_path git
 if [[ "$?" -eq 0 ]]; then
-    alias gd="git diff -- :/ ':(exclude,top)*Cargo.lock'"
-    alias gl="git log --decorate --graph --oneline"
+  alias gd="git diff -- :/ ':(exclude,top)*Cargo.lock'"
+  alias gf="git log --follow --date=short --pretty=format:'%C(bold blue)%ad%C(reset) %C(bold yellow)%p %h%C(reset) %s %C(bold red)%an%C(reset)' -- ."
+  alias gl="git log --decorate --graph --oneline"
+fi
+
+# gpg
+is_in_path gpgconf
+if [[ "$?" -eq 0 ]]; then
+  export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+  gpgconf --kill gpg-agent
+  gpgconf --launch gpg-agent
+  GPG_TTY=$(tty)
+  export GPG_TTY
 fi
 
 # go
-if [[ -d "$HOME/go" ]]; then
-    export GOBIN=$HOME/go/bin
-    export GOPATH=$HOME/go
-    export PATH=$GOBIN:$PATH
+if [[ -d "${local}/go/bin" ]]; then
+  export PATH="$PATH:/usr/local/go/bin"
+  export PATH="$PATH:$HOME/go/bin"
+  is_in_path go1.16.7
+  if [[ "$?" -eq 0 ]]; then
+    export GOROOT=$(go1.16.7 env GOROOT)
+    export PATH="$GOROOT/bin:$PATH"
+  fi
 fi
-
-# fzf
-[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
-export FZF_TMUX_OPTS="-p"
-export FZF_CTRL_R_OPTS="--reverse --preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
 
 # jenv
 if [[ -d "$HOME/.jenv" ]]; then
-    export PATH="$HOME/.jenv/bin:$PATH"
-    eval "$(jenv init -)"
+  export PATH="$HOME/.jenv/bin:$PATH"
+  eval "$(jenv init -)"
 fi
 
 # just
-alias j=just
-source <(just --completions bash)
-complete -F _just -o bashdefault -o default j
+is_in_path just
+if [[ "$?" -eq 0 ]]; then
+  alias j=just
+  source <(just --completions bash)
+  complete -F _just -o bashdefault -o default j
+fi
 
 # k8s
-alias k="kubectl"
-alias kg="k get all"
-alias kgp="k get pods"
-alias kdp="k describe pods"
-alias klogs="k logs -c app"
-alias kc="k config"
-alias kcontext="kc use-context"
-alias knamespace="kc set-context --current --namespace"
-alias kaf="k apply -f"
-
-source <(kubectl completion bash)
-
-function kgetcontext() {
-    kubectl config get-contexts
-}
-
-function kusecontext() {
-    kubectl config use-context "$1"
-}
-
-function kusenamespace() {
-    kubectl config set-context --current "--namespace=$1"
-}
+is_in_path kubectl
+if [[ "$?" -eq 0 ]]; then
+  alias k="kubectl"
+  alias kg="k get all"
+  alias kgp="k get pods"
+  alias kdp="k describe pods"
+  alias klogs="k logs -c app"
+  alias kc="k config"
+  alias kcontext="kc use-context"
+  alias knamespace="kc set-context --current --namespace"
+  alias kaf="k apply -f"
+  function kgetcontext() {
+      kubectl config get-contexts
+  }
+  function kusecontext() {
+      kubectl config use-context "$1"
+  }
+  function kusenamespace() {
+      kubectl config set-context --current "--namespace=$1"
+  }
+  source <(kubectl completion bash)
+fi
 
 # nvim
-export PATH="$PATH:$HOME/bin/nvim/bin"
 is_in_path nvim
 if [[ "$?" -eq 0 ]]; then
-    export EDITOR=nvim
-    export VISUAL=nvim
+  export EDITOR=nvim
+  export VISUAL=nvim
+  alias nvim="nvim --startuptime /tmp/nvim-startuptime"
 fi
 
 # nvm
-[[ -d "$HOME/.nvm" ]] && export NVM_DIR="$HOME/.nvm"
-[[ -s "/usr/local/opt/nvm/nvm.sh" ]] && source "/usr/local/opt/nvm/nvm.sh"
-[[ -s "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ]] && source "/usr/local/opt/nvm/etc/bash_completion.d/nvm"
+if [[ -d "$HOME/.nvm" ]]; then
+  export NVM_DIR="$HOME/.nvm"
+  [[ -s "${local}/opt/nvm/nvm.sh" ]] && source "${local}/opt/nvm/nvm.sh"
+  [[ -s "${local}/opt/nvm/etc/bash_completion.d/nvm" ]] && source "${local}/opt/nvm/etc/bash_completion.d/nvm"
+fi
 
 # npm
-NPM_PACKAGES="${HOME}/.config/npm" # TODO: Make this directory if it doesn't exist
-export PATH="$PATH:$NPM_PACKAGES/bin"
-export MANPATH="${MANPATH-$(manpath)}:$NPM_PACKAGES/share/man"
+npm_dir="${HOME}/.config/npm"
+if [[ -d $npm_dir ]]; then
+  export PATH="$PATH:$npm_dir/bin"
+  export MANPATH="${MANPATH-$(manpath)}:$npm_dir/share/man"
+fi
 
 # pipenv
 is_in_path pipenv
 if [[ "$?" -eq 0 ]]; then
-    eval "$(pipenv --completion)"
+  eval "$(pipenv --completion)"
 fi
-
-# pipx
-eval "$(register-python-argcomplete pipx)"
-export PATH="$PATH:$HOME/.local/bin"
 
 # pyenv, pyenv-virtualenv, and pyenv-virtualenvwrapper
 if [[ -d "$HOME/.pyenv" ]]; then
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PYENV_SHELL=bash
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init -)"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv virtualenv-init -)"
-    export PYENV_VIRTUALENVWRAPPER_PREFER_PYVENV="true"
-    export WORKON_HOME="$HOME/.virtualenvs"
-    pyenv virtualenvwrapper_lazy
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PYENV_SHELL=bash
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init -)"
+  eval "$(pyenv init --path)"
+  eval "$(pyenv virtualenv-init -)"
+  export PYENV_VIRTUALENVWRAPPER_PREFER_PYVENV="true"
+  export WORKON_HOME="$HOME/.virtualenvs"
+  pyenv virtualenvwrapper_lazy
 fi
 
 # ripgrep
-alias grep=rg
+is_in_path rg
+if [[ "$?" -eq 0 ]]; then
+  alias grep=rg
+fi
 
 # solana
-export PATH="$PATH:$HOME/.local/share/solana/install/active_release/bin"
+solana_dir="$HOME/.local/share/solana/install/active_release/bin"
+if [[ -d $solana_dir ]]; then
+  export PATH="$PATH:$solana_dir"
+fi
 
 # yarn
 is_in_path yarn
 if [[ "$?" -eq 0 ]]; then
-    export PATH="$(yarn global bin):$PATH"
+  export PATH="$(yarn global bin):$PATH"
 fi
 
 # Other
 set -o vi
-[[ -d $HOME/bin ]] && export PATH=$HOME/bin:$PATH
 [[ -r ~/.bash_secret ]] && source ~/.bash_secret
-
-alias nvim="nvim --startuptime /tmp/nvim-startuptime"
-
-export PATH="/usr/local/opt/php@7.4/bin:$PATH"
-export PATH="/usr/local/opt/php@7.4/sbin:$PATH"
-
-export PATH="/usr/local/opt/kubectl@1.23/bin:$PATH"

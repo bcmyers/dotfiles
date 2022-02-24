@@ -16,7 +16,7 @@ require("packer").startup(
     use "tpope/vim-commentary"
 
     -- compe
-    use {"hrsh7th/nvim-compe", requires = {"hrsh7th/vim-vsnip"}}
+    -- use {"hrsh7th/nvim-compe", requires = {"hrsh7th/vim-vsnip"}}
 
     -- crates
     use {
@@ -59,7 +59,7 @@ require("packer").startup(
     use {"preservim/nerdtree"}
 
     -- nvim-startup
-    use {"henriquehbr/nvim-startup.lua"}
+    -- use {"henriquehbr/nvim-startup.lua"}
 
     -- nvim-tree
     -- use {"kyazdani42/nvim-tree.lua", requires = {"kyazdani42/nvim-web-devicons"}}
@@ -103,7 +103,7 @@ require("my-lspconfig")
 require("my-autopairs")
 require("my-better-whitespace")
 require("my-commentary")
-require("my-compe")
+-- require("my-compe")
 require("my-formatter")
 -- require("my-gitsigns")
 require("my-indentline")
@@ -117,6 +117,3 @@ require("my-rust-tools")
 require("my-telescope")
 require("my-tmux-navigator")
 require("my-treesitter")
-
-
-require 'nvim-startup'.setup()

@@ -1,5 +1,3 @@
-background_opacity: 0.95
-
 font:
   normal:
     family: Inconsolata Nerd Font Mono
@@ -20,6 +18,8 @@ live_config_reload: true
 save_to_clipboard: true
 
 window:
+  opacity: 0.95
+
   dimensions:
     columns: 350
     lines: 100
