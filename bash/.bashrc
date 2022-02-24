@@ -143,13 +143,12 @@ if [[ "$?" -eq 0 ]]; then
   alias gl="git log --decorate --graph --oneline"
 fi
 
-# go
-if [[ -d "${local}/go/bin" ]]; then
-  export PATH="$PATH:/usr/local/go/bin"
-  export PATH="$PATH:$HOME/go/bin"
-  is_in_path go1.16.7
-  if [[ "$?" -eq 0 ]]; then
-    export GOROOT=$(go1.16.7 env GOROOT)
+# golang
+is_in_path go
+if [[ "$?" -eq 0 ]]; then
+  go_bin="$HOME/go/bin/go1.16.7"
+  if [[ -x $go_bin ]]; then
+    export GOROOT=$("$go_bin" env GOROOT)
     export PATH="$GOROOT/bin:$PATH"
   fi
 fi
