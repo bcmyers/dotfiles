@@ -31,7 +31,7 @@ case $(uname) in
         prompt_color="blue"
         ;;
       arm)
-        prompt_color="green"
+        prompt_color="yellow"
         if [[ $(sysctl -n sysctl.proc_translated) = "1" ]]; then
           local="/usr/local"
         else
@@ -58,7 +58,7 @@ case $(uname) in
       export PATH="/usr/local/opt/php@7.4/bin:$PATH"
       export PATH="/usr/local/opt/php@7.4/sbin:$PATH"
     fi
-    export SHELL="${local}/opt/bin/bash"
+    export SHELL="${local}/bin/bash"
     alias hide="defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app"
     alias show="defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app"
     ;;
@@ -152,6 +152,23 @@ if [[ -d "${local}/go/bin" ]]; then
     export GOROOT=$(go1.16.7 env GOROOT)
     export PATH="$GOROOT/bin:$PATH"
   fi
+fi
+
+# gpg
+is_in_path gpgconf
+if [[ "$?" -eq 0 ]]; then
+  unset SSH_AGENT_PID
+  if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+    export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+  fi
+  export GPG_TTY=$(tty)
+  gpg-connect-agent updatestartuptty /bye >/dev/null
+  # echo "I ran"
+  # gpgconf --kill gpg-agent
+  # gpgconf --launch gpg-agent
+  # export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+  # GPG_TTY=$(tty)
+  # export GPG_TTY
 fi
 
 # jenv

@@ -8,9 +8,9 @@
   excludesfile = /Users/bcmyers/.config/git/ignore
 [commit]
   gpgsign = true
-[credential]
-  helper = ""
-  helper = manager-core
+# [credential]
+#   helper = ""
+#   helper = manager-core
 [credential "https://dev.azure.com"]
   useHttpPath = true
 [diff]
