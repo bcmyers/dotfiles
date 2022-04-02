@@ -59,6 +59,9 @@ g.python3_host_prog = "~/.pyenv/shims/python3"
 vim.api.nvim_set_keymap("n", "n", "nzzzv", {noremap = true})
 vim.api.nvim_set_keymap("n", "N", "Nzzzv", {noremap = true})
 
+-- Save and reload current file
+vim.api.nvim_set_keymap("n", "<leader><leader>x", ":w<CR>:source %<CR>", {noremap = true})
+
 -- Better tabbing
 vim.api.nvim_set_keymap("v", "<", "<gv", {noremap = true})
 vim.api.nvim_set_keymap("v", ">", ">gv", {noremap = true})

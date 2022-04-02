@@ -132,6 +132,9 @@ lspconfig.sumneko_lua.setup {
   on_attach = on_attach
 }
 
+-- nix
+lspconfig.rnix.setup{}
+
 -- python
 lspconfig.pylsp.setup {
   cmd = {"pylsp"},

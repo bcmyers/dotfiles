@@ -70,6 +70,11 @@ case $(uname) in
     ;;
 esac
 
+# nix
+if [[ -d /nix/var/nix/profiles/default/bin ]]; then
+  export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
+fi
+
 # bash completion
 [[ -r "${local}/etc/profile.d/bash_completion.sh" ]] && source "${local}/etc/profile.d/bash_completion.sh"
 
@@ -81,7 +86,7 @@ alias ls="ls -al"
 if [[ -d "$HOME/.cargo" ]]; then
   source "$HOME/.cargo/env"
   alias cb="cargo build"
-  alias cc="cargo clippy --all-features --all"
+  alias cc="cargo clippy --all"
   alias cr="cargo run"
   alias ct="cargo test"
 fi
@@ -114,6 +119,12 @@ if [[ "$?" -eq 0 ]]; then
   alias bazel=bazelisk
 fi
 
+# branches
+is_in_path branches
+if [[ "$?" -eq 0 ]]; then
+  alias b=branches
+fi
+
 # exa
 is_in_path exa
 if [[ "$?" -eq 0 ]]; then
@@ -141,6 +152,14 @@ if [[ "$?" -eq 0 ]]; then
   alias gd="git diff -- :/ ':(exclude,top)*Cargo.lock'"
   alias gf="git log --follow --date=short --pretty=format:'%C(bold blue)%ad%C(reset) %C(bold yellow)%p %h%C(reset) %s %C(bold red)%an%C(reset)' -- ."
   alias gl="git log --decorate --graph --oneline"
+
+  function gff() {
+    if [[ -z $1 ]]; then
+      echo -e "Missing argument"
+      exit 1;
+    fi
+    git log --follow --date=short --pretty=format:'%C(bold blue)%ad%C(reset) %C(bold yellow)%p %h%C(reset) %s %C(bold red)%an%C(reset)' -- $1
+  }
 fi
 
 # golang
@@ -149,7 +168,7 @@ if [[ "$?" -eq 0 ]]; then
   go_bin="$HOME/go/bin/go1.16.7"
   if [[ -x $go_bin ]]; then
     export GOROOT=$("$go_bin" env GOROOT)
-    export PATH="$GOROOT/bin:$PATH"
+    export PATH="$GOROOT/bin:$HOME/go/bin:$PATH"
   fi
 fi
 
@@ -160,7 +179,8 @@ if [[ "$?" -eq 0 ]]; then
   if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
     export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
   fi
-  export GPG_TTY=$(tty)
+  GPG_TTY=$(tty)
+  export GPG_TTY
   gpg-connect-agent updatestartuptty /bye >/dev/null
 fi
 
@@ -207,6 +227,7 @@ is_in_path nvim
 if [[ "$?" -eq 0 ]]; then
   export EDITOR=nvim
   export VISUAL=nvim
+  alias lg="nvim . +'Telescope live_grep'"
   alias nvim="nvim --startuptime /tmp/nvim-startuptime"
 fi
 
@@ -264,3 +285,20 @@ fi
 # Other
 set -o vi
 [[ -r ~/.bash_secret ]] && source ~/.bash_secret
+
+# Functions
+
+function print_path() {
+  sed 's/:/\n/g' <<< "$PATH"
+}
+
+function ports() {
+  sudo lsof -P -i TCP -s TCP:LISTEN
+}
+
+function remove_ds_store() {
+  find . -name '.DS_Store' -type f -delete
+}
+
+# delete /usr/local/bin from beginning of PATH
+export PATH=${PATH/#"/usr/local/bin:"/}

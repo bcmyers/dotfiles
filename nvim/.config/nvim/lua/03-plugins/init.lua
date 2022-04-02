@@ -92,28 +92,27 @@ require("packer").startup(
     -- use "morhetz/gruvbox"
     -- use "pineapplegiant/spaceduck"
     -- use "tomasr/molokai"
+
+    use "/Users/bcmyers/lib/nvim/bcmyers-git"
   end
 )
 
-require("core")
-require("colors")
+require("03-plugins.lspconfig")
 
-require("my-lspconfig")
-
-require("my-autopairs")
-require("my-better-whitespace")
-require("my-commentary")
--- require("my-compe")
-require("my-formatter")
--- require("my-gitsigns")
-require("my-indentline")
--- require("my-lsp-saga")
-require("my-lsp-signature")
-require("my-lsp-utils")
-require("my-lualine")
-require("my-nerdtree")
--- require("my-nvim-tree")
-require("my-rust-tools")
-require("my-telescope")
-require("my-tmux-navigator")
-require("my-treesitter")
+require("03-plugins.autopairs")
+require("03-plugins.better-whitespace")
+require("03-plugins.commentary")
+-- require("03-plugins.compe")
+require("03-plugins.formatter")
+-- require("03-plugins.gitsigns")
+require("03-plugins.indentline")
+-- require("03-plugins.lsp-saga")
+require("03-plugins.lsp-signature")
+require("03-plugins.lsp-utils")
+require("03-plugins.lualine")
+require("03-plugins.nerdtree")
+-- require("03-plugins.nvim-tree")
+require("03-plugins.rust-tools")
+require("03-plugins.telescope")
+require("03-plugins.tmux-navigator")
+require("03-plugins.treesitter")
