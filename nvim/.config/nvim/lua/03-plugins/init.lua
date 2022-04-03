@@ -76,6 +76,7 @@ require("packer").startup(
 
     -- telescope
     use {"nvim-telescope/telescope.nvim", requires = {"nvim-lua/plenary.nvim", "nvim-lua/popup.nvim"}}
+    use {"nvim-telescope/telescope-file-browser.nvim"}
 
     -- tmux-navigator
     use "christoomey/vim-tmux-navigator"
