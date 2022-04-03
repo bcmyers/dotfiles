@@ -52,7 +52,7 @@ vim.api.nvim_command("let base16colorspace=256")
 vim.api.nvim_command("colorscheme " .. default_colorscheme)
 vim.api.nvim_set_keymap(
   "n", "<leader><leader>c",
-  ":lua require('04-colors').rotate_colorscheme()<CR>",
+  ":lua require('bcmyers.colors').rotate_colorscheme()<CR>",
   {noremap = true, silent = true}
 )
 

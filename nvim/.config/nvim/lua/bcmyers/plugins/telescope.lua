@@ -158,7 +158,7 @@ vim.api.nvim_set_keymap("n", "<leader>n",  ":lua require('telescope').extensions
 vim.api.nvim_set_keymap("n", "<leader>y",  ":lua require('telescope').extensions.neoclip.default()<CR>",           {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>z",  ":lua require('telescope').extensions.zoxide.list()<CR>",               {noremap = true})
 
-vim.api.nvim_set_keymap("n", "<leader>rf", ":lua require('03-plugins.telescope').rh_find_files()<CR>", {noremap = true})
-vim.api.nvim_set_keymap("n", "<leader>rl", ":lua require('03-plugins.telescope').rh_live_grep()<CR>",  {noremap = true})
+vim.api.nvim_set_keymap("n", "<leader>rf", ":lua require('bcmyers.plugins.telescope').rh_find_files()<CR>", {noremap = true})
+vim.api.nvim_set_keymap("n", "<leader>rl", ":lua require('bcmyers.plugins.telescope').rh_live_grep()<CR>",  {noremap = true})
 
 return M
