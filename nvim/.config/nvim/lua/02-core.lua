@@ -5,6 +5,7 @@ local o = vim.opt
 local wo = vim.wo
 
 vim.api.nvim_exec([[
+let loaded_netrwPlugin = 1
 filetype plugin indent on
 syntax on
 ]], false)

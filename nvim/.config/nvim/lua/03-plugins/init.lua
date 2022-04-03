@@ -54,9 +54,10 @@ require("packer").startup(
 
     -- lualine
     use {"hoob3rt/lualine.nvim", requires = {"kyazdani42/nvim-web-devicons", opt = true}}
+    use {"arkav/lualine-lsp-progress"}
 
     -- nerdtree
-    use {"preservim/nerdtree"}
+    -- use {"preservim/nerdtree"}
 
     -- nvim-startup
     -- use {"henriquehbr/nvim-startup.lua"}
@@ -110,7 +111,7 @@ require("03-plugins.indentline")
 require("03-plugins.lsp-signature")
 require("03-plugins.lsp-utils")
 require("03-plugins.lualine")
-require("03-plugins.nerdtree")
+-- require("03-plugins.nerdtree")
 -- require("03-plugins.nvim-tree")
 require("03-plugins.rust-tools")
 require("03-plugins.telescope")
