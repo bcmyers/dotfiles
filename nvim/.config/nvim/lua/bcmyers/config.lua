@@ -24,7 +24,6 @@ vim.o.guicursor = "a:ver25-blinkon0,r:hor25-blinkon0"
 vim.o.hidden = true
 vim.o.ignorecase = true
 vim.o.list = true
--- vim.o.listchars = "tab:▷·,trail:-,nbsp:+"
 vim.o.modeline = true
 vim.o.modelines = 10
 vim.o.mouse = "a"
