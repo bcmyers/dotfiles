@@ -36,6 +36,9 @@ require("packer").startup(
         end,
     }
 
+    -- fidget
+    use "j-hui/fidget.nvim"
+
     -- formatter
     use "mhartington/formatter.nvim"
 
@@ -62,7 +65,7 @@ require("packer").startup(
 
     -- lualine
     use {"hoob3rt/lualine.nvim", requires = {"kyazdani42/nvim-web-devicons", opt = true}}
-    use {"arkav/lualine-lsp-progress"}
+    -- use {"arkav/lualine-lsp-progress"}
 
     -- markdown preview
     use {"davidgranstrom/nvim-markdown-preview"}
@@ -120,6 +123,7 @@ require("03-plugins.autopairs")
 require("03-plugins.better-whitespace")
 require("03-plugins.commentary")
 require("03-plugins.cmp")
+require("03-plugins.fidget")
 require("03-plugins.formatter")
 -- require("03-plugins.gitsigns")
 require("03-plugins.indentline")

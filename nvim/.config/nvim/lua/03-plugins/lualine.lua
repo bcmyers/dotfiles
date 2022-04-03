@@ -22,14 +22,14 @@ require "lualine".setup {
     },
     lualine_x = {},
     lualine_y = {
-      {
-        "lsp_progress",
-        display_components = {"spinner"},
-        separators = {
-          spinner = { pre = "", post = "" },
-        },
-        spinner_symbols = { "🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘" },
-      },
+      -- {
+      --   "lsp_progress",
+      --   display_components = {"spinner"},
+      --   separators = {
+      --     spinner = { pre = "", post = "" },
+      --   },
+      --   spinner_symbols = { "🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘" },
+      -- },
       {"diagnostics", sources = {"nvim_lsp"}, always_visible = true},
       -- "encoding",
       -- "fileformat",
