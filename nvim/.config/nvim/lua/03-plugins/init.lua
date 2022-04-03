@@ -64,6 +64,9 @@ require("packer").startup(
     use {"hoob3rt/lualine.nvim", requires = {"kyazdani42/nvim-web-devicons", opt = true}}
     use {"arkav/lualine-lsp-progress"}
 
+    -- markdown preview
+    use {"davidgranstrom/nvim-markdown-preview"}
+
     -- nerdtree
     -- use {"preservim/nerdtree"}
 
