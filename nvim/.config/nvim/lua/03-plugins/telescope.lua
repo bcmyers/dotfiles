@@ -67,12 +67,35 @@ require("telescope").setup {
       override_generic_sorter = true,  -- override the generic sorter
       override_file_sorter = true,     -- override the file sorter
       case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
-    }
+    },
   },
 }
 
+require('neoclip').setup({
+  continuous_sync = true,
+  default_register = '+',
+  default_register_macros = 'q',
+  enable_persistent_history = true,
+  history = 1000,
+  keys = {
+    telescope = {
+      i = {
+        select = '<cr>',
+        paste = '<c-p>',
+        paste_behind = '<c-P>',
+      },
+      n = {
+        select = '<cr>',
+        paste = 'p',
+        paste_behind = 'P',
+      },
+    },
+  },
+})
+
 require("telescope").load_extension("file_browser")
 require("telescope").load_extension('fzf')
+require("telescope").load_extension("neoclip")
 require("telescope").load_extension('zoxide')
 
 local monorepo = "/Users/bcmyers/robinhood/rh"
@@ -100,6 +123,7 @@ vim.api.nvim_set_keymap("n", "<leader>h",  ":lua require('telescope.builtin').he
 vim.api.nvim_set_keymap("n", "<leader>k",  ":lua require('telescope.builtin').keymaps()<CR>",                      {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>l",  ":lua require('telescope.builtin').live_grep()<CR>",                    {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>m",  ":lua require('telescope.builtin').man_pages()<CR>",                    {noremap = true})
+vim.api.nvim_set_keymap("n", "<leader>y",  ":lua require('telescope').extensions.neoclip.default()<CR>",           {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>z",  ":lua require('telescope').extensions.zoxide.list()<CR>",               {noremap = true})
 
 vim.api.nvim_set_keymap("n", "<leader>rf", ":lua require('03-plugins.telescope').rh_find_files()<CR>", {noremap = true})
