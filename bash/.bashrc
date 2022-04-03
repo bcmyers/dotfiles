@@ -282,6 +282,12 @@ if [[ "$?" -eq 0 ]]; then
   export PATH="$(yarn global bin):$PATH"
 fi
 
+# zoxide
+is_in_path zoxide
+if [[ "$?" -eq 0 ]]; then
+  eval "$(zoxide init --cmd cd bash)"
+fi
+
 # Other
 set -o vi
 [[ -r ~/.bash_secret ]] && source ~/.bash_secret
