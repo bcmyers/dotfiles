@@ -1,7 +1,8 @@
-local cmp = require'cmp'
-local types = require "cmp.types"
-local lspkind = require "lspkind"
-local str = require "cmp.utils.str"
+local cmp = require('cmp')
+local compare = require('cmp.config.compare')
+local types = require("cmp.types")
+local lspkind = require("lspkind")
+local str = require("cmp.utils.str")
 
 lspkind.init {
   mode = 'symbol_text',
@@ -34,12 +35,50 @@ lspkind.init {
   },
 }
 
+local compare_kind = function(entry1, entry2)
+  local kind1 = entry1:get_kind()
+  kind1 = kind1 == types.lsp.CompletionItemKind.Text and 100 or kind1
+  local kind2 = entry2:get_kind()
+  kind2 = kind2 == types.lsp.CompletionItemKind.Text and 100 or kind2
+  if kind1 ~= kind2 then
+    if kind1 == types.lsp.CompletionItemKind.Snippet then
+      return false
+    end
+    if kind2 == types.lsp.CompletionItemKind.Snippet then
+      return true
+    end
+    local diff = kind1 - kind2
+    if diff < 0 then
+      return true
+    elseif diff > 0 then
+      return false
+    end
+  end
+end
+
 cmp.setup({
-  snippet = {
-    -- REQUIRED - you must specify a snippet engine
-    expand = function(args)
-      vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-    end,
+  documentation = {
+    border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+    scrollbar = "║",
+  },
+  experimental = {
+    ghost_text = true,
+  },
+  formatting = {
+    fields = { cmp.ItemField.Kind, cmp.ItemField.Abbr, cmp.ItemField.Menu },
+    format = lspkind.cmp_format({
+      mode = "symbol",
+      maxwidth = 60,
+      before = function (entry, vim_item)
+        local word = entry:get_insert_text()
+        if entry.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+          word = vim.lsp.util.parse_snippet(word)
+        end
+        word = str.oneline(word)
+        vim_item.abbr = word
+        return vim_item
+      end
+    })
   },
   mapping = {
     ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
@@ -61,70 +100,52 @@ cmp.setup({
       c = cmp.mapping.close(),
     }),
   },
-  experimental = {
-    ghost_text = false,
+  sorting = {
+    priority_weight = 2,
+    comparators = {
+      compare.offset,
+      compare.exact,
+      compare.score,
+      compare.recently_used,
+      compare.locality,
+      -- compare.scopes,
+      compare_kind,
+      compare.sort_text,
+      compare.length,
+      compare.order,
+    },
   },
-  documentation = {
-    border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+  snippet = {
+    -- REQUIRED - you must specify a snippet engine
+    expand = function(args)
+      vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+    end,
   },
   sources = cmp.config.sources({
     { name = 'nvim_lsp' },
+    { name = 'nvim_lua' },
     { name = "path" },
     { name = 'vsnip' },
   }, {
-    { name = 'buffer' },
+    { name = 'buffer', keyword_length = 5 },
   }),
-  formatting = {
-    fields = {
-      cmp.ItemField.Kind,
-      cmp.ItemField.Abbr,
-      cmp.ItemField.Menu,
-    },
-    format = lspkind.cmp_format({
-      mode = "symbol_text",
-      maxwidth = 60,
-      before = function(entry, vim_item)
-        vim_item.menu = ({
-          nvim_lua = "",
-          path = "ﱮ",
-          vsnip = "",
-        })[entry.source.name]
-
-        -- Get the full snippet (and only keep first line)
-        local word = entry:get_insert_text()
-        if entry.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-          word = vim.lsp.util.parse_snippet(word)
-        end
-        word = str.oneline(word)
-        if
-          entry.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
-          and string.sub(vim_item.abbr, -1, -1) == "~"
-        then
-          word = word .. "~"
-        end
-        vim_item.abbr = word
-
-        return vim_item
-      end,
-    }),
-  },
 })
 
 -- `/` cmdline setup.
--- cmp.setup.cmdline('/', {
---   sources = {
---     { name = 'buffer' }
---   }
--- })
+cmp.setup.cmdline('/', {
+  sources = {
+    { name = 'buffer', keyword_length = 5 }
+  }
+})
 
 -- `:` cmdline setup.
--- cmp.setup.cmdline(':', {
---   sources = cmp.config.sources({
---     { name = 'path' }
---   }, {
---     { name = 'cmdline' }
---   })
--- })
+cmp.setup.cmdline(':', {
+  sources = cmp.config.sources({
+    { name = 'path' }
+  }, {
+    { name = 'cmdline', keyword_length = 5 }
+  })
+})
 
 -- insert `(` after select function or method item
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
