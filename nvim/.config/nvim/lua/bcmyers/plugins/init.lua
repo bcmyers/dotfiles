@@ -1,5 +1,20 @@
--- Only required if you have packer configured as `opt`
-vim.cmd("packadd packer.nvim")
+local download_packer = function()
+  if vim.fn.input("Download Packer? (y for yes)" ~= "y") then
+    return
+  end
+  local directory = string.format("%s/site/pack/packer/start/", vim.fn.stdpath "data")
+  vim.fn.mkdir(directory, "p")
+  local out = vim.fn.system(
+    string.format("git clone %s %s", "https://github.com/wbthomason/packer.nvim", directory .. "/packer.nvim")
+  )
+  print(out)
+  print("Downloading packer.nvim...")
+  print("( You'll need to restart now )")
+end
+
+if not pcall(require, "packer") then
+  download_packer()
+end
 
 require("packer").startup(
   function()
@@ -42,20 +57,11 @@ require("packer").startup(
     -- formatter
     use "mhartington/formatter.nvim"
 
-    -- gitsigns
-    -- use {"lewis6991/gitsigns.nvim", requires = {"nvim-lua/plenary.nvim"}}
+    --- just
+    use "NoahTheDuke/vim-just"
 
-    -- indentLine
-    use "Yggdroot/indentLine"
-
-    -- lightline
-    -- use "itchyny/lightline.vim"
-
-    -- lspconfig
+    -- lsp-config
     use "neovim/nvim-lspconfig"
-
-    -- lspsaga
-    -- use "glepnir/lspsaga.nvim"
 
     -- lsp-signature
     use "ray-x/lsp_signature.nvim"
@@ -65,25 +71,9 @@ require("packer").startup(
 
     -- lualine
     use {"hoob3rt/lualine.nvim", requires = {"kyazdani42/nvim-web-devicons", opt = true}}
-    -- use {"arkav/lualine-lsp-progress"}
 
-    -- markdown preview
+    -- markdown-preview
     use {"davidgranstrom/nvim-markdown-preview"}
-
-    -- nerdtree
-    -- use {"preservim/nerdtree"}
-
-    -- nvim-startup
-    -- use {"henriquehbr/nvim-startup.lua"}
-
-    -- nvim-tree
-    -- use {"kyazdani42/nvim-tree.lua", requires = {"kyazdani42/nvim-web-devicons"}}
-
-    -- popup
-    use {"nvim-lua/popup.nvim", requires = {"nvim-lua/plenary.nvim"}}
-
-    -- reload
-    use "famiu/nvim-reload"
 
     -- rust-tools
     use "simrat39/rust-tools.nvim"
@@ -102,9 +92,6 @@ require("packer").startup(
     -- treesitter
     use {"nvim-treesitter/nvim-treesitter", run = ":TSUpdate"}
 
-    --- vim-just
-    use "NoahTheDuke/vim-just"
-
     -- colorschemes
     use "chriskempson/base16-vim"
     -- use "fcpg/vim-fahrenheit"
@@ -113,11 +100,29 @@ require("packer").startup(
     -- use "pineapplegiant/spaceduck"
     -- use "tomasr/molokai"
 
+    -- bcmyers
     use "/Users/bcmyers/lib/nvim/bcmyers-git"
+
+    -- disabled
+
+    -- gitsigns
+    -- use {"lewis6991/gitsigns.nvim", requires = {"nvim-lua/plenary.nvim"}}
+
+    -- lspsaga
+    -- use "glepnir/lspsaga.nvim"
+
+    -- nerdtree
+    -- use {"preservim/nerdtree"}
+
+    -- nvim-startup
+    -- use {"henriquehbr/nvim-startup.lua"}
+
+    -- nvim-tree
+    -- use {"kyazdani42/nvim-tree.lua", requires = {"kyazdani42/nvim-web-devicons"}}
   end
 )
 
-require("bcmyers.plugins.lspconfig")
+require("bcmyers.plugins.lsp-config")
 
 require("bcmyers.plugins.autopairs")
 require("bcmyers.plugins.better-whitespace")
@@ -126,7 +131,6 @@ require("bcmyers.plugins.cmp")
 require("bcmyers.plugins.fidget")
 require("bcmyers.plugins.formatter")
 -- require("bcmyers.plugins.gitsigns")
-require("bcmyers.plugins.indentline")
 -- require("bcmyers.plugins.lsp-saga")
 require("bcmyers.plugins.lsp-signature")
 require("bcmyers.plugins.lsp-utils")
