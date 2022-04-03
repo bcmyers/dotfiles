@@ -93,9 +93,40 @@ require('neoclip').setup({
   },
 })
 
+require("notify").setup({
+  -- Animation style (see below for details)
+  stages = "fade_in_slide_out",
+  -- Function called when a new window is opened, use for changing win settings/config
+  on_open = nil,
+  -- Function called when a window is closed
+  on_close = nil,
+  -- Render function for notifications. See notify-render()
+  render = "default",
+  -- Default timeout for notifications
+  timeout = 5000,
+  -- Max number of columns for messages
+  max_width = nil,
+  -- Max number of lines for a message
+  max_height = nil,
+  -- For stages that change opacity this is treated as the highlight behind the window
+  -- Set this to either a highlight group, an RGB hex value e.g. "#000000" or a function returning an RGB code for dynamic values
+  background_colour = "#000000",
+  -- Minimum width for notification windows
+  minimum_width = 50,
+  -- Icons for the different levels
+  icons = {
+    ERROR = "",
+    WARN = "",
+    INFO = "",
+    DEBUG = "",
+    TRACE = "✎",
+  },
+})
+
 require("telescope").load_extension("file_browser")
 require("telescope").load_extension('fzf')
 require("telescope").load_extension("neoclip")
+require("telescope").load_extension("notify")
 require("telescope").load_extension('zoxide')
 
 local monorepo = "/Users/bcmyers/robinhood/rh"
@@ -123,6 +154,7 @@ vim.api.nvim_set_keymap("n", "<leader>h",  ":lua require('telescope.builtin').he
 vim.api.nvim_set_keymap("n", "<leader>k",  ":lua require('telescope.builtin').keymaps()<CR>",                      {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>l",  ":lua require('telescope.builtin').live_grep()<CR>",                    {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>m",  ":lua require('telescope.builtin').man_pages()<CR>",                    {noremap = true})
+vim.api.nvim_set_keymap("n", "<leader>n",  ":lua require('telescope').extensions.notify.notify()<CR>",             {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>y",  ":lua require('telescope').extensions.neoclip.default()<CR>",           {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>z",  ":lua require('telescope').extensions.zoxide.list()<CR>",               {noremap = true})
 

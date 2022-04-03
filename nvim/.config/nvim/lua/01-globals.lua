@@ -3,6 +3,12 @@ P = function(val)
   return val
 end
 
+DBG = function(val)
+  local time = os.date "%H:%M"
+  require("notify")(vim.inspect(val), "debug", { title = "Debug", time })
+  return val
+end
+
 RELOAD = function(...)
   return require("plenary.reload").reload_module(...)
 end

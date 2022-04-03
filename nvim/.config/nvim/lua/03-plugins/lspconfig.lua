@@ -1,5 +1,8 @@
 local lspconfig = require("lspconfig")
 
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+
 local on_attach = function(client, bufnr)
   local opts = {noremap = true, silent = true}
 
@@ -26,47 +29,51 @@ end
 -- bash
 lspconfig.bashls.setup {
   cmd = {"bash-language-server", "start"},
-  on_attach = on_attach
+  on_attach = on_attach,
+  capabilities = capabilities
 }
 
 -- c
 lspconfig.clangd.setup {
   cmd = {"/usr/local/opt/llvm/bin/clangd", "--background-index"},
   filetypes = {"c", "cpp", "objc", "objcpp"},
-  on_attach = on_attach
+  on_attach = on_attach,
+  capabilities = capabilities
 }
 
 -- docker
 lspconfig.dockerls.setup {
   cmd = {"docker-langserver", "--stdio"},
   filetypes = {"Dockerfile", "dockerfile"},
-  on_attach = on_attach
+  on_attach = on_attach,
+  capabilities = capabilities
 }
 
 -- go
 lspconfig.gopls.setup {
   cmd = {"gopls"},
   filetypes = {"go", "gomod"},
-  on_attach = on_attach
+  on_attach = on_attach,
+  capabilities = capabilities
 }
 
 -- graphql
 lspconfig.graphql.setup {
   cmd = {"graphql-lsp", "server", "-m", "stream"},
   filetypes = {"graphql"},
-  on_attach = on_attach
+  on_attach = on_attach,
+  capabilities = capabilities
 }
 
 -- groovy
 lspconfig.groovyls.setup {
   cmd = {"java", "-jar", "/Users/bcmyers/opt/groovy-language-server/build/libs/groovy-language-server-all.jar"},
   filetypes = {"groovy"},
-  on_attach = on_attach
+  on_attach = on_attach,
+  capabilities = capabilities
 }
 
 -- html
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
 lspconfig.html.setup {
   cmd = {"vscode-html-language-server", "--stdio"},
   filetypes = {"html"},
@@ -85,7 +92,8 @@ lspconfig.jsonls.setup {
       end
     }
   },
-  on_attach = on_attach
+  capabilities = capabilities,
+  on_attach = on_attach,
 }
 
 -- lua
@@ -129,11 +137,15 @@ lspconfig.sumneko_lua.setup {
       }
     }
   },
-  on_attach = on_attach
+  capabilities = capabilities,
+  on_attach = on_attach,
 }
 
 -- nix
-lspconfig.rnix.setup{}
+lspconfig.rnix.setup{
+  capabilities = capabilities,
+  on_attach = on_attach,
+}
 
 -- python
 lspconfig.pylsp.setup {
@@ -149,6 +161,7 @@ lspconfig.pylsp.setup {
       }
     }
   },
+  capabilities = capabilities,
   on_attach = on_attach,
 }
 
@@ -156,28 +169,32 @@ lspconfig.pylsp.setup {
 lspconfig.terraformls.setup {
   cmd = {"terraform-ls", "serve"},
   filetypes = {"terraform"},
-  on_attach = on_attach
+  capabilities = capabilities,
+  on_attach = on_attach,
 }
 
 -- typescript
 lspconfig.tsserver.setup {
   cmd = {"typescript-language-server", "--stdio"},
   filetypes = {"javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx"},
-  on_attach = on_attach
+  capabilities = capabilities,
+  on_attach = on_attach,
 }
 
 -- vim
 lspconfig.vimls.setup {
   cmd = {"vim-language-server", "--stdio"},
   filetypes = {"vim"},
-  on_attach = on_attach
+  capabilities = capabilities,
+  on_attach = on_attach,
 }
 
 -- yaml
 lspconfig.yamlls.setup {
   cmd = {"yaml-language-server", "--stdio"},
   filetypes = {"yaml"},
-  on_attach = on_attach
+  capabilities = capabilities,
+  on_attach = on_attach,
 }
 
 -- rust
@@ -278,6 +295,7 @@ require("rust-tools").setup(
           }
         }
       },
+      capabilities = capabilities,
       on_attach = on_attach,
     } -- rust-analyer options
   }

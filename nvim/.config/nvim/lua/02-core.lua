@@ -7,6 +7,7 @@ local wo = vim.wo
 vim.api.nvim_exec([[
 let loaded_netrwPlugin = 1
 filetype plugin indent on
+set completeopt=menu,menuone,noselect
 syntax on
 ]], false)
 

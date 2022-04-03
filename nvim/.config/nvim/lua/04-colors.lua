@@ -37,10 +37,10 @@ vim.api.nvim_exec(
   [[
 augroup MyColors
     autocmd!
-    au ColorScheme * hi LineNr ctermbg=NONE guibg=NONE"
-    au ColorScheme * hi NonText ctermbg=NONE guibg=NONE guifg=NONE ctermfg=NONE"
-    au ColorScheme * hi Normal ctermbg=NONE guibg=NONE"
-    au ColorScheme * hi SignColumn ctermbg=NONE guibg=NONE"
+    au ColorScheme * hi LineNr ctermbg=NONE guibg=NONE
+    au ColorScheme * hi NonText ctermbg=NONE guibg=NONE guifg=NONE ctermfg=NONE
+    au ColorScheme * hi Normal ctermbg=NONE guibg=NONE
+    au ColorScheme * hi SignColumn ctermbg=NONE guibg=NONE
     " au ColorScheme * hi ColorColumn guibg=#000000"
 augroup END
 ]],

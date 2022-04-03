@@ -15,8 +15,15 @@ require("packer").startup(
     -- commentary
     use "tpope/vim-commentary"
 
-    -- compe
-    -- use {"hrsh7th/nvim-compe", requires = {"hrsh7th/vim-vsnip"}}
+    -- cmp
+    use { "hrsh7th/nvim-cmp" }
+    use { 'hrsh7th/cmp-buffer' }
+    use { 'hrsh7th/cmp-cmdline'}
+    use { "hrsh7th/cmp-nvim-lsp" }
+    use { "hrsh7th/cmp-path" }
+    use { "hrsh7th/cmp-vsnip" }
+    use { "hrsh7th/vim-vsnip" }
+    use { "onsails/lspkind-nvim" }
 
     -- crates
     use {
@@ -78,8 +85,9 @@ require("packer").startup(
     use {"nvim-telescope/telescope.nvim", requires = {"nvim-lua/plenary.nvim", "nvim-lua/popup.nvim"}}
     use {"nvim-telescope/telescope-file-browser.nvim"}
     use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
-    use {"jvgrootveld/telescope-zoxide"}
     use {"AckslD/nvim-neoclip.lua", requires = {'tami5/sqlite.lua'}}
+    use {"jvgrootveld/telescope-zoxide"}
+    use {"rcarriga/nvim-notify"}
 
     -- tmux-navigator
     use "christoomey/vim-tmux-navigator"
@@ -107,7 +115,7 @@ require("03-plugins.lspconfig")
 require("03-plugins.autopairs")
 require("03-plugins.better-whitespace")
 require("03-plugins.commentary")
--- require("03-plugins.compe")
+require("03-plugins.cmp")
 require("03-plugins.formatter")
 -- require("03-plugins.gitsigns")
 require("03-plugins.indentline")
