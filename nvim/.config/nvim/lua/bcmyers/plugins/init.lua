@@ -84,6 +84,7 @@ require("packer").startup(
     use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
     use {"AckslD/nvim-neoclip.lua", requires = {'tami5/sqlite.lua'}}
     use {"jvgrootveld/telescope-zoxide"}
+    use {"nvim-telescope/telescope-ui-select.nvim"}
     use {"rcarriga/nvim-notify"}
 
     -- tmux-navigator

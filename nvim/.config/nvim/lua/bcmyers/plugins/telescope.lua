@@ -68,6 +68,11 @@ require("telescope").setup {
       override_file_sorter = true,     -- override the file sorter
       case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
     },
+    ["ui-select"] = {
+      require("telescope.themes").get_dropdown({
+        -- even more opts
+      })
+    }
   },
 }
 
@@ -127,6 +132,7 @@ require("telescope").load_extension("file_browser")
 require("telescope").load_extension('fzf')
 require("telescope").load_extension("neoclip")
 require("telescope").load_extension("notify")
+require("telescope").load_extension("ui-select")
 require("telescope").load_extension('zoxide')
 
 local monorepo = "/Users/bcmyers/robinhood/rh"
@@ -142,6 +148,14 @@ M.rh_live_grep = function()
 end
 
 vim.api.nvim_set_keymap("n", "<C-n>", ":lua require('telescope.builtin').find_files()<CR>", {noremap = true})
+
+-- To go back, <C-o> ('oh!')
+-- To move forward, <C-i>
+
+vim.api.nvim_set_keymap("n", "<leader>ca", ":lua require('telescope.builtin').lsp_code_actions(require('telescope.themes').get_cursor())<CR>", {noremap = true})
+vim.api.nvim_set_keymap("n", "<leader>d",  ":lua require('telescope.builtin').lsp_definitions()<CR>",      {noremap = true})
+vim.api.nvim_set_keymap("n", "<leader>i",  ":lua require('telescope.builtin').lsp_implementations()<CR>",  {noremap = true})
+vim.api.nvim_set_keymap("n", "<leader>t",  ":lua require('telescope.builtin').lsp_type_definitions()<CR>", {noremap = true})
 
 vim.api.nvim_set_keymap("n", "<leader>b",  ":lua require('telescope.builtin').buffers()<CR>",                      {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>c",  ":lua require('telescope.builtin').colorscheme()<CR>",                  {noremap = true})
