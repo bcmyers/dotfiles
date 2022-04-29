@@ -57,10 +57,6 @@ local compare_kind = function(entry1, entry2)
 end
 
 cmp.setup({
-  documentation = {
-    border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
-    scrollbar = "║",
-  },
   experimental = {
     ghost_text = true,
   },
@@ -124,11 +120,16 @@ cmp.setup({
   sources = cmp.config.sources({
     { name = 'nvim_lsp' },
     { name = 'nvim_lua' },
+    { name = "crates" },
     { name = "path" },
     { name = 'vsnip' },
   }, {
     { name = 'buffer', keyword_length = 5 },
   }),
+  window = {
+    completion = cmp.config.window.bordered(),
+    documentation = cmp.config.window.bordered(),
+  },
 })
 
 -- `/` cmdline setup.

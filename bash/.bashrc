@@ -15,7 +15,7 @@ export EDITOR=vi
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-export PAGER=less
+export PAGER="less -r --use-color"
 export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
 export VISUAL=vi
 

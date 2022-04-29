@@ -40,7 +40,7 @@ def main():
     bash("rustup self update")
     bash("cargo install-update --all")
     # bash("cargo cache --autoclean")
-    bash("cargo cache --autoclean-expensive")
+    # bash("cargo cache --autoclean-expensive")
     bash(
         "git checkout master",
         cwd="/Users/bcmyers/opt/rust-analyzer",

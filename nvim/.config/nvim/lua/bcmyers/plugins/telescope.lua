@@ -147,7 +147,7 @@ M.rh_live_grep = function()
   require("telescope.builtin").live_grep(opts)
 end
 
-vim.api.nvim_set_keymap("n", "<C-n>", ":lua require('telescope.builtin').find_files()<CR>", {noremap = true})
+-- vim.api.nvim_set_keymap("n", "<C-n>", ":lua require('telescope.builtin').find_files()<CR>", {noremap = true})
 
 -- To go back, <C-o> ('oh!')
 -- To move forward, <C-i>
@@ -155,6 +155,7 @@ vim.api.nvim_set_keymap("n", "<C-n>", ":lua require('telescope.builtin').find_fi
 vim.api.nvim_set_keymap("n", "<leader>ca", ":lua require('telescope.builtin').lsp_code_actions(require('telescope.themes').get_cursor())<CR>", {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>d",  ":lua require('telescope.builtin').lsp_definitions()<CR>",      {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>i",  ":lua require('telescope.builtin').lsp_implementations()<CR>",  {noremap = true})
+vim.api.nvim_set_keymap("n", "<leader>r",  ":lua require('telescope.builtin').lsp_references()<CR>",       {noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>t",  ":lua require('telescope.builtin').lsp_type_definitions()<CR>", {noremap = true})
 
 vim.api.nvim_set_keymap("n", "<leader>b",  ":lua require('telescope.builtin').buffers()<CR>",                      {noremap = true})

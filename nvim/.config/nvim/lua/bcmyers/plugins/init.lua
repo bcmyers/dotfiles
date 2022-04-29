@@ -42,14 +42,7 @@ require("packer").startup(
     use { "onsails/lspkind-nvim" }
 
     -- crates
-    use {
-        'Saecki/crates.nvim',
-        event = { "BufRead Cargo.toml" },
-        requires = { { 'nvim-lua/plenary.nvim' } },
-        config = function()
-            require('crates').setup()
-        end,
-    }
+    -- use { 'saecki/crates.nvim', tag = 'v0.2.1', requires = { 'nvim-lua/plenary.nvim' } }
 
     -- fidget
     use "j-hui/fidget.nvim"
@@ -74,6 +67,9 @@ require("packer").startup(
 
     -- markdown-preview
     use {"davidgranstrom/nvim-markdown-preview"}
+
+    -- nerdtree
+    use {"preservim/nerdtree"}
 
     -- rust-tools
     use "simrat39/rust-tools.nvim"
@@ -112,9 +108,6 @@ require("packer").startup(
     -- lspsaga
     -- use "glepnir/lspsaga.nvim"
 
-    -- nerdtree
-    -- use {"preservim/nerdtree"}
-
     -- nvim-startup
     -- use {"henriquehbr/nvim-startup.lua"}
 
@@ -128,10 +121,11 @@ require("bcmyers.plugins.lsp-config")
 require("bcmyers.plugins.autopairs")
 require("bcmyers.plugins.better-whitespace")
 require("bcmyers.plugins.cmp")
+-- require("bcmyers.plugins.crates")
 require("bcmyers.plugins.fidget")
 require("bcmyers.plugins.formatter")
 require("bcmyers.plugins.lsp-utils")
 require("bcmyers.plugins.lualine")
--- require("bcmyers.plugins.nerdtree")
+require("bcmyers.plugins.nerdtree")
 require("bcmyers.plugins.telescope")
 require("bcmyers.plugins.treesitter")

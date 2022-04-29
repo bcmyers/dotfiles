@@ -28,6 +28,7 @@
   defaultBranch = main
 [merge]
   tool = vimdiff
+  conflictstyle = diff3
 [mergetool]
   path = nvim
 [pull]
@@ -42,5 +43,5 @@
 
 # Robinhood
 
-[includeIf "gitdir:~/robinhood/rh"]
-  path = ~/.config/git/robinhood
+[includeIf "gitdir:/Users/bcmyers/robinhood/rh"]
+  path = /Users/bcmyers/.config/git/robinhood

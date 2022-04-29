@@ -51,6 +51,14 @@ lspconfig.dockerls.setup {
 -- go
 lspconfig.gopls.setup {
   cmd = {"gopls"},
+  settings = {
+    gopls = {
+      analyses = {
+        unusedparams = true,
+      },
+      staticcheck = true,
+    }
+  },
   filetypes = {"go", "gomod"},
   on_attach = on_attach,
   capabilities = capabilities
@@ -285,7 +293,7 @@ require("rust-tools").setup(
       settings = {
         ["rust-analyzer"] = {
           cargo = {
-            allFeatures = true
+            allFeatures = false
           },
           checkOnSave = {
             allTargets = true,
