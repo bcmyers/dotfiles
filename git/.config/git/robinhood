@@ -1,6 +1,0 @@
-# vi: ft=gitconfig:expandtab:shiftwidth=2:softtabstop=0:tabstop=2
-
-[user]
-  name = Brian Myers
-  email = brian.myers@robinhood.com
-  signingkey = B86678B99457460F

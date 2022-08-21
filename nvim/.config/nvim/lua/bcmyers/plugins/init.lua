@@ -4,7 +4,8 @@ local download_packer = function()
   end
   local directory = string.format("%s/site/pack/packer/start/", vim.fn.stdpath "data")
   vim.fn.mkdir(directory, "p")
-  local out = vim.fn.system(
+  local out =
+    vim.fn.system(
     string.format("git clone %s %s", "https://github.com/wbthomason/packer.nvim", directory .. "/packer.nvim")
   )
   print(out)
@@ -17,7 +18,7 @@ if not pcall(require, "packer") then
 end
 
 require("packer").startup(
-  function()
+  function(use)
     -- packer
     use "wbthomason/packer.nvim"
 
@@ -31,18 +32,24 @@ require("packer").startup(
     use "tpope/vim-commentary"
 
     -- cmp
-    use { "hrsh7th/nvim-cmp" }
-    use { 'hrsh7th/cmp-buffer' }
-    use { 'hrsh7th/cmp-cmdline'}
-    use { "hrsh7th/cmp-nvim-lsp" }
-    use { "hrsh7th/cmp-nvim-lua" }
-    use { "hrsh7th/cmp-path" }
-    use { "hrsh7th/cmp-vsnip" }
-    use { "hrsh7th/vim-vsnip" }
-    use { "onsails/lspkind-nvim" }
+    use {"hrsh7th/nvim-cmp"}
+    use {"hrsh7th/cmp-buffer"}
+    use {"hrsh7th/cmp-cmdline"}
+    use {"hrsh7th/cmp-nvim-lsp"}
+    use {"hrsh7th/cmp-nvim-lua"}
+    use {"hrsh7th/cmp-path"}
+    use {"hrsh7th/cmp-vsnip"}
+    use {"hrsh7th/vim-vsnip"}
+    use {"onsails/lspkind-nvim"}
 
     -- crates
-    -- use { 'saecki/crates.nvim', tag = 'v0.2.1', requires = { 'nvim-lua/plenary.nvim' } }
+    use {
+      "saecki/crates.nvim",
+      requires = {"nvim-lua/plenary.nvim"},
+      config = function()
+        require("crates").setup()
+      end
+    }
 
     -- fidget
     use "j-hui/fidget.nvim"
@@ -60,7 +67,7 @@ require("packer").startup(
     use "ray-x/lsp_signature.nvim"
 
     -- lsp-utils
-    use {"RishabhRD/nvim-lsputils", requires = {"RishabhRD/popfix"}}
+    use {"RishabhRD/nvim-lsputils"}
 
     -- lualine
     use {"hoob3rt/lualine.nvim", requires = {"kyazdani42/nvim-web-devicons", opt = true}}
@@ -71,14 +78,29 @@ require("packer").startup(
     -- nerdtree
     use {"preservim/nerdtree"}
 
+    -- nvim-dap
+    use "mfussenegger/nvim-dap"
+    use {"rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"}}
+    use {"theHamsta/nvim-dap-virtual-text"}
+
+    -- plenary
+    use {"nvim-lua/plenary.nvim"}
+
+    -- popfix
+    use {"RishabhRD/popfix"}
+
     -- rust-tools
     use "simrat39/rust-tools.nvim"
 
     -- telescope
-    use {"nvim-telescope/telescope.nvim", requires = {"nvim-lua/plenary.nvim", "nvim-lua/popup.nvim"}}
+    use {
+      "nvim-telescope/telescope.nvim",
+      requires = {{"nvim-lua/plenary.nvim"}}
+    }
+    use {"nvim-telescope/telescope-dap.nvim"}
     use {"nvim-telescope/telescope-file-browser.nvim"}
-    use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
-    use {"AckslD/nvim-neoclip.lua", requires = {'tami5/sqlite.lua'}}
+    use {"nvim-telescope/telescope-fzf-native.nvim", run = "make"}
+    use {"AckslD/nvim-neoclip.lua", requires = {"tami5/sqlite.lua"}}
     use {"jvgrootveld/telescope-zoxide"}
     use {"nvim-telescope/telescope-ui-select.nvim"}
     use {"rcarriga/nvim-notify"}
@@ -97,9 +119,6 @@ require("packer").startup(
     -- use "pineapplegiant/spaceduck"
     -- use "tomasr/molokai"
 
-    -- bcmyers
-    use "/Users/bcmyers/lib/nvim/bcmyers-git"
-
     -- disabled
 
     -- gitsigns
@@ -116,12 +135,13 @@ require("packer").startup(
   end
 )
 
+require("nvim-dap-virtual-text").setup({})
+
 require("bcmyers.plugins.lsp-config")
 
 require("bcmyers.plugins.autopairs")
 require("bcmyers.plugins.better-whitespace")
 require("bcmyers.plugins.cmp")
--- require("bcmyers.plugins.crates")
 require("bcmyers.plugins.fidget")
 require("bcmyers.plugins.formatter")
 require("bcmyers.plugins.lsp-utils")

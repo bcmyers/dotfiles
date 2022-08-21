@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "bash-language-server": "^3.1.0",
+    "dockerfile-language-server-nodejs": "latest",
+    "graphql-language-service-cli": "latest",
+    "lua-fmt": "latest",
+    "prettier": "2.4.1",
+    "prettier-plugin-sh": "0.7.1",
+    "pyright": "latest",
+    "sql-lint": "latest",
+    "typescript": "latest",
+    "typescript-language-server": "latest",
+    "vim-language-server": "latest",
+    "vscode-langservers-extracted": "latest",
+    "yaml-language-server": "latest"
+  },
+  "license": "MIT"
+}

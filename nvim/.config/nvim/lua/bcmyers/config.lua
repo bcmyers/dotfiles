@@ -53,13 +53,13 @@ vim.o.writebackup = false
 
 vim.opt.listchars = {
   eol = nil,
-  extends = '>',
+  extends = ">",
   multispace = nil,
   nbsp = "·",
-  precedes = '<',
+  precedes = "<",
   space = " ",
   tab = ">·",
-  trail = "·",
+  trail = "·"
 }
 
 vim.wo.conceallevel = 0

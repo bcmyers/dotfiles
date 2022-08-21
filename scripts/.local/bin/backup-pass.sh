@@ -8,8 +8,8 @@ filename="pass-${now}.tar.gz"
 local_path="/tmp/$filename"
 
 (
-    cd $HOME
-    tar -cz --exclude=".git*" -f "$local_path" .password-store
+  cd "$HOME"
+  tar -cz --exclude=".git*" -f "$local_path" .password-store
 )
 
 aws --profile bcmyers s3 cp "$local_path" "s3://bcmyers/pass/$filename"

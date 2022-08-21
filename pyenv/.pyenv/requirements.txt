@@ -1,8 +1,18 @@
-black; python_version > '3.5'
-flake8
-isort; python_version > '3.5'
-mypy; python_version > '3.5'
-pynvim
-setuptools
-setuptools-rust; python_version > '3.5'
-wheel
+black==19.10b0; python_version >= '3.5'
+flake8==4.0.1; python_version >= '3.5'
+isort==5.4.1; python_version >= '3.5'
+pycodestyle==2.8.0; python_version >= '3.5'
+pyflakes==2.4.0; python_version >= '3.5'
+
+mypy; python_version >= '3.5'
+pylint; python_version >= '3.5'
+
+pyls-isort; python_version >= '3.5'
+pylsp-mypy; python_version >= '3.5'
+python-lsp-black; python_version >= '3.5'
+python-lsp-server; python_version >= '3.5'
+
+pynvim; python_version >= '3.5'
+
+virtualenv; python_version >= '3.5'
+virtualenvwrapper; python_version >= '3.5'

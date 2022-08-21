@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
 import shlex
 import subprocess
 import sys
+from pathlib import Path
 from typing import Optional
 
 
@@ -15,9 +15,7 @@ def red(s: str) -> str:
     return "\033[91m" + s + "\033[0m"
 
 
-def bash(
-    command: str, *, allow_fail: bool = False, cwd: Optional[Path] = None
-):
+def bash(command: str, *, allow_fail: bool = False, cwd: Optional[Path] = None):
     print(blue(command))
     commands = shlex.split(command)
     completed = subprocess.run(commands, cwd=cwd)
@@ -38,16 +36,13 @@ def main():
     bash("cargo install-update --all")
     bash("cargo cache --autoclean")
     bash(
-        "git checkout master",
-        cwd="/home/bcmyers/opt/rust-analyzer",
+        "git checkout master", cwd="/home/bcmyers/opt/rust-analyzer",
     )
     bash(
-        "git pull",
-        cwd="/home/bcmyers/opt/rust-analyzer",
+        "git pull", cwd="/home/bcmyers/opt/rust-analyzer",
     )
     bash(
-        "cargo +nightly xtask install",
-        cwd="/home/bcmyers/opt/rust-analyzer",
+        "cargo +nightly xtask install", cwd="/home/bcmyers/opt/rust-analyzer",
     )
     bash("sudo journalctl --vacuum-size=1G")
     bash("sudo updatedb")

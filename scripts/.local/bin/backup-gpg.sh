@@ -19,8 +19,8 @@ filename="gpg-${now}.tar.gz"
 local_path="/tmp/$filename"
 
 (
-    cd /tmp
-    tar -czv -f "$local_path" gpg
+  cd /tmp
+  tar -czv -f "$local_path" gpg
 )
 
 aws --profile bcmyers s3 cp "$local_path" "s3://bcmyers-encrypted/gpg/$filename"
