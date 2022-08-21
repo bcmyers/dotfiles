@@ -58,7 +58,7 @@ end
 
 require("formatter").setup(
   {
-    logging = true,
+    logging = false,
     filetype = {
       bash = {shfmt},
       css = {prettier},
@@ -91,6 +91,9 @@ vim.api.nvim_create_autocmd(
   {
     group = group,
     pattern = {
+      ".bashrc",
+      ".bash_profile",
+      ".bash_secret",
       "*.bash",
       "*.json",
       "*.json5",

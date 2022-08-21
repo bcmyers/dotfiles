@@ -29,6 +29,7 @@ vim.o.modelines = 10
 vim.o.mouse = "a"
 vim.o.mousefocus = true
 vim.o.number = true
+vim.o.relativenumber = true
 vim.o.scrolloff = 3 -- Minimum number of screen lines to keep above and below the cursor
 vim.o.shiftwidth = 4 -- Size of an indent
 vim.o.shortmess = "filnxtToOFc"

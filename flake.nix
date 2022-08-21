@@ -52,7 +52,7 @@
                     bold_italic:
                       family: Inconsolata Nerd Font Mono
                       style: Bold Italic
-                    size: 14.0
+                    size: 16.0
 
                   live_config_reload: true
 

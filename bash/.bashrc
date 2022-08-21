@@ -2,6 +2,18 @@
 
 # functions
 
+function edit_dotfiles() {
+  pushd "$HOME/dotfiles"
+  nvim .
+}
+export edit_dotfiles
+
+function edit_user_chrome() {
+  pushd "$HOME/Library/Application Support/Firefox/Profiles/ouotagtz.default-release-1636802624234/chrome"
+  nvim .
+}
+export edit_user_chrome
+
 function is_in_path {
   builtin type -P "$1" &> /dev/null
 }
@@ -59,17 +71,19 @@ Linux-arm64)
   ;;
 esac
 
+export PATH="${HOME}/.local/bin:${usr_local}/bin:/usr/bin:/bin:${HOME}/.local/sbin:${usr_local}/sbin:/usr/sbin:/sbin"
+
 case "$(uname -s)" in
 Darwin)
-  if [[ -e "${usr_local}/bin/bash" ]]; then
+  if [[ -e ${usr_local}/bin/bash ]]; then
     export SHELL="${usr_local}/bin/bash"
   fi
-  if [[ -d "${usr_local}/opt/openssl@1.1" ]]; then
+  if [[ -e ${usr_local}/opt/openssl@1.1 ]]; then
     export CPPFLAGS="-I${usr_local}/opt/openssl@1.1/include"
     export LDFLAGS="-L/${usr_local}/opt/openssl@1.1/lib"
     export OPENSSL_ROOT_DIR="${usr_local}/opt/openssl@1.1"
   fi
-  if [[ -d "${usr_local}/opt/php@7.4" ]]; then
+  if [[ -e ${usr_local}/opt/php@7.4 ]]; then
     export PATH="${usr_local}/opt/php@7.4/bin:$PATH"
     export PATH="${usr_local}/opt/php@7.4/sbin:$PATH"
   fi
@@ -83,8 +97,6 @@ Linux)
   echo "WARNING: unsupported platform"
   ;;
 esac
-
-export PATH="${HOME}/.local/bin:${usr_local}/bin:/usr/bin:/bin:${HOME}/.local/sbin:${usr_local}/sbin:/usr/sbin:/sbin"
 
 # nix
 if [[ -d $HOME/.nix-profile/bin ]]; then
@@ -191,14 +203,11 @@ fi
 # gpg
 if is_in_path gpgconf; then
   unset SSH_AGENT_PID
-  if [[ ${gnupg_SSH_AUTH_SOCK_by:-0} -ne $$ ]]; then
-    SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-    export SSH_AUTH_SOCK
-  fi
+  SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+  export SSH_AUTH_SOCK
   GPG_TTY=$(tty)
   export GPG_TTY
-  gpg-connect-agent updatestartuptty /bye > /dev/null
-  gpgconf --kill gpg-agent
+  gpg-connect-agent updatestartuptty /bye > /dev/null 2>&1
 fi
 
 # jenv
