@@ -6,13 +6,13 @@
     "lua-fmt": "latest",
     "prettier": "2.4.1",
     "prettier-plugin-sh": "0.7.1",
-    "pyright": "latest",
+    "pyright": "^1.1.268",
     "sql-lint": "latest",
-    "typescript": "latest",
-    "typescript-language-server": "latest",
+    "typescript": "^4.8.2",
+    "typescript-language-server": "^1.1.1",
     "vim-language-server": "latest",
     "vscode-langservers-extracted": "latest",
-    "yaml-language-server": "latest"
+    "yaml-language-server": "^1.10.0"
   },
   "license": "MIT"
 }

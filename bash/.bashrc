@@ -14,7 +14,7 @@ function edit_user_chrome() {
 }
 export edit_user_chrome
 
-function is_in_path {
+function is_in_path() {
   builtin type -P "$1" &> /dev/null
 }
 
@@ -54,48 +54,48 @@ if [[ $platform == Darwin-arm64 ]] && [[ $(sysctl -n sysctl.proc_translated) = "
 fi
 
 case "${platform}" in
-Darwin-x86_64)
-  echo "" > /dev/null
-  ;;
-Darwin-arm64)
-  usr_local="/opt/homebrew"
-  ;;
-Linux-x86_64)
-  echo "" > /dev/null
-  ;;
-Linux-arm64)
-  echo "" > /dev/null
-  ;;
-*)
-  echo "WARNING: unsupported platform"
-  ;;
+  Darwin-x86_64)
+    echo "" > /dev/null
+    ;;
+  Darwin-arm64)
+    usr_local="/opt/homebrew"
+    ;;
+  Linux-x86_64)
+    echo "" > /dev/null
+    ;;
+  Linux-arm64)
+    echo "" > /dev/null
+    ;;
+  *)
+    echo "WARNING: unsupported platform"
+    ;;
 esac
 
 export PATH="${HOME}/.local/bin:${usr_local}/bin:/usr/bin:/bin:${HOME}/.local/sbin:${usr_local}/sbin:/usr/sbin:/sbin"
 
 case "$(uname -s)" in
-Darwin)
-  if [[ -e ${usr_local}/bin/bash ]]; then
-    export SHELL="${usr_local}/bin/bash"
-  fi
-  if [[ -e ${usr_local}/opt/openssl@1.1 ]]; then
-    export CPPFLAGS="-I${usr_local}/opt/openssl@1.1/include"
-    export LDFLAGS="-L/${usr_local}/opt/openssl@1.1/lib"
-    export OPENSSL_ROOT_DIR="${usr_local}/opt/openssl@1.1"
-  fi
-  if [[ -e ${usr_local}/opt/php@7.4 ]]; then
-    export PATH="${usr_local}/opt/php@7.4/bin:$PATH"
-    export PATH="${usr_local}/opt/php@7.4/sbin:$PATH"
-  fi
-  alias hide="defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app"
-  alias show="defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app"
-  ;;
-Linux)
-  alias open="xdg-open"
-  ;;
-*)
-  echo "WARNING: unsupported platform"
-  ;;
+  Darwin)
+    if [[ -e ${usr_local}/bin/bash ]]; then
+      export SHELL="${usr_local}/bin/bash"
+    fi
+    if [[ -e ${usr_local}/opt/openssl@1.1 ]]; then
+      export CPPFLAGS="-I${usr_local}/opt/openssl@1.1/include"
+      export LDFLAGS="-L/${usr_local}/opt/openssl@1.1/lib"
+      export OPENSSL_ROOT_DIR="${usr_local}/opt/openssl@1.1"
+    fi
+    if [[ -e ${usr_local}/opt/php@7.4 ]]; then
+      export PATH="${usr_local}/opt/php@7.4/bin:$PATH"
+      export PATH="${usr_local}/opt/php@7.4/sbin:$PATH"
+    fi
+    alias hide="defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app"
+    alias show="defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app"
+    ;;
+  Linux)
+    alias open="xdg-open"
+    ;;
+  *)
+    echo "WARNING: unsupported platform"
+    ;;
 esac
 
 # nix
@@ -317,3 +317,5 @@ set -o vi
 if [[ -e $HOME/.bash_secret ]]; then
   source "$HOME/.bash_secret"
 fi
+
+export PATH="${HOME}/.local/bin:${PATH}"

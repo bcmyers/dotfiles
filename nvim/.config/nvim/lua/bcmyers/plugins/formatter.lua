@@ -43,24 +43,35 @@ local prettier = function()
   }
 end
 
-local shfmt = function()
+local prettierSh = function()
   return {
-    exe = "shfmt",
+    exe = "prettier",
     args = {
-      "-i",
-      "2",
-      "-sr",
-      "-"
+      "--stdin-filepath",
+      vim.fn.shellescape(vim.api.nvim_buf_get_name(0))
     },
     stdin = true
   }
 end
 
+-- local shfmt = function()
+--   return {
+--     exe = "shfmt",
+--     args = {
+--       "-i",
+--       "2",
+--       "-sr",
+--       "-"
+--     },
+--     stdin = true
+--   }
+-- end
+
 require("formatter").setup(
   {
     logging = false,
     filetype = {
-      bash = {shfmt},
+      bash = {prettierSh},
       css = {prettier},
       graphql = {prettier},
       html = {prettier},
@@ -74,7 +85,7 @@ require("formatter").setup(
       lua = {luafmt},
       markdown = {prettier},
       scss = {prettier},
-      sh = {shfmt},
+      sh = {prettierSh},
       typescript = {prettier},
       typescriptreact = {prettier},
       ["typescript.tsx"] = {prettier},
@@ -94,11 +105,9 @@ vim.api.nvim_create_autocmd(
       ".bashrc",
       ".bash_profile",
       ".bash_secret",
-      "*.bash",
       "*.json",
       "*.json5",
       "*.lua",
-      "*.sh",
       "*.yaml",
       "*.yml"
     },

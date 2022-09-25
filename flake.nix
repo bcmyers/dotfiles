@@ -28,9 +28,9 @@
                   autoconf automake awscli bash bash-completion
                   bazel-buildtools bazelisk bzip2 clang-tools coreutils curl
                   diffoscope diffutils fzf gettext gitAndTools.gitFull gnuplot
-                  gnused htop hyperfine jq libtool moreutils neovim newsboat
-                  ninja nmap pandoc patchutils pinentry pulumi-bin qemu
-                  qrencode rs-git-fsmonitor salt shellcheck shfmt stow
+                  gnused htop hyperfine jq moreutils neovim newsboat ninja nmap
+                  pandoc patchutils pinentry pulumi-bin qemu qrencode
+                  rs-git-fsmonitor salt shellcheck shfmt stow
                   sumneko-lua-language-server terraform-ls tree-sitter tmux
                   tree vault xz wget yarn yq
                 ];

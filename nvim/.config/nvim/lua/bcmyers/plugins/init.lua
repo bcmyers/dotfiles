@@ -111,6 +111,9 @@ require("packer").startup(
     -- treesitter
     use {"nvim-treesitter/nvim-treesitter", run = ":TSUpdate"}
 
+    -- vim-jsonnet
+    use {"google/vim-jsonnet"}
+
     -- colorschemes
     use "chriskempson/base16-vim"
     -- use "fcpg/vim-fahrenheit"
