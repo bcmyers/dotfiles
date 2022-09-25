@@ -1,0 +1,28 @@
+# Ignore case for autocomplete
+set completion-ignore-case on
+
+# Show all possibilities for autocomplete
+set show-all-if-ambiguous on
+
+# Allow UTF-8 input and output, instead of showing stuff like $'\0123\0456'
+set input-meta on
+set output-meta on
+set convert-meta off
+
+# colorized completion
+set colored-stats on
+
+# turn off bell
+set bell-style none
+
+# vi mode
+set editing-mode vi
+set show-mode-in-prompt on
+
+$if term=linux
+    set vi-ins-mode-string \1\e[?0c\2
+    set vi-cmd-mode-string \1\e[?8c\2
+$else
+    set vi-ins-mode-string \1\e[6 q\2
+    set vi-cmd-mode-string \1\e[2 q\2
+$endif

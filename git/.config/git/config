@@ -1,0 +1,33 @@
+# vi: ft=gitconfig
+
+[commit]
+    gpgSign = true
+
+[core]
+    editor = "nvim"
+    untrackedcache = true
+
+[diff]
+    algorithm = "patience"
+
+[gpg]
+    program = "gpg"
+
+[init]
+    defaultBranch = "main"
+
+[merge]
+    conflictstyle = "diff3"
+    tool = "nvim -d"
+
+[pull]
+    ff = "only"
+    rebase = true
+
+[push]
+    default = "simple"
+
+[user]
+    email = "brian.myers@robinhood.com"
+    name = "Brian Myers"
+    signingkey = "B86678B99457460F"

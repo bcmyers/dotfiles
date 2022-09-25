@@ -58,6 +58,7 @@ case "${platform}" in
     echo "" > /dev/null
     ;;
   Darwin-arm64)
+    prompt_color="yellow"
     usr_local="/opt/homebrew"
     ;;
   Linux-x86_64)
