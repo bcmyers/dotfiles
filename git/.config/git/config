@@ -28,6 +28,6 @@
     default = "simple"
 
 [user]
-    email = "brian.myers@robinhood.com"
+    email = "brian.carl.myers@gmail.com"
     name = "Brian Myers"
     signingkey = "B86678B99457460F"
