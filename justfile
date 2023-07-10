@@ -8,7 +8,6 @@ install: remove-ds-store
     system="$(uname -s)"
     if [[ $system == "Darwin" ]]; then
         machine="$(uname -m)"
-        stow -v --target ~ --no-folding bash-macos
         stow -v --target ~ --no-folding scripts-macos
         stow -v --target ~ --no-folding spotifyd-macos
         if [[ $machine == "x86_64" ]]; then

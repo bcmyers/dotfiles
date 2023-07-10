@@ -1,34 +1,55 @@
-local lspconfig = require("lspconfig")
-
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require("cmp_nvim_lsp").update_capabilities(capabilities)
-
-local on_attach = function(_, bufnr)
-  local opts = {noremap = true, silent = true}
-
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "gd", ":lua vim.lsp.buf.definition()<CR>", opts)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "gD", ":lua vim.lsp.buf.declaration()<CR>", opts)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "gi", ":lua vim.lsp.buf.implementation()<CR>", opts)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "gr", ":lua vim.lsp.buf.rename()<CR>", opts)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "gre", ":lua vim.lsp.buf.references()<CR>", opts)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "gtd", ":lua vim.lsp.buf.type_definition()<CR>", opts)
-
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "[d", ":lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "]d", ":lua vim.lsp.diagnostic.goto_next()<CR>", opts)
-
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "K", ":lua vim.lsp.buf.hover()<CR>", opts)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "<C-k>", ":lua vim.lsp.buf.signature_help()<CR>", opts)
-
-  -- vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>e", ":lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
-  -- vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>q", ":lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
-
-  require "lsp_signature".on_attach()
+local status, lspconfig = pcall(require, "lspconfig")
+if not status then
+  return
 end
+
+local status_, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
+if not status_ then
+  return
+end
+
+local status__, rust_tools = pcall(require, "rust-tools")
+if not status__ then
+  return
+end
+
+local capabilities = cmp_nvim_lsp.default_capabilities()
+
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float)
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
+vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist)
+
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+  callback = function(ev)
+    -- Enable completion triggered by <c-x><c-o>
+    vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
+
+    -- Buffer local mappings.
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    local opts = { buffer = ev.buf }
+    vim.keymap.set("n", "gc", vim.lsp.buf.incoming_calls, opts)
+    vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+    vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+    vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+
+    vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+    vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
+
+    vim.keymap.set({ 'n', 'v' }, "<space>ca", vim.lsp.buf.code_action, opts)
+    vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
+    vim.keymap.set('n', "<space>f", function()
+      vim.lsp.buf.format { async = true }
+    end, opts)
+    vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, opts)
+  end,
+})
 
 -- bash
 lspconfig.bashls.setup {
   cmd = {"bash-language-server", "start"},
-  on_attach = on_attach,
   capabilities = capabilities
 }
 
@@ -36,7 +57,6 @@ lspconfig.bashls.setup {
 lspconfig.clangd.setup {
   cmd = {"clangd", "--background-index"},
   filetypes = {"c", "cpp", "objc", "objcpp"},
-  on_attach = on_attach,
   capabilities = capabilities
 }
 
@@ -44,7 +64,6 @@ lspconfig.clangd.setup {
 lspconfig.dockerls.setup {
   cmd = {"docker-langserver", "--stdio"},
   filetypes = {"Dockerfile", "dockerfile"},
-  on_attach = on_attach,
   capabilities = capabilities
 }
 
@@ -60,15 +79,6 @@ lspconfig.gopls.setup {
     }
   },
   filetypes = {"go", "gomod"},
-  on_attach = on_attach,
-  capabilities = capabilities
-}
-
--- graphql
-lspconfig.graphql.setup {
-  cmd = {"graphql-lsp", "server", "-m", "stream"},
-  filetypes = {"graphql"},
-  on_attach = on_attach,
   capabilities = capabilities
 }
 
@@ -76,7 +86,6 @@ lspconfig.graphql.setup {
 lspconfig.groovyls.setup {
   cmd = {"java", "-jar", "/Users/bcmyers/opt/groovy-language-server/build/libs/groovy-language-server-all.jar"},
   filetypes = {"groovy"},
-  on_attach = on_attach,
   capabilities = capabilities
 }
 
@@ -85,7 +94,6 @@ lspconfig.html.setup {
   cmd = {"vscode-html-language-server", "--stdio"},
   filetypes = {"html"},
   capabilities = capabilities,
-  on_attach = on_attach
 }
 
 -- json
@@ -100,19 +108,20 @@ lspconfig.jsonls.setup {
     }
   },
   capabilities = capabilities,
-  on_attach = on_attach
 }
 
 -- jsonnet
-lspconfig.jsonnet_ls.setup {}
+lspconfig.jsonnet_ls.setup {
+  capabilities = capabilities
+}
 
 -- lua
-require "lspconfig".sumneko_lua.setup {
+lspconfig.lua_ls.setup {
   settings = {
     Lua = {
       runtime = {
         -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-        version = "LuaJIT"
+        version = "LuaJIT",
       },
       diagnostics = {
         -- Get the language server to recognize the `vim` global
@@ -120,20 +129,21 @@ require "lspconfig".sumneko_lua.setup {
       },
       workspace = {
         -- Make the server aware of Neovim runtime files
-        library = vim.api.nvim_get_runtime_file("", true)
+        library = vim.api.nvim_get_runtime_file("", true),
+        checkThirdParty = false,
       },
       -- Do not send telemetry data containing a randomized but unique identifier
       telemetry = {
         enable = false
       }
     }
-  }
+  },
+  capabilities = capabilities
 }
 
 -- nix
 lspconfig.rnix.setup {
   capabilities = capabilities,
-  on_attach = on_attach
 }
 
 -- python
@@ -142,22 +152,20 @@ lspconfig.pylsp.setup {
   filetypes = {"python"},
   settings = {
     pylsp = {
-      -- configurationSources = {"flake8"},
       plugins = {
         black = {
           enabled = true,
           line_length = "79"
         },
-        pyls_isort = {enabled = true},
+        pyls_isort = {enabled = false},
         pylsp_mypy = {enabled = true, live_mode = true},
         pycodestyle = {enabled = false},
-        pyflakes = {enabled = true},
+        pyflakes = {enabled = false},
         mccabe = {enabled = false}
       }
     }
   },
   capabilities = capabilities,
-  on_attach = on_attach
 }
 
 -- terraform
@@ -165,7 +173,6 @@ lspconfig.terraformls.setup {
   cmd = {"terraform-ls", "serve"},
   filetypes = {"terraform"},
   capabilities = capabilities,
-  on_attach = on_attach
 }
 
 -- typescript
@@ -173,7 +180,6 @@ lspconfig.tsserver.setup {
   cmd = {"typescript-language-server", "--stdio"},
   filetypes = {"javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx"},
   capabilities = capabilities,
-  on_attach = on_attach
 }
 
 -- vim
@@ -181,7 +187,6 @@ lspconfig.vimls.setup {
   cmd = {"vim-language-server", "--stdio"},
   filetypes = {"vim"},
   capabilities = capabilities,
-  on_attach = on_attach
 }
 
 -- yaml
@@ -189,11 +194,19 @@ lspconfig.yamlls.setup {
   cmd = {"yaml-language-server", "--stdio"},
   filetypes = {"yaml"},
   capabilities = capabilities,
-  on_attach = on_attach
+}
+
+lspconfig.ruff_lsp.setup {
+  init_options = {
+    settings = {
+      args = {"--config", "/Users/brian.myers/robinhood/rh2/devx/linters/devx-ruff/data/ruff.toml"}
+    }
+  },
+  capabilities = capabilities
 }
 
 -- rust
-require("rust-tools").setup(
+rust_tools.setup(
   {
     tools = {
       -- rust-tools options
@@ -288,7 +301,6 @@ require("rust-tools").setup(
         }
       },
       capabilities = capabilities,
-      on_attach = on_attach
     }, -- rust-analyer options
     -- debugging stuff
     dap = {
@@ -305,7 +317,7 @@ vim.api.nvim_exec(
   [[
 augroup FormatSyncAutogroup
   autocmd!
-  autocmd BufWritePre *.go,*.py,*.rs lua vim.lsp.buf.formatting_sync(nil, 2000)
+  autocmd BufWritePre *.go,*.py,*.rs lua vim.lsp.buf.format(nil, 2000)
 augroup END
 ]],
   true

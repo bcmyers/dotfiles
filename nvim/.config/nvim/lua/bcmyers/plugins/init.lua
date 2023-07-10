@@ -1,154 +1,112 @@
-local download_packer = function()
-  if vim.fn.input("Download Packer? (y for yes)" ~= "y") then
-    return
-  end
-  local directory = string.format("%s/site/pack/packer/start/", vim.fn.stdpath "data")
-  vim.fn.mkdir(directory, "p")
-  local out =
-    vim.fn.system(
-    string.format("git clone %s %s", "https://github.com/wbthomason/packer.nvim", directory .. "/packer.nvim")
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system(
+    {
+      "git",
+      "clone",
+      "--filter=blob:none",
+      "https://github.com/folke/lazy.nvim.git",
+      "--branch=stable", -- latest stable release
+      lazypath
+    }
   )
-  print(out)
-  print("Downloading packer.nvim...")
-  print("( You'll need to restart now )")
 end
 
-if not pcall(require, "packer") then
-  download_packer()
-end
+vim.opt.rtp:prepend(lazypath)
 
-require("packer").startup(
-  function(use)
-    -- packer
-    use "wbthomason/packer.nvim"
+local plugins = {
+  -- used by a lot of other plugins
+  "kyazdani42/nvim-web-devicons",
+  "nvim-lua/plenary.nvim",
+  --
+  "cappyzawa/trim.nvim",
+  { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+  "chriskempson/base16-vim",
+  {"google/vim-jsonnet", ft="jsonnet"},
+  "hoob3rt/lualine.nvim",
+  {"j-hui/fidget.nvim", tag = "legacy"},
+  "jay-babu/mason-null-ls.nvim",
+  "jose-elias-alvarez/null-ls.nvim",
+  "kyazdani42/nvim-tree.lua",
+  "mfussenegger/nvim-dap",
+  "neovim/nvim-lspconfig",
+  {"NoahTheDuke/vim-just", ft="just"},
+  "numToStr/Comment.nvim",
+  {"nvim-treesitter/nvim-treesitter", build = ":TSUpdate"},
+  {"saecki/crates.nvim", ft="toml"},
+  "simrat39/rust-tools.nvim",
+  {
+    "williamboman/mason.nvim",
+    build = ":MasonUpdate" -- :MasonUpdate updates registry contents
+  },
+  "williamboman/mason-lspconfig.nvim",
+  "windwp/nvim-autopairs",
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter"
+  },
+  "zbirenbaum/copilot-cmp",
+  --- not done
+  "mfussenegger/nvim-dap",
+  -- {
+  --   "folke/which-key.nvim",
+  --   event = "VeryLazy",
+  --   init = function()
+  --     vim.o.timeout = true
+  --     vim.o.timeoutlen = 300
+  --   end,
+  --   opts = {}
+  -- },
 
-    -- autopairs
-    use "windwp/nvim-autopairs"
+  -- cmp
+  "hrsh7th/nvim-cmp",
+  "hrsh7th/cmp-buffer",
+  "hrsh7th/cmp-cmdline",
+  "hrsh7th/cmp-nvim-lsp",
+  "hrsh7th/cmp-nvim-lua",
+  "hrsh7th/cmp-path",
+  -- "hrsh7th/cmp-vsnip",
+  -- "hrsh7th/vim-vsnip",
+  "onsails/lspkind-nvim",
 
-    -- better-whitespace
-    use "ntpeters/vim-better-whitespace"
+  -- "mhartington/formatter.nvim",
 
-    -- commentary
-    use "tpope/vim-commentary"
 
-    -- cmp
-    use {"hrsh7th/nvim-cmp"}
-    use {"hrsh7th/cmp-buffer"}
-    use {"hrsh7th/cmp-cmdline"}
-    use {"hrsh7th/cmp-nvim-lsp"}
-    use {"hrsh7th/cmp-nvim-lua"}
-    use {"hrsh7th/cmp-path"}
-    use {"hrsh7th/cmp-vsnip"}
-    use {"hrsh7th/vim-vsnip"}
-    use {"onsails/lspkind-nvim"}
+  -- "ray-x/lsp_signature.nvim",
 
-    -- crates
-    use {
-      "saecki/crates.nvim",
-      requires = {"nvim-lua/plenary.nvim"},
-      config = function()
-        require("crates").setup()
-      end
-    }
+  "RishabhRD/nvim-lsputils",
 
-    -- fidget
-    use "j-hui/fidget.nvim"
+  -- "davidgranstrom/nvim-markdown-preview",
 
-    -- formatter
-    use "mhartington/formatter.nvim"
+  -- "rcarriga/nvim-dap-ui",
+  -- "theHamsta/nvim-dap-virtual-text",
 
-    --- just
-    use "NoahTheDuke/vim-just"
+  "RishabhRD/popfix",
 
-    -- lsp-config
-    use "neovim/nvim-lspconfig"
 
-    -- lsp-signature
-    use "ray-x/lsp_signature.nvim"
+  -- "nvim-telescope/telescope.nvim",
+  -- "nvim-telescope/telescope-dap.nvim",
+  -- "nvim-telescope/telescope-file-browser.nvim",
+  -- {
+  --   "nvim-telescope/telescope-fzf-native.nvim",
+  --   build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build"
+  -- },
+  -- {
+  --   "AckslD/nvim-neoclip.lua",
+  --   dependencies = {"tami5/sqlite.lua"}
+  -- },
+  -- "jvgrootveld/telescope-zoxide",
+  -- "nvim-telescope/telescope-ui-select.nvim",
+  -- "rcarriga/nvim-notify",
 
-    -- lsp-utils
-    use {"RishabhRD/nvim-lsputils"}
+  -- "christoomey/vim-tmux-navigator",
 
-    -- lualine
-    use {"hoob3rt/lualine.nvim", requires = {"kyazdani42/nvim-web-devicons", opt = true}}
 
-    -- markdown-preview
-    use {"davidgranstrom/nvim-markdown-preview"}
+  -- "lewis6991/gitsigns.nvim",
 
-    -- nerdtree
-    use {"preservim/nerdtree"}
+  -- "glepnir/lspsaga.nvim"
+}
 
-    -- nvim-dap
-    use "mfussenegger/nvim-dap"
-    use {"rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"}}
-    use {"theHamsta/nvim-dap-virtual-text"}
-
-    -- plenary
-    use {"nvim-lua/plenary.nvim"}
-
-    -- popfix
-    use {"RishabhRD/popfix"}
-
-    -- rust-tools
-    use "simrat39/rust-tools.nvim"
-
-    -- telescope
-    use {
-      "nvim-telescope/telescope.nvim",
-      requires = {{"nvim-lua/plenary.nvim"}}
-    }
-    use {"nvim-telescope/telescope-dap.nvim"}
-    use {"nvim-telescope/telescope-file-browser.nvim"}
-    use {"nvim-telescope/telescope-fzf-native.nvim", run = "make"}
-    use {"AckslD/nvim-neoclip.lua", requires = {"tami5/sqlite.lua"}}
-    use {"jvgrootveld/telescope-zoxide"}
-    use {"nvim-telescope/telescope-ui-select.nvim"}
-    use {"rcarriga/nvim-notify"}
-
-    -- tmux-navigator
-    use "christoomey/vim-tmux-navigator"
-
-    -- treesitter
-    use {"nvim-treesitter/nvim-treesitter", run = ":TSUpdate"}
-
-    -- vim-jsonnet
-    use {"google/vim-jsonnet"}
-
-    -- colorschemes
-    use "chriskempson/base16-vim"
-    -- use "fcpg/vim-fahrenheit"
-    -- use "gustavo-hms/garbo"
-    -- use "morhetz/gruvbox"
-    -- use "pineapplegiant/spaceduck"
-    -- use "tomasr/molokai"
-
-    -- disabled
-
-    -- gitsigns
-    -- use {"lewis6991/gitsigns.nvim", requires = {"nvim-lua/plenary.nvim"}}
-
-    -- lspsaga
-    -- use "glepnir/lspsaga.nvim"
-
-    -- nvim-startup
-    -- use {"henriquehbr/nvim-startup.lua"}
-
-    -- nvim-tree
-    -- use {"kyazdani42/nvim-tree.lua", requires = {"kyazdani42/nvim-web-devicons"}}
-  end
-)
-
-require("nvim-dap-virtual-text").setup({})
-
-require("bcmyers.plugins.lsp-config")
-
-require("bcmyers.plugins.autopairs")
-require("bcmyers.plugins.better-whitespace")
-require("bcmyers.plugins.cmp")
-require("bcmyers.plugins.fidget")
-require("bcmyers.plugins.formatter")
-require("bcmyers.plugins.lsp-utils")
-require("bcmyers.plugins.lualine")
-require("bcmyers.plugins.nerdtree")
-require("bcmyers.plugins.telescope")
-require("bcmyers.plugins.treesitter")
+require("lazy").setup(plugins, {})

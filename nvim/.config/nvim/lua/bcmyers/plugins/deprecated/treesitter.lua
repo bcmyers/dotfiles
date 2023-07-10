@@ -1,9 +1,4 @@
-local status, treesitter = pcall(require, "nvim-treesitter.configs")
-if not status then
-  return
-end
-
-treesitter.setup {
+require "nvim-treesitter.configs".setup {
   autopairs = {enable = true},
   ensure_installed = "all",
   ignore_install = {

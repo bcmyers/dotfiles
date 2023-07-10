@@ -108,8 +108,8 @@ vim.api.nvim_create_autocmd(
       "*.json",
       "*.json5",
       "*.lua",
-      "*.yaml",
-      "*.yml"
+      "*.yaml"
+      -- "*.yml"
     },
     command = "FormatWrite"
   }

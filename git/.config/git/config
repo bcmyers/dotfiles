@@ -5,7 +5,9 @@
 
 [core]
     editor = "nvim"
-    untrackedcache = true
+	untrackedcache = True
+    fsmonitor = True
+    excludesfile = /Users/brian.myers/.gitignore_global
 
 [diff]
     algorithm = "patience"
@@ -28,6 +30,6 @@
     default = "simple"
 
 [user]
-    email = "brian.carl.myers@gmail.com"
-    name = "Brian Myers"
+    email = brian.myers@robinhood.com
+    name = Brian Myers
     signingkey = "B86678B99457460F"

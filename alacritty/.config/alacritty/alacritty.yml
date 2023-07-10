@@ -31,11 +31,11 @@ font:
     style:
       'Bold
       Italic'
-  size: 16.0
+  size: 14.0
 live_config_reload: true
 save_to_clipboard: true
 window:
-  opacity: 0.95
+  opacity: 1.0
   dimensions:
     columns: 400
     lines: 100

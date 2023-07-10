@@ -8,31 +8,25 @@ function edit_dotfiles() {
 }
 export edit_dotfiles
 
-function edit_user_chrome() {
-  pushd "$HOME/Library/Application Support/Firefox/Profiles/ouotagtz.default-release-1636802624234/chrome"
-  nvim .
-}
-export edit_user_chrome
-
 function is_in_path() {
   builtin type -P "$1" &> /dev/null
-}
-
-function print_path() {
-  echo -e "${PATH//:/\\n}"
-}
-
-function remove_from_path() {
-  PATH=$(echo -n "$PATH" | awk -v RS=: -v ORS=: '$0 != "'"$1"'"' | sed 's/:$//')
-  export PATH
 }
 
 function ports() {
   sudo lsof -P -i TCP -s TCP:LISTEN
 }
 
+function print_path() {
+  echo -e "${PATH//:/\\n}"
+}
+
 function remove_ds_store() {
   find . -name '.DS_Store' -type f -delete
+}
+
+function remove_from_path() {
+  PATH=$(echo -n "$PATH" | awk -v RS=: -v ORS=: '$0 != "'"$1"'"' | sed 's/:$//')
+  export PATH
 }
 
 export EDITOR=vi
@@ -72,7 +66,7 @@ case "${platform}" in
     ;;
 esac
 
-export PATH="${HOME}/.local/bin:${usr_local}/bin:/usr/bin:/bin:${HOME}/.local/sbin:${usr_local}/sbin:/usr/sbin:/sbin"
+export PATH="${HOME}/.local/bin:${usr_local}/bin:/usr/bin:/bin:${HOME}/.local/sbin:${usr_local}/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin"
 
 case "$(uname -s)" in
   Darwin)
@@ -173,8 +167,9 @@ fi
 # git
 if is_in_path git; then
   alias gd="git diff -- :/ ':(exclude,top)*Cargo.lock'"
-  alias gf="git log --follow --date=short --pretty=format:'%C(bold blue)%ad%C(reset) %C(bold yellow)%p %h%C(reset) %s %C(bold red)%an%C(reset)' -- ."
-  alias gl="git log --decorate --graph --oneline"
+  alias gf="git log --decorate=short --date=short --graph --pretty=format:'%C(bold blue)%ad%C(reset) %C(bold yellow)%h%C(reset) %<(5)%al %<(20)%s' --max-count=40"
+  alias gl="git log --decorate --graph --oneline --max-count=100"
+  alias gw="git worktree"
 
   function gff() {
     if [[ -z $1 ]]; then
@@ -193,11 +188,12 @@ fi
 
 # golang
 if is_in_path go; then
-  go_bin="$HOME/go/bin/go1.16.7"
+  go_bin="$HOME/go/bin/go1.19.4"
   if [[ -x $go_bin ]]; then
     GOROOT=$("$go_bin" env GOROOT)
     export GOROOT
     export PATH="$GOROOT/bin:$HOME/go/bin:$PATH"
+    export PATH="$HOME/go/bin:$PATH"
   fi
 fi
 
@@ -256,8 +252,7 @@ fi
 if is_in_path nvim; then
   export EDITOR=nvim
   export VISUAL=nvim
-  alias lg="nvim . +'Telescope live_grep'"
-  alias nvim="nvim --startuptime /tmp/nvim-startuptime"
+  alias nivm=nvim
 fi
 
 # nvm
@@ -315,8 +310,9 @@ fi
 # Other
 set -o vi
 
-if [[ -e $HOME/.bash_secret ]]; then
-  source "$HOME/.bash_secret"
+if [[ -e $HOME/.bash_secrets ]]; then
+  source "$HOME/.bash_secrets"
 fi
 
-export PATH="${HOME}/.local/bin:${PATH}"
+export PATH="${HOME}/.local/bin:${PATH}:/usr/local/bin"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion

@@ -17,6 +17,7 @@ vim.o.clipboard = "unnamedplus"
 vim.o.cmdheight = 1
 vim.o.colorcolumn = "80,100"
 vim.o.completeopt = "menu,menuone,noselect"
+vim.o.cursorline = true
 vim.o.emoji = false
 vim.o.expandtab = true -- Use spaces instead of tabs
 vim.o.formatoptions = "cjnqr"
@@ -118,3 +119,16 @@ augroup END
 ]],
   false
 )
+
+vim.keymap.set("n", "<leader>-", "<C-w>s")
+vim.keymap.set("n", "<leader>\\", "<C-w>v")
+
+vim.keymap.set("n", "<leader>tt", ":tabnew<CR>")
+vim.keymap.set("n", "<leader>tn", ":tabn<CR>")
+vim.keymap.set("n", "<leader>tp", ":tabp<CR>")
+
+vim.filetype.add({
+  filename = {
+    ['justfile'] = 'just',
+  },
+})

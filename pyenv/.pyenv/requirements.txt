@@ -14,5 +14,7 @@ python-lsp-server; python_version >= '3.5'
 
 pynvim; python_version >= '3.5'
 
+ruff-lsp; python_version >= '3.5'
+
 virtualenv; python_version >= '3.5'
 virtualenvwrapper; python_version >= '3.5'
