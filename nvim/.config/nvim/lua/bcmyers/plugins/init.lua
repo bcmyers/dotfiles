@@ -86,25 +86,25 @@ local plugins = {
   "RishabhRD/popfix",
 
 
-  -- "nvim-telescope/telescope.nvim",
-  -- "nvim-telescope/telescope-dap.nvim",
-  -- "nvim-telescope/telescope-file-browser.nvim",
-  -- {
-  --   "nvim-telescope/telescope-fzf-native.nvim",
-  --   build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build"
-  -- },
+  {
+    'nvim-telescope/telescope.nvim', tag = '0.1.8',
+    dependencies = { 'nvim-lua/plenary.nvim' }
+  },
+  "nvim-telescope/telescope-dap.nvim",
+  {
+    'nvim-telescope/telescope-fzf-native.nvim',
+    build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release',
+  },
   -- {
   --   "AckslD/nvim-neoclip.lua",
   --   dependencies = {"tami5/sqlite.lua"}
   -- },
   -- "jvgrootveld/telescope-zoxide",
-  -- "nvim-telescope/telescope-ui-select.nvim",
-  -- "rcarriga/nvim-notify",
+  "nvim-telescope/telescope-ui-select.nvim",
 
   -- "christoomey/vim-tmux-navigator",
 
-
-  -- "lewis6991/gitsigns.nvim",
+  "lewis6991/gitsigns.nvim",
 
   -- "glepnir/lspsaga.nvim"
 }
