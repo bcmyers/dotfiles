@@ -105,6 +105,7 @@ local plugins = {
   -- "christoomey/vim-tmux-navigator",
 
   "lewis6991/gitsigns.nvim",
+  {"ellisonleao/glow.nvim", config = true, cmd = "Glow"},
 
   -- "glepnir/lspsaga.nvim"
 }
