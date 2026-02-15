@@ -1,8 +1,8 @@
 vim.bo.expandtab = true -- use spaces for tabs
-vim.bo.shiftwidth = 4
-vim.bo.smartindent = true -- insert indents automatically
-vim.bo.tabstop = 4
+vim.bo.shiftwidth = 2
+vim.bo.smartindent = false -- smartindent interferes with markdown lists
+vim.bo.tabstop = 2
+vim.bo.textwidth = 80
 
-vim.wo.colorcolumn = "80,100"
-vim.wo.conceallevel = 0
-vim.wo.concealcursor = ""
+vim.wo.wrap = true
+vim.wo.spell = true
