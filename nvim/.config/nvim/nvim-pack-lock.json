@@ -63,7 +63,7 @@
     "snacks.nvim": {
       "rev": "a4e46becca45eb65c73a388634b1ce8aad629ae0",
       "src": "https://github.com/folke/snacks.nvim",
-      "version": "'fe7cfe9800a182274d0f868a74b7263b8c0c020b'"
+      "version": "'9912042fc8bca2209105526ac7534e9a0c2071b2'"
     },
     "telescope.nvim": {
       "rev": "3333a52ff548ba0a68af6d8da1e54f9cd96e9179",

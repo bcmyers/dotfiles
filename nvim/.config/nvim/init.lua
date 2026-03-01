@@ -58,8 +58,8 @@ vim.pack.add({
 	}, -- 2026-01-22
 	{
 		src = "https://github.com/folke/snacks.nvim",
-		version = "fe7cfe9800a182274d0f868a74b7263b8c0c020b",
-	}, -- 2025-11-18
+		version = "9912042fc8bca2209105526ac7534e9a0c2071b2",
+	}, -- 2026-03-01
 	{
 		src = "https://github.com/folke/todo-comments.nvim",
 		version = "31e3c38ce9b29781e4422fc0322eb0a21f4e8668",
@@ -121,6 +121,9 @@ vim.opt.splitbelow = true
 
 -- Undo
 vim.opt.undofile = true
+
+-- Swap
+vim.opt.swapfile = false
 
 -- Clipboard
 vim.opt.clipboard = "unnamedplus"
@@ -311,16 +314,10 @@ require("which-key").setup({
 -- Lualine
 -- Show file path relative to git root (e.g. "lua/plugins/init.lua"),
 -- falls back to path relative to cwd if not in a git repo.
-local function git_relative_path()
-	local filepath = vim.fn.expand("%:p")
-	if filepath == "" then
-		return ""
-	end
-	local root = vim.fs.root(0, ".git")
-	if root then
-		return filepath:sub(#root + 2)
-	end
-	return vim.fn.expand("%:.")
+local function full_path()
+	local path = vim.fn.expand("%:p")
+	local home = vim.fn.expand("~")
+	return path:gsub("^" .. home, "~")
 end
 
 ---@diagnostic disable-next-line: undefined-field
@@ -335,7 +332,7 @@ require("lualine").setup({
 	sections = {
 		lualine_a = { "mode" },
 		lualine_b = {},
-		lualine_c = { git_relative_path },
+		lualine_c = { full_path },
 		lualine_x = { "diagnostics" },
 		lualine_y = { "location" },
 		lualine_z = {},
@@ -343,7 +340,7 @@ require("lualine").setup({
 	inactive_sections = {
 		lualine_a = {},
 		lualine_b = {},
-		lualine_c = { git_relative_path },
+		lualine_c = { full_path },
 		lualine_x = {},
 		lualine_y = {},
 		lualine_z = {},
@@ -363,6 +360,7 @@ require("snacks").setup({
 		sources = {
 			explorer = {
 				hidden = true,
+				ignored = true,
 			},
 		},
 	},
