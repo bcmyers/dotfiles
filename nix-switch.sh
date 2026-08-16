@@ -2,4 +2,9 @@
 
 set -euo pipefail
 
-home-manager switch --flake .#bcmyers@macbook-intel
+exec nix \
+  --extra-experimental-features "nix-command flakes" \
+  run . -- \
+  switch \
+  --flake ".#bcmyers@linux" \
+  "$@"
