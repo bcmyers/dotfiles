@@ -20,7 +20,7 @@ Stop if any of those facts differ. Never infer the target disk from device order
 4. From an x86_64 Linux machine with KVM, build and review the flake and both VM tests:
 
    ```console
-   just check
+   ./nix-flake.sh flake check --all-systems --no-build --print-build-logs
    just build
    just build-vm
    just test-disko
@@ -53,7 +53,7 @@ mkdir -p ~/lib
 git clone https://github.com/bcmyers/dotfiles.git ~/lib/dotfiles
 cd ~/lib/dotfiles
 git switch master
-nix flake check --all-systems --no-build --print-build-logs
+./nix-flake.sh flake check --all-systems --no-build --print-build-logs
 ```
 
 If the NixOS work is still in a pull request, fetch and switch to its exact reviewed commit instead of `master`.
@@ -84,7 +84,7 @@ lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS /dev/nvme0n1
 The next command irreversibly destroys the partition table, Pop!_OS recovery environment, current LUKS container, and all files on `/dev/nvme0n1`:
 
 ```console
-sudo nix run .#disko -- \
+sudo nix --extra-experimental-features "nix-command flakes" run .#disko -- \
   --mode destroy,format,mount \
   --flake '.#thinkpad'
 ```
@@ -99,7 +99,9 @@ lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS /dev/nvme0n1
 ## 6. Install and set the local password
 
 ```console
-sudo nixos-install --flake '.#thinkpad' --no-root-passwd
+sudo nix --extra-experimental-features "nix-command flakes" run .#nixos-install -- \
+  --flake '.#thinkpad' \
+  --no-root-passwd
 sudo nixos-enter --root /mnt -c 'passwd bcmyers'
 sudo rm -f /tmp/secret.key
 ```
@@ -162,7 +164,7 @@ From the repository on the installed ThinkPad:
 
 ```console
 git pull --ff-only
-nix flake update
+./nix-flake.sh flake update
 just check
 just build
 just switch

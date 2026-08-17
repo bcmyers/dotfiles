@@ -10,7 +10,7 @@
 Edit the encrypted file from the repository root with:
 
 ```sh
-sops secrets/mac.yaml
+./nix-flake.sh run .#sops -- secrets/mac.yaml
 ```
 
 Only encrypted SOPS documents belong in this directory. Never commit an age

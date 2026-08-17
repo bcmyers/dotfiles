@@ -1,30 +1,33 @@
 default: check
 
 build:
-    nix build '.#nixosConfigurations.thinkpad.config.system.build.toplevel'
+    ./nix-flake.sh build '.#nixosConfigurations.thinkpad.config.system.build.toplevel'
 
 build-home: build-home-linux
 
 build-home-linux:
-    nix build '.#homeConfigurations."bcmyers@linux".activationPackage'
+    ./nix-flake.sh build '.#homeConfigurations."bcmyers@linux".activationPackage'
 
 build-home-mac:
-    nix build '.#homeConfigurations."bcmyers@mac".activationPackage'
+    ./nix-flake.sh build '.#homeConfigurations."bcmyers@mac".activationPackage'
 
 build-mac:
-    nix build '.#darwinConfigurations.mac.system'
+    ./nix-flake.sh build '.#darwinConfigurations.mac.system'
 
 build-vm:
-    nix build '.#vm' --out-link result-vm
+    ./nix-flake.sh build '.#vm' --out-link result-vm
 
 test-disko:
-    nix build '.#disko-test' --print-build-logs
+    ./nix-flake.sh build '.#disko-test' --print-build-logs
 
 check:
-    nix flake check --all-systems --no-build --print-build-logs
+    ./nix-flake.sh flake check --all-systems --no-build --print-build-logs
 
 format:
-    nix fmt
+    ./nix-flake.sh fmt
+
+show:
+    ./nix-flake.sh flake show --all-systems
 
 gc:
     ./nix-garbage-collections.sh
@@ -44,4 +47,4 @@ vm: build-vm
     ./result-vm/bin/run-thinkpad-vm-vm
 
 update:
-    nix flake update
+    ./nix-flake.sh flake update

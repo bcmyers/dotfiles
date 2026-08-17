@@ -66,6 +66,11 @@
           inherit system;
           config.allowUnfree = false;
         };
+      mkPrompt =
+        system:
+        (mkPkgs nixpkgs-unstable system).callPackage ./packages/prompt.nix {
+          src = inputs.prompt-src;
+        };
       mkHomeConfiguration =
         {
           homeManager,
@@ -128,11 +133,13 @@
         disko-install = nixosConfiguration.config.system.build.installTest;
         home = linuxHomeConfiguration.activationPackage;
         nixos = nixosConfiguration.config.system.build.toplevel;
+        prompt = mkPrompt linuxSystem;
         vm = nixosConfiguration.config.system.build.vm;
       };
       checks.${macSystem} = {
         darwin = darwinConfiguration.system;
         home = macHomeConfiguration.activationPackage;
+        prompt = mkPrompt macSystem;
       };
 
       formatter = nixpkgs.lib.genAttrs formatterSystems (
@@ -144,11 +151,13 @@
         disko = disko.packages.${linuxSystem}.disko;
         disko-test = nixosConfiguration.config.system.build.installTest;
         home-manager = home-manager.packages.${linuxSystem}.home-manager;
+        prompt = mkPrompt linuxSystem;
         vm = nixosConfiguration.config.system.build.vm;
       };
       packages.${macSystem} = {
         default = darwinConfiguration.system;
         home-manager = home-manager-unstable.packages.${macSystem}.home-manager;
+        prompt = mkPrompt macSystem;
       };
 
       apps = nixpkgs.lib.genAttrs formatterSystems (
@@ -163,6 +172,23 @@
                 home-manager.packages.${system}.home-manager
             }/bin/home-manager";
             meta.description = "Run Home Manager using this flake's pinned version";
+          };
+          sops = {
+            type = "app";
+            program = "${(mkPkgs nixpkgs-unstable system).sops}/bin/sops";
+            meta.description = "Run the SOPS version pinned by this flake";
+          };
+        }
+        // nixpkgs.lib.optionalAttrs (system == linuxSystem) {
+          nixos-install = {
+            type = "app";
+            program = "${nixosConfiguration.config.system.build.nixos-install}/bin/nixos-install";
+            meta.description = "Install the ThinkPad NixOS configuration";
+          };
+          nixos-rebuild = {
+            type = "app";
+            program = "${nixosConfiguration.config.system.build.nixos-rebuild}/bin/nixos-rebuild";
+            meta.description = "Build and activate the ThinkPad NixOS configuration";
           };
         }
         // nixpkgs.lib.optionalAttrs (system == macSystem) {

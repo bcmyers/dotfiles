@@ -2,4 +2,7 @@
 
 set -euo pipefail
 
-exec sudo nixos-rebuild switch --flake ".#thinkpad" "$@"
+exec sudo nix \
+  --extra-experimental-features "nix-command flakes" \
+  run ".#nixos-rebuild" -- \
+  switch --flake ".#thinkpad" "$@"

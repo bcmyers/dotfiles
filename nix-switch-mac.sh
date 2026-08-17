@@ -11,7 +11,10 @@ if command -v brew >/dev/null 2>&1 && brew list --formula ollama >/dev/null 2>&1
   restore_homebrew_ollama=true
 fi
 
-if ! sudo nix run '.#darwin-rebuild' -- switch --flake '.#mac'; then
+if ! sudo nix \
+  --extra-experimental-features "nix-command flakes" \
+  run '.#darwin-rebuild' -- \
+  switch --flake '.#mac'; then
   if $restore_homebrew_ollama; then
     brew services start ollama
   fi

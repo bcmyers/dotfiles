@@ -44,6 +44,24 @@ The Mac uses nixpkgs-unstable throughout because it is a workstation user enviro
 
 Rust itself is managed by Rustup rather than Nix so that stable Rust can be updated immediately without waiting for Nixpkgs. After the first activation on a new machine, run `just rust-update`.
 
+## Flake workflow
+
+The repository does not depend on Nix channels or an ambient `<nixpkgs>`. Every Nix input, package, rebuild tool, and formatter is resolved through `flake.nix` and `flake.lock`. `nix-flake.sh` explicitly enables `nix-command` and `flakes`, which also makes the bootstrap commands work before Home Manager, NixOS, or nix-darwin has written the permanent Nix settings.
+
+Useful flake entry points include:
+
+```console
+./nix-flake.sh flake show --all-systems
+./nix-flake.sh flake check --all-systems --no-build
+./nix-flake.sh build .#prompt
+./nix-flake.sh run .#sops -- --version
+./nix-flake.sh run .#nixos-install -- --help  # x86_64 Linux
+./nix-flake.sh run .#nixos-rebuild -- --help  # x86_64 Linux
+./nix-flake.sh run .#darwin-rebuild -- --help # Apple Silicon macOS
+```
+
+The non-flake `prompt-src` input is intentional: it imports the source archive of the separate prompt repository into this flake, and its exact revision and content hash are still locked.
+
 ## Mac nix-darwin
 
 The `mac` nix-darwin target shares command-line tools, Fish configuration and abbreviations, the custom `prompt` executable, Git/GPG configuration, Neovim, tmux, Alacritty, and other user preferences with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
@@ -65,6 +83,7 @@ After the first successful activation, open a fresh Fish shell and verify that `
 
 ```console
 just check       # Evaluate all flake outputs
+just show        # Display every flake output for both systems
 just build       # Build the complete NixOS system
 just build-home-linux # Build standalone Linux Home Manager
 just build-home-mac   # Build standalone Mac Home Manager
