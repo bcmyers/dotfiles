@@ -25,7 +25,7 @@ check-secrets:
     ./scripts/check-secrets.sh
 
 install-hooks:
-    git config core.hooksPath .githooks
+    ./scripts/install-git-hooks.sh
 
 edit-secrets:
     ./scripts/nix-flake.sh run .#sops -- secrets/personal.yaml

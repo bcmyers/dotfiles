@@ -73,19 +73,17 @@ nix --extra-experimental-features 'nix-command flakes' build \
   ".#homeConfigurations.\"${DEVBOX_TARGET}\".activationPackage"
 ```
 
-Then run the Home Manager executable and configuration from the same local
-flake. Activate without `sudo`—the shell is already root:
+Then use the guarded activation script from that same checkout. Activate
+without `sudo`—the shell is already root:
 
 ```console
-nix --extra-experimental-features 'nix-command flakes' run \
-  '.#home-manager' -- \
-  switch \
-  --flake ".#\"${DEVBOX_TARGET}\"" \
-  -b home-manager-backup
+./scripts/switch-work-devbox.sh
 ```
 
 Conflicting files receive the `.home-manager-backup` suffix; inspect them
-before removal.
+before removal. The script independently refuses a dirty checkout, an attached
+branch, an unsupported architecture, a non-root user, or a home other than
+`/root`.
 
 ## 4. Update to another reviewed revision
 
@@ -104,15 +102,17 @@ just switch-work-devbox
 ```
 
 The build and switch scripts automatically select the x86_64 or ARM target.
-The guarded switch script also refuses to run unless the host is Linux and the
-effective user and home directory are `root` and `/root`.
+The guarded switch script also refuses to run unless the host is Linux, the
+effective user is named `root`, `USER` can safely be normalized to `root`, and
+the home directory is `/root`.
 
 ## 5. Shell behavior
 
 Home Manager installs and configures Fish but deliberately leaves root's login
-shell under devbox management. Start it explicitly with `fish`. If the devbox
-platform has an approved startup hook, that hook may launch Fish separately;
-do not change `/etc/passwd` merely to activate this profile.
+shell and Bash startup files under devbox management. Start the managed shell
+explicitly with `/root/.nix-profile/bin/fish`. If the devbox platform has an
+approved startup hook, that hook may launch Fish separately; do not change
+`/etc/passwd` merely to activate this profile.
 
 The managed Fish startup never deletes universal or global `fish_user_paths`.
 That preserves paths installed by the devbox platform and work tooling.
@@ -147,3 +147,29 @@ contents into a remote terminal instead of allowing remote clipboard reads.
 
 Never copy the personal age identity, GPG private keys, Password Store data,
 or `secrets/personal.yaml` access to a work devbox.
+
+## 7. Recover or roll back
+
+Home Manager activation is not transactional after its preflight checks. If an
+activation exits nonzero, read the final failed activation phase, correct that
+specific problem, and rerun the same reviewed checkout before starting a new
+shell.
+
+List retained standalone Home Manager generations:
+
+```console
+home-manager generations
+```
+
+Each entry includes an immutable generation path. To restore one, run its
+activation program directly:
+
+```console
+previous_generation='/nix/store/...-home-manager-generation'
+"$previous_generation/activate"
+```
+
+To return the source checkout as well, detach it at the previously reviewed
+commit, verify it is clean, build it, and use the guarded switch script. Restore
+an individual pre-Home-Manager file from its `.home-manager-backup` copy only
+after verifying that Home Manager no longer owns the destination.

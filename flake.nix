@@ -78,20 +78,6 @@
         (mkPkgs nixpkgs-unstable system).callPackage ./pkgs/prompt {
           src = inputs.prompt-src;
         };
-      mkSecretScan =
-        system:
-        let
-          pkgs = mkPkgs nixpkgs-unstable system;
-        in
-        pkgs.runCommand "dotfiles-secret-scan"
-          {
-            nativeBuildInputs = [ pkgs.gitleaks ];
-            source = ./.;
-          }
-          ''
-            gitleaks --no-banner --redact dir "$source"
-            touch "$out"
-          '';
       mkHomeConfiguration =
         {
           homeManager,
@@ -155,20 +141,17 @@
       checks.${thinkpadSystem} = {
         disko-test = nixosConfiguration.config.system.build.installTest;
         prompt = mkPrompt thinkpadSystem;
-        secrets = mkSecretScan thinkpadSystem;
         thinkpad = nixosConfiguration.config.system.build.toplevel;
         vm = nixosConfiguration.config.system.build.vm;
         work-devbox = workDevboxHomeConfigurations.x86_64-linux.activationPackage;
       };
       checks.aarch64-linux = {
         prompt = mkPrompt "aarch64-linux";
-        secrets = mkSecretScan "aarch64-linux";
         work-devbox = workDevboxHomeConfigurations.aarch64-linux.activationPackage;
       };
       checks.${macSystem} = {
         personal-mac = personalMacConfiguration.system;
         prompt = mkPrompt macSystem;
-        secrets = mkSecretScan macSystem;
         work-mac = workMacHomeConfiguration.activationPackage;
       };
 
@@ -201,11 +184,6 @@
             type = "app";
             program = "${home-manager-unstable.packages.${system}.home-manager}/bin/home-manager";
             meta.description = "Run Home Manager using this flake's pinned version";
-          };
-          gitleaks = {
-            type = "app";
-            program = "${(mkPkgs nixpkgs-unstable system).gitleaks}/bin/gitleaks";
-            meta.description = "Scan the repository with the Gitleaks version pinned by this flake";
           };
           sops = {
             type = "app";

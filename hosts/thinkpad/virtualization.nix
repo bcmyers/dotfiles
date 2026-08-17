@@ -16,7 +16,7 @@
       desktopManager.cosmic.enable = lib.mkForce false;
       displayManager.cosmic-greeter.enable = lib.mkForce false;
       getty.autologinUser = "bcmyers";
-      openssh.settings.PasswordAuthentication = lib.mkForce true;
+      openssh.settings.PasswordAuthentication = lib.mkForce false;
       xserver.videoDrivers = lib.mkForce [ "modesetting" ];
     };
     users.users.bcmyers.initialPassword = "nixos-vm";
@@ -26,7 +26,10 @@
       forwardPorts = [
         {
           from = "host";
-          host.port = 2222;
+          host = {
+            address = "127.0.0.1";
+            port = 2222;
+          };
           guest.port = 22;
         }
       ];

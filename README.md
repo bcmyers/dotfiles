@@ -183,6 +183,10 @@ omit Alacritty, fonts, desktop clipboard packages, Caffeine, Thaw, GPG,
 Password Store, SOPS, age, AWS and cloud deployment tools, workstation network
 administration tools, and Windsurf integration.
 
+They also preserve the platform-provided root Bash startup files. Fish is
+managed under `/root/.nix-profile` and launched explicitly rather than
+replacing the devbox login shell or Bash initialization.
+
 Build and activate it as root:
 
 ```console
@@ -229,7 +233,18 @@ just update      # Update all locked inputs
 just format      # Format Nix files
 ```
 
-The regular VM variant disables Disko and NVIDIA, uses a disposable QEMU disk, exposes guest SSH on host port `2222`, and automatically logs in as `bcmyers` on its serial console. Its temporary password is `nixos-vm`; that password is not present in the production configuration. The separate Disko test formats a disposable virtual disk, installs and boots NixOS from its encrypted root, and verifies LUKS, ext4, and the swapfile with a VM-only dummy key.
+`just install-hooks` materializes Gitleaks from the exact nixpkgs-unstable
+revision in `flake.lock` without evaluating this repository as a flake. The
+hook then invokes that immutable binary directly, so a rejected staged secret
+is not first copied into the Nix store as part of the candidate source tree.
+
+The regular VM variant disables Disko and NVIDIA, uses a disposable QEMU disk,
+exposes key-only guest SSH at `127.0.0.1:2222`, and automatically logs in as
+`bcmyers` on its serial console. Its temporary local-console password is
+`nixos-vm`; that password is not accepted over SSH and is not present in the
+production configuration. The separate Disko test formats a disposable
+virtual disk, installs and boots NixOS from its encrypted root, and verifies
+LUKS, ext4, and the swapfile with a VM-only dummy key.
 
 ## State versions
 

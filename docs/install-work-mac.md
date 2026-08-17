@@ -79,3 +79,21 @@ The managed Fish configuration never deletes universal or global
 inspect it first with `set --show fish_user_paths`. Remove entries only after
 confirming they are obsolete; corporate installers may intentionally store
 paths there.
+
+## 6. Recover or roll back
+
+Standalone Home Manager activation is not transactional after preflight. If it
+fails after linking files, fix the reported phase and rerun the same reviewed
+checkout before opening a new shell.
+
+List retained generations and activate the chosen previous one directly:
+
+```console
+home-manager generations
+previous_generation='/nix/store/...-home-manager-generation'
+"$previous_generation/activate"
+```
+
+The generation path comes from the first command. A `.home-manager-backup` file
+is the pre-activation file, not a complete generation rollback; restore one
+only after confirming the current generation no longer owns its destination.

@@ -5,5 +5,10 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
-git diff --cached --binary --no-ext-diff | \
-  ./scripts/nix-flake.sh run .#gitleaks -- --no-banner --redact stdin
+gitleaks_bin="$(git config --get dotfiles.gitleaks-path || true)"
+if [[ -z "$gitleaks_bin" || ! -x "$gitleaks_bin" ]]; then
+  echo "The pinned Gitleaks binary is unavailable; run 'just install-hooks'." >&2
+  exit 1
+fi
+
+exec "$gitleaks_bin" --no-banner --redact git --pre-commit --staged .

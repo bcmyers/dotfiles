@@ -237,16 +237,49 @@ Before relying on the machine, test:
 
 Hibernation is intentionally not configured. The 8 GiB swapfile is for memory pressure and can be resized declaratively later.
 
-## 9. Routine updates
+## 9. Consume reviewed updates
 
-From the repository on the installed ThinkPad:
+Routine activation consumes an already reviewed and committed lock file. From
+the repository on the installed ThinkPad:
 
 ```console
 git pull --ff-only
-./scripts/nix-flake.sh flake update
 just check
 just build-thinkpad
 just switch-thinkpad
 ```
 
-Review and commit `flake.lock` updates from a branch rather than updating the running machine from an uncommitted lock file.
+Do not run `flake update` in this workflow.
+
+## 10. Prepare dependency updates for review
+
+Create a branch on a development machine, update the lock file there, and test
+before opening or updating a pull request:
+
+```console
+git switch -c update/nix-inputs-YYYY-MM-DD
+just update
+just check
+just build-thinkpad
+just build-vm
+just test-disko
+git diff -- flake.lock
+```
+
+Commit and review the resulting `flake.lock`. Activate it on the ThinkPad only
+after that reviewed commit is merged or otherwise explicitly approved.
+
+## 11. Recover or roll back
+
+If the new system cannot boot normally, select a previous generation from the
+systemd-boot menu. Once logged in, make that previous generation current:
+
+```console
+sudo nixos-rebuild switch --rollback
+```
+
+Return the repository to the corresponding known-good reviewed commit before
+the next `just switch-thinkpad`; otherwise the next switch simply reapplies the
+bad configuration. If the machine cannot reach a local shell, boot the NixOS
+installer USB, unlock and mount the encrypted root, and repair it from the live
+environment rather than repartitioning the disk.

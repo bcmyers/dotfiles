@@ -85,6 +85,18 @@ configuration, remove it once with `set --erase --universal fish_user_paths`.
 The managed Fish startup intentionally does not erase universal or global
 paths, because installers and work tooling can legitimately use them.
 
+A legacy `~/.zprofile` may still run `brew shellenv`. Once nix-darwin supplies
+the system PATH, inspect that file and remove or archive the obsolete line. If
+the file contains nothing else worth retaining, preserve it under a unique
+name instead of letting every zsh login evaluate Fish syntax:
+
+```console
+sed -n '1,160p' ~/.zprofile
+zprofile_backup="$HOME/.zprofile.before-nix.$(date +%Y%m%d-%H%M%S)"
+test ! -e "$zprofile_backup"
+mv ~/.zprofile "$zprofile_backup"
+```
+
 ## 4. Verify the migrated environment
 
 Open a fresh Fish shell and verify:
@@ -99,4 +111,20 @@ Open a fresh Fish shell and verify:
 
 Remove the obsolete plaintext `~/.config/fish/secret.fish` only after the SOPS
 variables work. Rotate the Anthropic and Twilio credentials because that legacy
-file was previously readable by other local users.
+file stored them as persistent plaintext and may still exist in backups.
+
+## 5. Recover or roll back
+
+List the nix-darwin system generations before selecting a rollback:
+
+```console
+sudo /run/current-system/sw/bin/darwin-rebuild --list-generations
+sudo /run/current-system/sw/bin/darwin-rebuild switch --rollback
+```
+
+Open a new terminal after rollback. If the current system path is damaged, use
+the corresponding `darwin-rebuild` executable from a retained generation under
+`/nix/var/nix/profiles/system-*-link/sw/bin/`. Before switching forward again,
+return the repository to a known-good reviewed commit. Individual
+`.home-manager-backup` files can restore pre-activation content, but they do not
+replace a complete nix-darwin generation rollback.
