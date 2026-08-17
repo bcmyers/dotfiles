@@ -95,6 +95,12 @@
         nixpkgsInput = nixpkgs-unstable;
         system = macSystem;
       };
+      workDevboxHomeConfiguration = mkHomeConfiguration {
+        homeManager = home-manager-unstable;
+        homeModule = ./hosts/work-devbox/home.nix;
+        nixpkgsInput = nixpkgs-unstable;
+        system = linuxSystem;
+      };
       nixosConfiguration = nixpkgs.lib.nixosSystem {
         system = linuxSystem;
         specialArgs = (mkHomeSpecialArgs linuxSystem) // {
@@ -122,6 +128,7 @@
     {
       homeConfigurations = {
         "brian.myers@work-mac" = workMacHomeConfiguration;
+        "root@work-devbox" = workDevboxHomeConfiguration;
       };
       darwinConfigurations.personal-mac = personalMacConfiguration;
       nixosConfigurations.thinkpad = nixosConfiguration;
@@ -131,6 +138,7 @@
         prompt = mkPrompt linuxSystem;
         thinkpad = nixosConfiguration.config.system.build.toplevel;
         vm = nixosConfiguration.config.system.build.vm;
+        work-devbox = workDevboxHomeConfiguration.activationPackage;
       };
       checks.${macSystem} = {
         personal-mac = personalMacConfiguration.system;
@@ -164,12 +172,7 @@
           };
           home-manager = {
             type = "app";
-            program = "${
-              if system == macSystem then
-                home-manager-unstable.packages.${system}.home-manager
-              else
-                home-manager.packages.${system}.home-manager
-            }/bin/home-manager";
+            program = "${home-manager-unstable.packages.${system}.home-manager}/bin/home-manager";
             meta.description = "Run Home Manager using this flake's pinned version";
           };
           sops = {

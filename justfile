@@ -6,6 +6,9 @@ build-thinkpad:
 build-work-mac:
     ./scripts/nix-flake.sh build '.#homeConfigurations."brian.myers@work-mac".activationPackage'
 
+build-work-devbox:
+    ./scripts/nix-flake.sh build '.#homeConfigurations."root@work-devbox".activationPackage'
+
 build-personal-mac:
     ./scripts/nix-flake.sh build '.#darwinConfigurations.personal-mac.system'
 
@@ -35,6 +38,9 @@ switch-personal-mac:
 
 switch-work-mac:
     ./scripts/switch-work-mac.sh
+
+switch-work-devbox:
+    ./scripts/switch-work-devbox.sh
 
 rust-update:
     rustup update stable

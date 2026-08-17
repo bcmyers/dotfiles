@@ -34,7 +34,6 @@
       just
       luarocks
       moreutils
-      nerd-fonts.inconsolata
       ninja
       nmap
       openssl

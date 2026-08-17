@@ -11,7 +11,11 @@
   ];
 
   home-manager.users.bcmyers = {
-    imports = [ ../../users/bcmyers ];
+    imports = [
+      ../../modules/home/apps/alacritty.nix
+      ../../modules/home/apps/linux-desktop.nix
+      ../../users/bcmyers
+    ];
     home.homeDirectory = "/home/bcmyers";
   };
 

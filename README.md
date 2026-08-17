@@ -2,20 +2,21 @@
 
 This repository declaratively manages Brian's Lenovo ThinkPad with NixOS and
 Home Manager, his personal Apple Silicon Mac with nix-darwin and Home Manager,
-and his work Apple Silicon Mac with standalone Home Manager.
+his work Apple Silicon Mac with standalone Home Manager, and root shells on
+x86_64 Linux work devboxes with standalone Home Manager.
 
 ## Repository layout
 
 - `hosts/` contains machine-specific system configuration. The ThinkPad is
   split by boot, hardware, networking, Disko storage, desktop, users, and
   virtualization concerns. The personal Mac owns its nix-darwin integration;
-  the work Mac owns its standalone Home Manager entry point.
+  the work Mac and work devbox own standalone Home Manager entry points.
 - `modules/system/` contains system-level wiring shared by NixOS and
   nix-darwin.
 - `modules/home/` is the shared Home Manager profile. Platform-specific
   differences are isolated under `platform/`, and program configuration is
   grouped by concern under `programs/`. Host-selected GUI applications are
-  under `apps/`.
+  under `apps/`, so headless hosts do not inherit them.
 - `users/` supplies account identity and policy around the shared profile.
   Git signing, GPG-agent SSH keys, AWS defaults, hosted editor integrations,
   and personal SOPS secrets belong only to `bcmyers`; `brian.myers` is the
@@ -31,8 +32,9 @@ and his work Apple Silicon Mac with standalone Home Manager.
   workstation modules.
 
 The ThinkPad and personal Mac integrate Home Manager with their system
-configurations. The work Mac intentionally uses only standalone Home Manager,
-leaving macOS and corporate system management untouched.
+configurations. The work Mac and work devboxes intentionally use only
+standalone Home Manager, leaving their operating systems and corporate system
+management untouched.
 
 ## ThinkPad
 
@@ -163,6 +165,29 @@ just switch-work-mac
 See [the work Mac Home Manager runbook](docs/install-work-mac.md) for first-use
 conflicts, application permissions, and the Homebrew Fish handoff.
 
+## Work devboxes
+
+The `root@work-devbox` target manages a headless CLI environment under `/root`
+on `x86_64-linux`. It assumes the Nix package manager is already installed and
+uses Home Manager only as a Nix-driven user-environment activator. It does not
+install or configure Nix, use NixOS, modify `/etc`, manage services, or change
+root's login shell.
+
+The target shares the neutral work Git identity and command-line tools with the
+work Mac, but omits Alacritty, fonts, desktop clipboard packages, Caffeine, and
+Thaw. Like the work Mac, it has no personal SOPS access, signing key, GPG SSH
+agent, AWS profile, or Windsurf integration.
+
+Build and activate it as root:
+
+```console
+just build-work-devbox
+just switch-work-devbox
+```
+
+See [the work devbox runbook](docs/install-work-devbox.md) for bootstrap and
+verification instructions that require only an existing Nix package manager.
+
 ## Commands
 
 ```console
@@ -171,12 +196,14 @@ just show        # Display every flake output for both systems
 just build-thinkpad    # Build the complete NixOS system
 just build-personal-mac # Build the complete nix-darwin system
 just build-work-mac   # Build standalone work Mac Home Manager
+just build-work-devbox # Build standalone root Home Manager for Linux devboxes
 just build-vm    # Build the safe headless VM variant
 just test-disko  # Install and boot the encrypted layout in an isolated VM
 just vm          # Build and run the VM
 just switch-thinkpad # Build and activate NixOS on the installed ThinkPad
 just switch-personal-mac # Activate nix-darwin and Home Manager on the personal Mac
 just switch-work-mac # Activate Home Manager only on the work Mac
+just switch-work-devbox # Activate Home Manager only under /root on a work devbox
 just edit-secrets # Edit the personal encrypted SOPS document
 just rust-update # Update stable Rust and standard developer components
 just update      # Update all locked inputs
@@ -188,5 +215,5 @@ The regular VM variant disables Disko and NVIDIA, uses a disposable QEMU disk, e
 ## State versions
 
 The ThinkPad's `system.stateVersion`, the personal Mac's nix-darwin state
-version, and all three Home Manager profiles have explicit compatibility state
+version, and all four Home Manager profiles have explicit compatibility state
 versions. These values should not be changed merely when inputs are updated.

@@ -15,7 +15,7 @@ if command_exists pbcopy; then
   exit 0
 fi
 
-if command_exists wl-copy; then
+if [[ -n "${WAYLAND_DISPLAY-}" ]] && command_exists wl-copy; then
   printf '%s' "$selection" | wl-copy
   exit 0
 fi
