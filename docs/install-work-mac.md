@@ -54,7 +54,7 @@ type -a fish fzf pass prompt nvim
 git config --global user.email
 ```
 
-The Git email should be `brian.myers@robinhood.com`. Also verify the `c`, `cc`,
+The Git email should be `brianmyers@openai.com`. Also verify the `c`, `cc`,
 and `ls` Fish abbreviations, a GPG-signed test commit, GPG-agent SSH access,
 Neovim, tmux, Alacritty, and any work-specific tools.
 

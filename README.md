@@ -136,7 +136,7 @@ and post-migration verification.
 
 The `brian.myers@work-mac` target applies the shared Apple Silicon Home Manager
 profile to `/Users/brian.myers`. It uses the work Git identity
-`brian.myers@robinhood.com`, but otherwise shares Fish, the custom prompt,
+`brianmyers@openai.com`, but otherwise shares Fish, the custom prompt,
 Git/GPG, Neovim, tmux, Alacritty, development packages, Caffeine, and Thaw with
 the personal Mac.
 

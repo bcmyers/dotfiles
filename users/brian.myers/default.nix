@@ -13,5 +13,5 @@
     stateVersion = "26.05";
   };
 
-  programs.git.settings.user.email = "brian.myers@robinhood.com";
+  programs.git.settings.user.email = "brianmyers@openai.com";
 }
