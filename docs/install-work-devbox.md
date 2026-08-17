@@ -15,6 +15,7 @@ id -u
 printf '%s\n' "$HOME"
 uname -sm
 nix --version
+git --version
 nix --extra-experimental-features 'nix-command flakes' flake metadata \
   'github:NixOS/nixpkgs/nixpkgs-unstable'
 ```
@@ -22,40 +23,66 @@ nix --extra-experimental-features 'nix-command flakes' flake metadata \
 The last command is only a capability check. This configuration uses its own
 locked inputs and does not change the devbox's registry or daemon settings.
 
-## 2. Bootstrap directly from the reviewed Git revision
+## 2. Check out exactly one reviewed Git revision
 
-Home Manager itself does not need to be installed globally. From the reviewed
-branch or commit, first build the activation package:
+Choose the full 40-character commit SHA that was reviewed and approved. Do not
+bootstrap root from a branch name: a branch can move between the build and the
+activation. Fetch only that commit, detach the checkout at it, and verify that
+Git resolved the exact value you supplied:
+
+```console
+export DOTFILES_REVISION='<full 40-character reviewed commit SHA>'
+test "${#DOTFILES_REVISION}" -eq 40
+
+mkdir -p /root/lib/dotfiles
+cd /root/lib/dotfiles
+git init
+git remote add origin https://github.com/bcmyers/dotfiles.git
+git fetch --depth=1 origin "$DOTFILES_REVISION"
+git switch --detach FETCH_HEAD
+test "$(git rev-parse HEAD)" = "$DOTFILES_REVISION"
+```
+
+Stop if the final comparison fails. Keep this checkout detached during the
+build and activation so no pull or branch switch can change the source.
+
+## 3. Build and activate that same checkout
+
+Home Manager itself does not need to be installed globally. Build the local
+activation package first:
 
 ```console
 nix --extra-experimental-features 'nix-command flakes' build \
   --no-link \
-  'git+https://github.com/bcmyers/dotfiles.git?ref=refs/heads/codex/linux-home-manager-refresh#homeConfigurations."root@work-devbox".activationPackage'
+  '.#homeConfigurations."root@work-devbox".activationPackage'
 ```
 
-Then activate it without `sudo`—the shell is already root:
+Then run the Home Manager executable and configuration from the same local
+flake. Activate without `sudo`—the shell is already root:
 
 ```console
 nix --extra-experimental-features 'nix-command flakes' run \
-  'git+https://github.com/bcmyers/dotfiles.git?ref=refs/heads/codex/linux-home-manager-refresh#home-manager' -- \
-  -b home-manager-backup \
-  --flake 'git+https://github.com/bcmyers/dotfiles.git?ref=refs/heads/codex/linux-home-manager-refresh#"root@work-devbox"' \
-  switch
+  '.#home-manager' -- \
+  switch \
+  --flake '.#"root@work-devbox"' \
+  -b home-manager-backup
 ```
 
-Replace the branch reference with `master` after the pull request is merged,
-or use an exact reviewed commit for reproducible provisioning. Conflicting
-files receive the `.home-manager-backup` suffix; inspect them before removal.
+Conflicting files receive the `.home-manager-backup` suffix; inspect them
+before removal.
 
-## 3. Clone for routine updates
+## 4. Update to another reviewed revision
 
-The first activation supplies Git and Just. Keep the checkout under `/root/lib`:
+The first activation supplies Just. To update, fetch another reviewed full SHA,
+verify the detached checkout again, and only then build and switch:
 
 ```console
-mkdir -p /root/lib
-git clone https://github.com/bcmyers/dotfiles.git /root/lib/dotfiles
 cd /root/lib/dotfiles
-git switch codex/linux-home-manager-refresh
+export DOTFILES_REVISION='<new full 40-character reviewed commit SHA>'
+test "${#DOTFILES_REVISION}" -eq 40
+git fetch --depth=1 origin "$DOTFILES_REVISION"
+git switch --detach FETCH_HEAD
+test "$(git rev-parse HEAD)" = "$DOTFILES_REVISION"
 just build-work-devbox
 just switch-work-devbox
 ```
@@ -63,7 +90,7 @@ just switch-work-devbox
 The guarded switch script refuses to run unless the host is Linux and the
 effective user and home directory are `root` and `/root`.
 
-## 4. Shell behavior
+## 5. Shell behavior
 
 Home Manager installs and configures Fish but deliberately leaves root's login
 shell under devbox management. Start it explicitly with `fish`. If the devbox
@@ -73,7 +100,7 @@ do not change `/etc/passwd` merely to activate this profile.
 The managed Fish startup never deletes universal or global `fish_user_paths`.
 That preserves paths installed by the devbox platform and work tooling.
 
-## 5. Verify the boundary
+## 6. Verify the boundary
 
 ```console
 type -a fish fzf pass prompt nvim tmux aws
