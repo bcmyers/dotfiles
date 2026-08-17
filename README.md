@@ -84,6 +84,19 @@ just switch-mac
 
 `just switch-mac` activates nix-darwin and Home Manager. The first activation uses the `home-manager-backup` extension for files that would otherwise conflict. Inspect any resulting backup files before removing them.
 
+The official Nix installer may have added its initialization block to
+`/etc/bashrc`. If the first activation refuses to replace that unmanaged file,
+inspect it and preserve it before retrying:
+
+```console
+diff -u /etc/bashrc.backup-before-nix /etc/bashrc
+sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
+just switch-mac
+```
+
+nix-darwin then owns `/etc/bashrc`; the renamed file remains available as the
+pre-activation backup.
+
 After the first successful activation, open a fresh Fish shell and verify that `prompt`, the Fish abbreviations, Password Store, GPG signing, and SSH through the GPG agent all work. Confirm the three SOPS-provided environment variables are set without printing their values, then remove the obsolete plaintext `~/.config/fish/secret.fish`. Rotate the Anthropic and Twilio credentials because that legacy file was previously readable by other local users.
 
 ## Commands

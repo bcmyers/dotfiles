@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-exec sudo nix \
+exec sudo -H nix \
   --extra-experimental-features "nix-command flakes" \
   run '.#darwin-rebuild' -- \
   switch --flake '.#mac' "$@"
