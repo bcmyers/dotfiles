@@ -3,7 +3,7 @@
   fonts.fontconfig.enable = true;
 
   home.file.".local/bin/yank.sh" = {
-    source = ../../../files/bin/yank.sh;
+    source = ../../../files/tmux/yank.sh;
     executable = true;
   };
 

@@ -69,10 +69,6 @@ vim.pack.add({
 		version = "4089aa6ea6423e02e1a8326a7a7a00159f6f5e04",
 	}, -- 2026-01-22
 	{
-		src = "https://github.com/williamboman/mason.nvim",
-		version = "44d1e90e1f66e077268191e3ee9d2ac97cc18e65",
-	}, -- 2026-01-07
-	{
 		src = "https://github.com/j-hui/fidget.nvim",
 		version = "7fa433a83118a70fe24c1ce88d5f0bd3453c0970",
 	}, -- 2026-01-13
@@ -375,11 +371,6 @@ require("todo-comments").setup()
 -- Mini.pairs
 require("mini.pairs").setup()
 
--- Mason
-require("mason").setup({
-	ensure_installed = { "starpls", "buildifier" },
-})
-
 -- Trim (trailing whitespace)
 require("trim").setup({
 	trim_on_write = true,
@@ -425,9 +416,9 @@ vim.lsp.config("starpls", {
 	root_markers = { "MODULE.bazel", "WORKSPACE", "WORKSPACE.bazel", ".git" },
 })
 
--- gopls (via dd-gopls wrapper)
+-- gopls
 vim.lsp.config("gopls", {
-	cmd = { "dd-gopls" },
+	cmd = { "gopls" },
 	cmd_env = { GOPLS_DISABLE_MODULE_LOADS = "1" },
 	filetypes = { "go", "gomod", "gowork", "gotmpl" },
 	root_markers = { "go.mod", "go.work", ".git" },

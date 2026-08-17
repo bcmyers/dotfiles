@@ -2,10 +2,7 @@
   networking = {
     hostName = "thinkpad";
     networkmanager.enable = true;
-    firewall = {
-      trustedInterfaces = [ "tailscale0" ];
-      allowedTCPPorts = [ ];
-    };
+    firewall.interfaces.tailscale0.allowedTCPPorts = [ 22 ];
   };
 
   services = {

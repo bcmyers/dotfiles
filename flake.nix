@@ -68,18 +68,15 @@
       mkHomeSpecialArgs =
         {
           homeDirectory,
-          isDarwin,
-          isSystemManaged,
           system,
         }:
         {
           inherit
             homeDirectory
             inputs
-            isDarwin
-            isSystemManaged
             ;
           unstablePkgs = mkPkgs nixpkgs-unstable system;
+          promptPackage = mkPrompt system;
         };
       mkPrompt =
         system:
@@ -97,10 +94,11 @@
           pkgs = mkPkgs nixpkgsInput system;
           extraSpecialArgs = mkHomeSpecialArgs {
             inherit homeDirectory system;
-            isDarwin = system == macSystem;
-            isSystemManaged = false;
           };
-          modules = [ ./modules/home ];
+          modules = [
+            ./modules/home
+            ./modules/home/standalone-nix.nix
+          ];
         };
       linuxHomeConfiguration = mkHomeConfiguration {
         homeManager = home-manager;
@@ -119,8 +117,6 @@
         specialArgs =
           (mkHomeSpecialArgs {
             homeDirectory = "/home/bcmyers";
-            isDarwin = false;
-            isSystemManaged = true;
             system = linuxSystem;
           })
           // {
@@ -138,8 +134,6 @@
         specialArgs =
           (mkHomeSpecialArgs {
             homeDirectory = "/Users/bcmyers";
-            isDarwin = true;
-            isSystemManaged = true;
             system = macSystem;
           })
           // {
@@ -181,13 +175,11 @@
         default = nixosConfiguration.config.system.build.toplevel;
         disko = disko.packages.${linuxSystem}.disko;
         disko-test = nixosConfiguration.config.system.build.installTest;
-        home-manager = home-manager.packages.${linuxSystem}.home-manager;
         prompt = mkPrompt linuxSystem;
         vm = nixosConfiguration.config.system.build.vm;
       };
       packages.${macSystem} = {
         default = darwinConfiguration.system;
-        home-manager = home-manager-unstable.packages.${macSystem}.home-manager;
         prompt = mkPrompt macSystem;
       };
 
@@ -199,7 +191,7 @@
             program = "${(mkPkgs nixpkgs-unstable system).age}/bin/age-keygen";
             meta.description = "Run the age key generator pinned by this flake";
           };
-          default = {
+          home-manager = {
             type = "app";
             program = "${
               if system == macSystem then

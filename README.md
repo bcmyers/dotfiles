@@ -15,10 +15,10 @@ This repository declaratively manages Brian's complete Lenovo ThinkPad X1 Extrem
 - `files/` contains raw files installed by Home Manager, currently Neovim
   configuration and the tmux clipboard helper.
 - `pkgs/` contains locally defined Nix packages.
-- `scripts/` contains bootstrap and activation helpers; `justfile` is the
+- `scripts/` contains flake and activation helpers; `justfile` is the
   normal command interface.
-- `docs/` and `secrets/` contain the installation runbook and SOPS material.
-- `infrastructure/web-server/` preserves an old, non-deployed nginx/Certbot
+- `docs/` and `secrets/` contain machine runbooks and SOPS material.
+- `archive/web-server/` preserves an old, non-deployed nginx/Certbot
   configuration as explicit migration input rather than mixing it with the
   workstation modules.
 
@@ -35,7 +35,8 @@ nix-darwin configurations.
 - Selected user tools: nixpkgs-unstable
 - Desktop: COSMIC
 - Graphics: NVIDIA GTX 1050 Ti using the legacy 580 driver
-- Remote access: Tailscale and key-only OpenSSH
+- Remote access: Tailscale and key-only OpenSSH, with only SSH admitted on the
+  Tailnet interface
 
 ## Disk layout
 
@@ -50,6 +51,12 @@ GPT
 ```
 
 There is no LVM or separate `/home` partition. See [the installation runbook](docs/install-thinkpad.md) before running Disko.
+
+This passphrase-based layout does **not** boot unattended. Firmware can power
+the laptop back on after an outage, but NixOS stops at the LUKS prompt until
+someone enters the passphrase. Before installation, explicitly choose either
+manual unlock, a separately designed and tested unattended unlock mechanism,
+or an unencrypted root. The current configuration implements manual unlock.
 
 ## What NixOS manages
 
@@ -92,7 +99,13 @@ The non-flake `prompt-src` input is intentional: it imports the source archive o
 
 The `mac` nix-darwin target shares command-line tools, Fish configuration and abbreviations, the custom `prompt` executable, Git/GPG configuration, Neovim, tmux, Alacritty, and other user preferences with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
 
-nix-darwin owns the system Nix settings and login shell; Home Manager owns the user profile, Password Store, GPG/SSH agent, Fish, and dotfiles. SOPS decrypts the Fish API credentials at activation time using the age key at `~/Library/Application Support/sops/age/keys.txt`. The private key is never committed.
+nix-darwin owns the system Nix settings and the list of permitted login shells;
+Home Manager owns the user profile, Password Store, GPG/SSH agent, Fish, and
+dotfiles. Changing an existing macOS account to use Nix-managed Fish remains a
+one-time account operation. SOPS decrypts the Fish API credentials at
+activation time using the age key at
+`~/Library/Application Support/sops/age/keys.txt`. The private key is never
+committed.
 
 The Mac and ThinkPad consume the same encrypted `secrets/shared.yaml` document,
 but each machine has its own private age identity. Linux reads
@@ -106,43 +119,9 @@ just build-mac
 just switch-mac
 ```
 
-`just switch-mac` activates nix-darwin and Home Manager. The first activation uses the `home-manager-backup` extension for files that would otherwise conflict. Inspect any resulting backup files before removing them.
-
-The official Nix installer may have added its initialization block to
-`/etc/bashrc`. If the first activation refuses to replace that unmanaged file,
-inspect it and preserve it before retrying:
-
-```console
-diff -u /etc/bashrc.backup-before-nix /etc/bashrc
-sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
-just switch-mac
-```
-
-nix-darwin then owns `/etc/bashrc`; the renamed file remains available as the
-pre-activation backup.
-
-A Homebrew Fish installation may also have added `/opt/homebrew/bin/fish` to
-`/etc/shells`. The nix-darwin version preserves every standard macOS shell and
-replaces the Homebrew entry with the Nix-managed Fish path. Preserve the old
-file before the first activation takes ownership:
-
-```console
-sudo mv /etc/shells /etc/shells.before-nix-darwin
-just switch-mac
-```
-
-nix-darwin does not change the login shell of an existing macOS account. After
-the first activation has added Nix Fish to `/etc/shells`, make the one-time
-macOS account change and open a new terminal:
-
-```console
-sudo chsh -s /run/current-system/sw/bin/fish bcmyers
-```
-
-Only after `dscacheutil -q user -a name bcmyers` reports the Nix Fish path
-should the old Homebrew packages be removed with `brew uninstall fish pass`.
-
-After the first successful activation, open a fresh Fish shell and verify that `prompt`, the Fish abbreviations, Password Store, GPG signing, and SSH through the GPG agent all work. Confirm the three SOPS-provided environment variables are set without printing their values, then remove the obsolete plaintext `~/.config/fish/secret.fish`. Rotate the Anthropic and Twilio credentials because that legacy file was previously readable by other local users.
+See [the Mac installation and migration runbook](docs/install-mac.md) for the
+first activation, `/etc` ownership conflicts, the one-time login-shell change,
+and post-migration verification.
 
 ## Commands
 

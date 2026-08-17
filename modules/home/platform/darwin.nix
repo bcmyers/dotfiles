@@ -4,7 +4,7 @@
   unstablePkgs,
   ...
 }:
-{
+lib.mkIf unstablePkgs.stdenv.hostPlatform.isDarwin {
   home.packages = with unstablePkgs; [
     caffeine
     thaw

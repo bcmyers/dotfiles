@@ -12,6 +12,24 @@ This runbook replaces Pop!_OS and every partition on the ThinkPad's only interna
 
 Stop if any of those facts differ. Never infer the target disk from device ordering alone when another internal disk is present.
 
+## Availability decision before installation
+
+The checked-in layout encrypts the complete root filesystem with a manually
+entered LUKS passphrase. Lenovo firmware can power the laptop back on after an
+outage, but the machine will wait at the unlock prompt and will not return to
+Tailscale or SSH by itself.
+
+Do not install this layout while unattended recovery is a requirement. First
+choose and test one of these policies:
+
+- keep the current manual unlock and accept that someone must be physically
+  present after a full power loss;
+- design a separately protected TPM2, FIDO2, or network-bound unlock path with
+  a recovery key; or
+- remove root encryption after explicitly accepting the data-at-rest risk.
+
+The current configuration and Disko test implement only the first policy.
+
 ## 1. Prepare while Pop!_OS still boots
 
 1. Connect AC power.
@@ -27,7 +45,14 @@ Stop if any of those facts differ. Never infer the target disk from device order
    ```
 
    `just test-disko` formats only a disposable virtual disk. It installs and boots the encrypted layout with a VM-only dummy key.
-5. Download the official NixOS 26.05 x86_64 graphical ISO, verify its published SHA-256 checksum, and write it to a USB drive.
+5. Verify that the GPG identities and Password Store expected by the new
+   configuration have a tested restore source. On the Mac, confirm that
+   `gpg --list-secret-keys --with-keygrip` includes the signing and SSH keys
+   referenced by `modules/home/programs/security.nix`, and that
+   `git -C ~/.password-store remote -v` names a reachable private remote. Stop
+   if either check fails; the declarative configuration does not contain those
+   private keys or encrypted password entries.
+6. Download the official NixOS 26.05 x86_64 graphical ISO, verify its published SHA-256 checksum, and write it to a USB drive.
 
 ## 2. Boot and inspect the installer
 
@@ -126,9 +151,11 @@ sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 
 Only after matching the fingerprint should the obsolete `known_hosts` entry be removed and the new one accepted.
 
-The first Home Manager activation may be unable to decrypt the shared Fish
-credentials until the dedicated ThinkPad age identity is installed. After
-accepting the verified SSH host key, run these commands on the Mac:
+The first Home Manager activation is expected to fail because it cannot decrypt
+the shared Fish credentials until the dedicated ThinkPad age identity is
+installed. The base NixOS system, local login, Tailscale, and the static SSH
+authorized key remain available. After accepting the verified SSH host key,
+run these commands on the Mac:
 
 ```console
 ssh thinkpad 'install -d -m 700 ~/.config/sops/age'
@@ -143,11 +170,38 @@ ThinkPad:
 ```console
 sudo systemctl restart home-manager-bcmyers.service
 systemctl status home-manager-bcmyers.service --no-pager
-fish -lc 'set -q ANTHROPIC_API_KEY; and set -q TWILIO_SID; and set -q TWILIO_CLIENT_SECRET'
+fish -ic 'set -q ANTHROPIC_API_KEY; and set -q TWILIO_SID; and set -q TWILIO_CLIENT_SECRET'
 ```
 
 The final command checks only that all three variables exist; it does not print
 their values. Never copy either age identity into the repository.
+
+Restore the GPG material from its verified source before expecting signed Git
+commits or GPG-backed SSH authentication to work. When the working source is
+the Mac, an authenticated SSH stream avoids writing an unencrypted export to
+disk:
+
+```console
+gpg --export --armor | ssh thinkpad 'gpg --import'
+gpg --export-secret-subkeys --armor | ssh thinkpad 'gpg --import'
+gpg --export-ownertrust | ssh thinkpad 'gpg --import-ownertrust'
+```
+
+Review the keys being exported first; these commands intentionally transfer the
+Mac's complete GPG keyring. On the ThinkPad, compare `gpg
+--list-secret-keys --with-keygrip` with the declarative `sshKeys` list and prune
+obsolete keygrips rather than copying unexplained entries forward.
+
+Then restore Password Store from its existing private Git remote:
+
+```console
+git clone bcmyers@bcmyers.com:~/.password-store ~/.password-store
+pass ls >/dev/null
+```
+
+Do not wipe the source machine or remove its GPG material until decryption, a
+test signature, GPG-agent SSH authentication, and Password Store all succeed on
+the ThinkPad.
 
 Clone the reviewed configuration into the newly installed user's home directory:
 

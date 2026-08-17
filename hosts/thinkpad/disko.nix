@@ -1,5 +1,14 @@
 { lib, ... }:
 {
+  services.fstrim.enable = true;
+
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 8 * 1024;
+    }
+  ];
+
   disko = {
     tests = {
       bootCommands = ''

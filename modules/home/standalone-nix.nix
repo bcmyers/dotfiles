@@ -1,6 +1,5 @@
 {
   inputs,
-  isDarwin,
   pkgs,
   ...
 }:
@@ -8,7 +7,8 @@
   nix = {
     package = pkgs.nix;
 
-    registry.nixpkgs.flake = if isDarwin then inputs.nixpkgs-unstable else inputs.nixpkgs;
+    registry.nixpkgs.flake =
+      if pkgs.stdenv.hostPlatform.isDarwin then inputs.nixpkgs-unstable else inputs.nixpkgs;
 
     settings = import ../../lib/nix-settings.nix;
 

@@ -32,9 +32,6 @@ format:
 show:
     ./scripts/nix-flake.sh flake show --all-systems
 
-gc:
-    ./scripts/gc.sh
-
 switch:
     ./scripts/switch-linux.sh
 

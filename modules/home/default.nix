@@ -1,24 +1,19 @@
 {
   homeDirectory,
-  isDarwin,
-  isSystemManaged,
-  lib,
   ...
 }:
 {
   imports = [
     ./core.nix
     ./packages.nix
+    ./platform
     ./programs/editor.nix
     ./programs/git.nix
     ./programs/security.nix
     ./programs/shell.nix
     ./programs/terminal.nix
     ./secrets.nix
-  ]
-  ++ lib.optional (!isSystemManaged) ./standalone-nix.nix
-  ++ lib.optional isDarwin ./platform/darwin.nix
-  ++ lib.optional (!isDarwin) ./platform/linux.nix;
+  ];
 
   home = {
     username = "bcmyers";

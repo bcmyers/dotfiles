@@ -11,7 +11,6 @@
     settings = {
       core = {
         editor = "nvim";
-        fsmonitor = true;
         untrackedCache = true;
       };
       diff.algorithm = "patience";

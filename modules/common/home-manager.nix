@@ -1,7 +1,7 @@
 {
   homeDirectory,
   inputs,
-  isDarwin,
+  promptPackage,
   unstablePkgs,
   ...
 }:
@@ -12,10 +12,9 @@
       inherit
         homeDirectory
         inputs
-        isDarwin
+        promptPackage
         unstablePkgs
         ;
-      isSystemManaged = true;
     };
     useGlobalPkgs = true;
     useUserPackages = true;

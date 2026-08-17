@@ -1,16 +1,12 @@
 {
-  inputs,
   pkgs,
+  promptPackage,
   unstablePkgs,
   ...
 }:
-let
-  prompt = unstablePkgs.callPackage ../../pkgs/prompt {
-    src = inputs.prompt-src;
-  };
-in
 {
   home.packages =
+    # Mature command-line and build tools follow the host's primary package set.
     (with pkgs; [
       age
       arp-scan
@@ -51,7 +47,6 @@ in
       shellcheck
       shfmt
       skopeo
-      stow
       tree
       tree-sitter
       unzip
@@ -61,10 +56,13 @@ in
       yq-go
       zip
     ])
+    # Fast-moving language toolchains and developer tools follow unstable on
+    # both platforms.
     ++ (with unstablePkgs; [
       cargo-update
       cmake
       go
+      gotools
       gopls
       jujutsu
       lua-language-server
@@ -73,14 +71,18 @@ in
       nodejs_26
       opentofu
       pi-coding-agent
+      prettier
       pulumi
       python3
       rustup
       sops
       sqlx-cli
+      starpls
+      stylua
       tofu-ls
       trunk
+      typescript-language-server
       uv
     ])
-    ++ [ prompt ];
+    ++ [ promptPackage ];
 }

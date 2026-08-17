@@ -38,6 +38,8 @@
     maxCacheTtlSsh = 7200;
     pinentry.package =
       if pkgs.stdenv.hostPlatform.isDarwin then unstablePkgs.pinentry_mac else pkgs.pinentry-curses;
+    # Migrated GPG-agent SSH keygrips. The ThinkPad runbook requires comparing
+    # this inventory with restored secret keys and pruning obsolete entries.
     sshKeys = [
       "1CA52012CCEA51647915567430D8C22585EDAFDD"
       "BC2C3DB08614B3D98C10B2E4451EFA2458CA01E3"

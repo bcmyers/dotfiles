@@ -1,16 +1,11 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
+  promptPackage,
   unstablePkgs,
   ...
 }:
-let
-  prompt = unstablePkgs.callPackage ../../../pkgs/prompt {
-    src = inputs.prompt-src;
-  };
-in
 {
   programs = {
     man.generateCaches = pkgs.stdenv.hostPlatform.isLinux;
@@ -64,7 +59,7 @@ in
         set --prepend --global --export PATH ${lib.getBin unstablePkgs.fzf}/bin
       '';
       functions.fish_prompt = ''
-        set -l prompt_output (${lib.getExe prompt})
+        set -l prompt_output (${lib.getExe promptPackage})
         echo -e "$prompt_output\n\$ "
       '';
       shellAbbrs = {

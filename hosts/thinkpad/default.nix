@@ -6,7 +6,6 @@
     ./disko.nix
     ./hardware.nix
     ./networking.nix
-    ./storage.nix
     ./users.nix
     ./virtualization.nix
   ];

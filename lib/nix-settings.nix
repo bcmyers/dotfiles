@@ -3,6 +3,4 @@
     "nix-command"
     "flakes"
   ];
-  keep-derivations = true;
-  keep-outputs = true;
 }
