@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  isDarwin,
   lib,
   pkgs,
   unstablePkgs,
@@ -92,10 +93,28 @@ in
       # Packages' native Fish completions remain available.
       generateCompletions = false;
       package = unstablePkgs.fish;
-      # GUI terminals can retain a pre-activation PATH until the next login.
-      # Make the pinned fzf visible before its Fish integration initializes.
       shellInit = ''
-        fish_add_path --global --prepend --move ${lib.getBin unstablePkgs.fzf}/bin
+        # Retire path entries persisted by the legacy, imperative Fish config.
+        # Home Manager's sessionPath and nix-darwin now own PATH instead.
+        set --erase --universal fish_user_paths
+        set --erase --global fish_user_paths
+
+        # GUI terminals can retain a pre-activation PATH until the next login.
+        # Make the pinned fzf visible before its Fish integration initializes.
+        set --prepend --global --export PATH ${lib.getBin unstablePkgs.fzf}/bin
+      ''
+      + lib.optionalString isDarwin ''
+        # Keep Homebrew as a deduplicated, lowest-priority macOS fallback even
+        # when Terminal inherited the old Homebrew-first environment.
+        set -l path_without_homebrew
+        for path_entry in $PATH
+          if not contains -- $path_entry /opt/homebrew/bin /opt/homebrew/sbin
+            if not contains -- $path_entry $path_without_homebrew
+              set --append path_without_homebrew $path_entry
+            end
+          end
+        end
+        set --global --export PATH $path_without_homebrew /opt/homebrew/bin /opt/homebrew/sbin
       '';
       functions.fish_prompt = ''
         set -l prompt_output (${lib.getExe prompt})
