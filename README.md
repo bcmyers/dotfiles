@@ -21,8 +21,8 @@ x86_64 Linux work devboxes with standalone Home Manager.
   Git signing, GPG-agent SSH keys, AWS defaults, hosted editor integrations,
   and personal SOPS secrets belong only to `bcmyers`; `brian.myers` is the
   secret-free work profile.
-- `files/` contains raw files installed by Home Manager, currently Neovim
-  configuration and the tmux clipboard helper.
+- `files/` contains raw files installed by Home Manager, currently the Neovim
+  configuration.
 - `pkgs/` contains locally defined Nix packages.
 - `scripts/` contains flake and activation helpers; `justfile` is the
   normal command interface.
@@ -187,6 +187,18 @@ just switch-work-devbox
 
 See [the work devbox runbook](docs/install-work-devbox.md) for bootstrap and
 verification instructions that require only an existing Nix package manager.
+
+## Clipboard behavior
+
+Alacritty permits OSC 52 clipboard writes but not reads. Tmux uses its native
+`set-clipboard external` mode, so copy mode sends text to the attached
+Alacritty client without an OS-specific helper. Neovim selects `pbcopy` on
+macOS, `wl-copy` on the graphical ThinkPad, and `tmux load-buffer -w -` inside
+a devbox tmux session. Use the terminal's normal paste shortcut for the reverse
+direction instead of allowing a remote process to read the local clipboard.
+
+The supported remote path is Alacritty to SSH to tmux. Run Neovim inside tmux
+on work devboxes.
 
 ## Commands
 

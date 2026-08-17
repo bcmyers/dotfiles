@@ -28,6 +28,7 @@
         };
       };
       general.live_config_reload = true;
+      terminal.osc52 = "OnlyCopy";
       window = {
         opacity = 1.0;
         padding = {

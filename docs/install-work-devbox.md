@@ -5,6 +5,10 @@ This target manages only root's files and Nix profile under `/root` on an
 target does not install or configure Nix, use NixOS, modify `/etc`, manage
 services, or change the login shell.
 
+Start the SSH connection from the Nix-managed Alacritty configuration on a Mac
+or the ThinkPad. Alacritty allows OSC 52 clipboard writes but deliberately
+blocks remote clipboard reads.
+
 Stop if `id -u` is not `0`, `HOME` is not `/root`, or `uname -m` is not
 `x86_64`. A separate flake target is required for ARM Linux devboxes.
 
@@ -102,11 +106,16 @@ That preserves paths installed by the devbox platform and work tooling.
 
 ## 6. Verify the boundary
 
+Start or attach to tmux with `tmux new -As main`, then run these checks inside
+that session:
+
 ```console
 type -a fish fzf pass prompt nvim tmux aws
 git config --global user.email
 git config --global commit.gpgsign
 printf '%s\n' "${SSH_AUTH_SOCK-}"
+tmux show -s set-clipboard
+tmux info | grep 'Ms:'
 ```
 
 The Git email should be `brianmyers@openai.com`; commit signing should be
@@ -116,8 +125,12 @@ and AWS command-line tools without copying personal keys, password entries, or
 account credentials.
 
 Alacritty, desktop fonts, Wayland clipboard utilities, Caffeine, and Thaw are
-intentionally absent. Tmux copy mode falls back to OSC 52 so clipboard yanks
-can travel through the SSH terminal.
+intentionally absent. Run Neovim inside tmux on a devbox. Tmux uses its native
+OSC 52 support to send copied text through SSH to the attached terminal; it
+does not use a platform-specific clipboard helper or read `SSH_TTY` directly.
+`set-clipboard` should report `external`, and `Ms` must not report `[missing]`.
+Use Command-V on macOS or Control-Shift-V on Linux to paste local clipboard
+contents into a remote terminal instead of allowing remote clipboard reads.
 
 Never copy the personal age identity, GPG private keys, Password Store data,
 or `secrets/personal.yaml` access to a work devbox.

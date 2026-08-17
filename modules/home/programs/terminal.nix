@@ -1,10 +1,5 @@
-{ config, ... }:
+{ ... }:
 {
-  home.file.".local/bin/yank.sh" = {
-    source = ../../../files/tmux/yank.sh;
-    executable = true;
-  };
-
   programs.tmux = {
     enable = true;
     aggressiveResize = true;
@@ -19,7 +14,7 @@
       set-option -sa terminal-features ',xterm-256color:RGB'
       set -g focus-events on
       set -g renumber-windows on
-      set -g set-clipboard on
+      set -s set-clipboard external
 
       bind \\ split-window -h
       bind - split-window -v
@@ -31,7 +26,7 @@
       bind -n C-l if-shell -F '#{m/r:(n?vim|fzf),#{pane_current_command}}' 'send-keys C-l' 'select-pane -R'
 
       bind -T copy-mode-vi v send-keys -X begin-selection
-      bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel '${config.home.homeDirectory}/.local/bin/yank.sh'
+      bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
 
       bind Right resize-pane -R 5
       bind Left resize-pane -L 5
