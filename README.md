@@ -97,6 +97,16 @@ just switch-mac
 nix-darwin then owns `/etc/bashrc`; the renamed file remains available as the
 pre-activation backup.
 
+A Homebrew Fish installation may also have added `/opt/homebrew/bin/fish` to
+`/etc/shells`. The nix-darwin version preserves every standard macOS shell and
+replaces the Homebrew entry with the Nix-managed Fish path. Preserve the old
+file before the first activation takes ownership:
+
+```console
+sudo mv /etc/shells /etc/shells.before-nix-darwin
+just switch-mac
+```
+
 nix-darwin does not change the login shell of an existing macOS account. After
 the first activation has added Nix Fish to `/etc/shells`, make the one-time
 macOS account change and open a new terminal:
