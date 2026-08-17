@@ -3,7 +3,7 @@ keys:
   - &thinkpad age1kuh7wrek6sgrdv8srpww05vu3jv3c0ph0fu8y0fshs2rszxv8qysc8ekhu
 
 creation_rules:
-  - path_regex: secrets/shared\.yaml$
+  - path_regex: secrets/personal\.yaml$
     key_groups:
       - age:
           - *mac

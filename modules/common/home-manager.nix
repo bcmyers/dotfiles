@@ -18,6 +18,6 @@
     };
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.bcmyers = import ../home;
+    users.bcmyers = import ../../users/bcmyers;
   };
 }

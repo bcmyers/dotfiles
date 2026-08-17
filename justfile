@@ -11,6 +11,9 @@ build-home-linux:
 build-home-mac:
     ./scripts/nix-flake.sh build '.#homeConfigurations."bcmyers@mac".activationPackage'
 
+build-home-work-mac:
+    ./scripts/nix-flake.sh build '.#homeConfigurations."brian.myers@work-mac".activationPackage'
+
 build-mac:
     ./scripts/nix-flake.sh build '.#darwinConfigurations.mac.system'
 
@@ -24,7 +27,7 @@ check:
     ./scripts/nix-flake.sh flake check --all-systems --no-build --print-build-logs
 
 edit-secrets:
-    ./scripts/nix-flake.sh run .#sops -- secrets/shared.yaml
+    ./scripts/nix-flake.sh run .#sops -- secrets/personal.yaml
 
 format:
     ./scripts/nix-flake.sh fmt
@@ -37,6 +40,9 @@ switch:
 
 switch-mac:
     ./scripts/switch-mac.sh
+
+switch-work-mac:
+    ./scripts/nix-flake.sh run .#home-manager -- -b home-manager-backup --flake '.#"brian.myers@work-mac"' switch
 
 rust-update:
     rustup update stable

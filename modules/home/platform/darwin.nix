@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   unstablePkgs,
   ...
@@ -23,6 +22,4 @@ lib.mkIf unstablePkgs.stdenv.hostPlatform.isDarwin {
     end
     set --global --export PATH $path_without_homebrew /opt/homebrew/bin /opt/homebrew/sbin
   '';
-
-  sops.age.keyFile = "${config.home.homeDirectory}/Library/Application Support/sops/age/keys.txt";
 }

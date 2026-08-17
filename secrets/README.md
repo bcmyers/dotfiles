@@ -1,9 +1,14 @@
 # Encrypted secrets
 
-`shared.yaml` contains the API credentials used by Fish on both macOS and
-Linux. It is encrypted to separate Mac and ThinkPad age recipients declared in
-`../.sops.yaml`; only the public recipients and encrypted document belong in
-Git.
+`personal.yaml` contains the API credentials used by `bcmyers` on the personal
+Mac and ThinkPad. It is encrypted to separate personal-Mac and ThinkPad age
+recipients declared in `../.sops.yaml`; only the public recipients and
+encrypted document belong in Git.
+
+The `brian.myers@work-mac` profile deliberately does not import this file. If
+the work machine eventually needs managed secrets, create a separate encrypted
+document with its own recipient rather than adding the work recipient to
+`personal.yaml`.
 
 Home Manager reads the machine identities from:
 
@@ -15,7 +20,7 @@ Linux: ~/.config/sops/age/keys.txt
 Edit the encrypted file from the repository root with:
 
 ```sh
-./scripts/nix-flake.sh run .#sops -- secrets/shared.yaml
+./scripts/nix-flake.sh run .#sops -- secrets/personal.yaml
 ```
 
 The dedicated ThinkPad identity is staged on the Mac at
@@ -29,7 +34,7 @@ add only its public recipient to `.sops.yaml`, and update the recipients:
 
 ```sh
 ./scripts/nix-flake.sh run .#age-keygen -- -o /secure/path/to/keys.txt
-./scripts/nix-flake.sh run .#sops -- updatekeys --yes secrets/shared.yaml
+./scripts/nix-flake.sh run .#sops -- updatekeys --yes secrets/personal.yaml
 ```
 
 Only encrypted SOPS documents belong in this directory. Never commit an age

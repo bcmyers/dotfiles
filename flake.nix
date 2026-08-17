@@ -87,6 +87,7 @@
         {
           homeManager,
           homeDirectory,
+          homeModule,
           nixpkgsInput,
           system,
         }:
@@ -96,19 +97,28 @@
             inherit homeDirectory system;
           };
           modules = [
-            ./modules/home
+            homeModule
             ./modules/home/standalone-nix.nix
           ];
         };
       linuxHomeConfiguration = mkHomeConfiguration {
         homeManager = home-manager;
         homeDirectory = "/home/bcmyers";
+        homeModule = ./users/bcmyers;
         nixpkgsInput = nixpkgs;
         system = linuxSystem;
       };
       macHomeConfiguration = mkHomeConfiguration {
         homeManager = home-manager-unstable;
         homeDirectory = "/Users/bcmyers";
+        homeModule = ./users/bcmyers;
+        nixpkgsInput = nixpkgs-unstable;
+        system = macSystem;
+      };
+      workMacHomeConfiguration = mkHomeConfiguration {
+        homeManager = home-manager-unstable;
+        homeDirectory = "/Users/brian.myers";
+        homeModule = ./users/brian.myers;
         nixpkgsInput = nixpkgs-unstable;
         system = macSystem;
       };
@@ -150,6 +160,7 @@
       homeConfigurations = {
         "bcmyers@linux" = linuxHomeConfiguration;
         "bcmyers@mac" = macHomeConfiguration;
+        "brian.myers@work-mac" = workMacHomeConfiguration;
       };
       darwinConfigurations.mac = darwinConfiguration;
       nixosConfigurations.thinkpad = nixosConfiguration;
@@ -164,6 +175,7 @@
       checks.${macSystem} = {
         darwin = darwinConfiguration.system;
         home = macHomeConfiguration.activationPackage;
+        work-home = workMacHomeConfiguration.activationPackage;
         prompt = mkPrompt macSystem;
       };
 

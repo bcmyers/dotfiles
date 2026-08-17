@@ -27,7 +27,6 @@
       };
       rebase.autoStash = true;
       user = {
-        email = "brian.carl.myers@gmail.com";
         name = "Brian Myers";
       };
     };

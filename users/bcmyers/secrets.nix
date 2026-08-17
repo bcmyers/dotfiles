@@ -2,6 +2,7 @@
   config,
   inputs,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -23,7 +24,12 @@ in
   '';
 
   sops = {
-    defaultSopsFile = ../../secrets/shared.yaml;
+    age.keyFile =
+      if pkgs.stdenv.hostPlatform.isDarwin then
+        "${config.home.homeDirectory}/Library/Application Support/sops/age/keys.txt"
+      else
+        "${config.xdg.configHome}/sops/age/keys.txt";
+    defaultSopsFile = ../../secrets/personal.yaml;
     defaultSopsFormat = "yaml";
     secrets = {
       anthropic_api_key = { };

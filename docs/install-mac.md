@@ -1,7 +1,7 @@
-# Install the macOS configuration
+# Install the personal macOS configuration
 
 This runbook covers the first nix-darwin and Home Manager activation on Brian's
-Apple Silicon Mac. Routine updates require only `git pull --ff-only`, `just
+personal Apple Silicon Mac. Routine updates require only `git pull --ff-only`, `just
 check`, `just build-mac`, and `just switch-mac`.
 
 ## 1. Build before activating

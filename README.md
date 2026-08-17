@@ -1,6 +1,8 @@
 # NixOS and macOS dotfiles
 
-This repository declaratively manages Brian's complete Lenovo ThinkPad X1 Extreme installation with NixOS and Home Manager, plus his Apple Silicon Mac with nix-darwin and Home Manager.
+This repository declaratively manages Brian's Lenovo ThinkPad with NixOS and
+Home Manager, his personal Apple Silicon Mac with nix-darwin and Home Manager,
+and his work Apple Silicon Mac with standalone Home Manager.
 
 ## Repository layout
 
@@ -12,6 +14,9 @@ This repository declaratively manages Brian's complete Lenovo ThinkPad X1 Extrem
 - `modules/home/` is the shared Home Manager profile. Platform-specific
   differences are isolated under `platform/`, and program configuration is
   grouped by concern under `programs/`.
+- `users/` supplies account identity and policy around the shared profile.
+  Personal SOPS secrets belong only to `bcmyers`; `brian.myers` is the
+  secret-free work profile.
 - `files/` contains raw files installed by Home Manager, currently Neovim
   configuration and the tmux clipboard helper.
 - `pkgs/` contains locally defined Nix packages.
@@ -22,11 +27,11 @@ This repository declaratively manages Brian's complete Lenovo ThinkPad X1 Extrem
   configuration as explicit migration input rather than mixing it with the
   workstation modules.
 
-The standalone Home Manager outputs remain available as migration and
-evaluation targets, but the deployed machines use the complete NixOS and
-nix-darwin configurations.
+The ThinkPad and personal Mac integrate Home Manager with their system
+configurations. The work Mac intentionally uses only standalone Home Manager,
+leaving macOS and corporate system management untouched.
 
-## Machine
+## ThinkPad
 
 - Host: `thinkpad`
 - Platform: `x86_64-linux`
@@ -65,14 +70,17 @@ or an unencrypted root. The current configuration implements manual unlock.
 - COSMIC, audio, Bluetooth, printing, power management, firmware updates, and virtualization
 - NetworkManager, Tailscale, firewall policy, and OpenSSH
 - Fish, Git/GPG, Neovim, tmux, Alacritty, and development toolchains through Home Manager
-- Shared Fish API credentials decrypted by SOPS with a dedicated ThinkPad age identity
+- Personal Fish API credentials decrypted by SOPS with a dedicated ThinkPad age identity
 - Weekly Nix garbage collection for objects older than 30 days
 
 ## Package channels
 
 The ThinkPad deliberately keeps its operating system on the stable NixOS 26.05 branch. Home Manager receives a second, pinned `nixpkgs-unstable` package set for tools where current releases matter: Fish, Neovim, GnuPG, Go, Node.js, Python, Rustup, Nix language tooling, OpenTofu, Pulumi, `uv`, and related development tools. Core system services, the kernel, NVIDIA driver, boot stack, and disk configuration remain stable.
 
-The Mac uses nixpkgs-unstable throughout because it is a workstation user environment rather than the recovery-sensitive laptop operating system. Both channels are locked in `flake.lock`, so "unstable" means deliberately updated, reviewed revisions rather than an unrepeatable moving target.
+Both Mac profiles use nixpkgs-unstable throughout because they are workstation
+user environments rather than the recovery-sensitive laptop operating system.
+Both channels are locked in `flake.lock`, so "unstable" means deliberately
+updated, reviewed revisions rather than an unrepeatable moving target.
 
 Rust itself is managed by Rustup rather than Nix so that stable Rust can be updated immediately without waiting for Nixpkgs. After the first activation on a new machine, run `just rust-update`.
 
@@ -95,7 +103,7 @@ Useful flake entry points include:
 
 The non-flake `prompt-src` input is intentional: it imports the source archive of the separate prompt repository into this flake, and its exact revision and content hash are still locked.
 
-## Mac nix-darwin
+## Personal Mac
 
 The `mac` nix-darwin target shares command-line tools, Fish configuration and abbreviations, the custom `prompt` executable, Git/GPG configuration, Neovim, tmux, Alacritty, and other user preferences with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
 
@@ -107,7 +115,8 @@ activation time using the age key at
 `~/Library/Application Support/sops/age/keys.txt`. The private key is never
 committed.
 
-The Mac and ThinkPad consume the same encrypted `secrets/shared.yaml` document,
+The personal Mac and ThinkPad consume the same encrypted
+`secrets/personal.yaml` document,
 but each machine has its own private age identity. Linux reads
 `~/.config/sops/age/keys.txt`. See [the secrets guide](secrets/README.md) and
 [ThinkPad installation runbook](docs/install-thinkpad.md) for provisioning.
@@ -123,6 +132,28 @@ See [the Mac installation and migration runbook](docs/install-mac.md) for the
 first activation, `/etc` ownership conflicts, the one-time login-shell change,
 and post-migration verification.
 
+## Work Mac
+
+The `brian.myers@work-mac` target applies the shared Apple Silicon Home Manager
+profile to `/Users/brian.myers`. It uses the work Git identity
+`brian.myers@robinhood.com`, but otherwise shares Fish, the custom prompt,
+Git/GPG, Neovim, tmux, Alacritty, development packages, Caffeine, and Thaw with
+the personal Mac.
+
+It does not configure nix-darwin, `/etc`, the account's login shell, system
+defaults, or corporate-managed macOS services. It also does not import
+`secrets/personal.yaml` or require an age identity.
+
+Build and activate it without `sudo`:
+
+```console
+just build-home-work-mac
+just switch-work-mac
+```
+
+See [the work Mac Home Manager runbook](docs/install-work-mac.md) for first-use
+conflicts, application permissions, and the Homebrew Fish handoff.
+
 ## Commands
 
 ```console
@@ -131,13 +162,15 @@ just show        # Display every flake output for both systems
 just build       # Build the complete NixOS system
 just build-home-linux # Build standalone Linux Home Manager
 just build-home-mac   # Build standalone Mac Home Manager
+just build-home-work-mac # Build work Mac Home Manager
 just build-mac        # Build the complete nix-darwin system
 just build-vm    # Build the safe headless VM variant
 just test-disko  # Install and boot the encrypted layout in an isolated VM
 just vm          # Build and run the VM
 just switch      # Build and activate NixOS on the installed ThinkPad
 just switch-mac  # Build and activate nix-darwin and Home Manager on this Mac
-just edit-secrets # Edit the shared encrypted SOPS document
+just switch-work-mac # Activate Home Manager only on the work Mac
+just edit-secrets # Edit the personal encrypted SOPS document
 just rust-update # Update stable Rust and standard developer components
 just update      # Update all locked inputs
 just format      # Format Nix files
@@ -147,4 +180,6 @@ The regular VM variant disables Disko and NVIDIA, uses a disposable QEMU disk, e
 
 ## State versions
 
-The ThinkPad's `system.stateVersion` and both Home Manager targets' `home.stateVersion` are `26.05`. These values control compatibility defaults and should not be changed merely when inputs are updated.
+The ThinkPad's `system.stateVersion` and all three Home Manager targets'
+`home.stateVersion` are `26.05`. These values control compatibility defaults
+and should not be changed merely when inputs are updated.
