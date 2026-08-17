@@ -1,6 +1,5 @@
 {
   homeDirectory,
-  isDarwin,
   isSystemManaged,
   lib,
   ...
@@ -12,7 +11,6 @@
     ./home/programs.nix
     ./home/secrets.nix
   ]
-  ++ lib.optional isDarwin ./home/darwin.nix
   ++ lib.optional (!isSystemManaged) ./home/nix.nix;
 
   home = {
