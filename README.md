@@ -34,6 +34,7 @@ There is no LVM or separate `/home` partition. See [the installation runbook](do
 - COSMIC, audio, Bluetooth, printing, power management, firmware updates, and virtualization
 - NetworkManager, Tailscale, firewall policy, and OpenSSH
 - Fish, Git/GPG, Neovim, tmux, Alacritty, and development toolchains through Home Manager
+- Shared Fish API credentials decrypted by SOPS with a dedicated ThinkPad age identity
 - Weekly Nix garbage collection for objects older than 30 days
 
 ## Package channels
@@ -54,6 +55,7 @@ Useful flake entry points include:
 ./nix-flake.sh flake show --all-systems
 ./nix-flake.sh flake check --all-systems --no-build
 ./nix-flake.sh build .#prompt
+./nix-flake.sh run .#age-keygen -- --help
 ./nix-flake.sh run .#sops -- --version
 ./nix-flake.sh run .#nixos-install -- --help  # x86_64 Linux
 ./nix-flake.sh run .#nixos-rebuild -- --help  # x86_64 Linux
@@ -67,6 +69,11 @@ The non-flake `prompt-src` input is intentional: it imports the source archive o
 The `mac` nix-darwin target shares command-line tools, Fish configuration and abbreviations, the custom `prompt` executable, Git/GPG configuration, Neovim, tmux, Alacritty, and other user preferences with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
 
 nix-darwin owns the system Nix settings and login shell; Home Manager owns the user profile, GPG/SSH agent, Fish, Ollama service, and dotfiles. SOPS decrypts the Fish API credentials at activation time using the age key at `~/Library/Application Support/sops/age/keys.txt`. The private key is never committed.
+
+The Mac and ThinkPad consume the same encrypted `secrets/shared.yaml` document,
+but each machine has its own private age identity. Linux reads
+`~/.config/sops/age/keys.txt`. See [the secrets guide](secrets/README.md) and
+[ThinkPad installation runbook](docs/install-thinkpad.md) for provisioning.
 
 Build and activate it with:
 
@@ -93,6 +100,7 @@ just test-disko  # Install and boot the encrypted layout in an isolated VM
 just vm          # Build and run the VM
 just switch      # Build and activate NixOS on the installed ThinkPad
 just switch-mac  # Build and activate nix-darwin and Home Manager on this Mac
+just edit-secrets # Edit the shared encrypted SOPS document
 just rust-update # Update stable Rust and standard developer components
 just update      # Update all locked inputs
 just format      # Format Nix files

@@ -50,7 +50,6 @@
       nixos-hardware,
       nixpkgs,
       nixpkgs-unstable,
-      sops-nix,
       ...
     }:
     let
@@ -75,7 +74,6 @@
         {
           homeManager,
           homeDirectory,
-          modules ? [ ],
           nixpkgsInput,
           system,
         }:
@@ -88,7 +86,7 @@
             isSystemManaged = false;
             unstablePkgs = mkPkgs nixpkgs-unstable system;
           };
-          modules = [ ./home.nix ] ++ modules;
+          modules = [ ./home.nix ];
         };
       linuxHomeConfiguration = mkHomeConfiguration {
         homeManager = home-manager;
@@ -99,7 +97,6 @@
       macHomeConfiguration = mkHomeConfiguration {
         homeManager = home-manager-unstable;
         homeDirectory = "/Users/bcmyers";
-        modules = [ sops-nix.homeManagerModules.sops ];
         nixpkgsInput = nixpkgs-unstable;
         system = macSystem;
       };
@@ -163,6 +160,11 @@
       apps = nixpkgs.lib.genAttrs formatterSystems (
         system:
         {
+          age-keygen = {
+            type = "app";
+            program = "${(mkPkgs nixpkgs-unstable system).age}/bin/age-keygen";
+            meta.description = "Run the age key generator pinned by this flake";
+          };
           default = {
             type = "app";
             program = "${

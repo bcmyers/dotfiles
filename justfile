@@ -23,6 +23,9 @@ test-disko:
 check:
     ./nix-flake.sh flake check --all-systems --no-build --print-build-logs
 
+edit-secrets:
+    ./nix-flake.sh run .#sops -- secrets/shared.yaml
+
 format:
     ./nix-flake.sh fmt
 

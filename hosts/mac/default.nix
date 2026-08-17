@@ -22,7 +22,6 @@
       isSystemManaged = true;
       unstablePkgs = pkgs;
     };
-    sharedModules = [ inputs.sops-nix.homeManagerModules.sops ];
     useGlobalPkgs = true;
     useUserPackages = true;
     users.bcmyers = import ../../home.nix;

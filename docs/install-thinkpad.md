@@ -126,6 +126,29 @@ sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 
 Only after matching the fingerprint should the obsolete `known_hosts` entry be removed and the new one accepted.
 
+The first Home Manager activation may be unable to decrypt the shared Fish
+credentials until the dedicated ThinkPad age identity is installed. After
+accepting the verified SSH host key, run these commands on the Mac:
+
+```console
+ssh thinkpad 'install -d -m 700 ~/.config/sops/age'
+scp "$HOME/Library/Application Support/sops/age/thinkpad-keys.txt" \
+  thinkpad:.config/sops/age/keys.txt
+ssh thinkpad 'chmod 600 ~/.config/sops/age/keys.txt'
+```
+
+Then restart and verify the declarative Home Manager activation on the
+ThinkPad:
+
+```console
+sudo systemctl restart home-manager-bcmyers.service
+systemctl status home-manager-bcmyers.service --no-pager
+fish -lc 'set -q ANTHROPIC_API_KEY; and set -q TWILIO_SID; and set -q TWILIO_CLIENT_SECRET'
+```
+
+The final command checks only that all three variables exist; it does not print
+their values. Never copy either age identity into the repository.
+
 Clone the reviewed configuration into the newly installed user's home directory:
 
 ```console
@@ -153,6 +176,7 @@ Before relying on the machine, test:
 - Audio, Bluetooth, printing, keyboard, TrackPoint, touchpad, and brightness
 - Suspend and resume several times
 - Fish, Git/GPG signing, Neovim, tmux, Alacritty, and direnv
+- SOPS-provided Fish variables exist without printing their values
 - `just check`, `just build`, and `just switch`
 - A previous NixOS generation from the systemd-boot menu
 
