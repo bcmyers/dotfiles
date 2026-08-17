@@ -1,11 +1,10 @@
 {
   imports = [
     ./core.nix
-    ./packages.nix
+    ./packages/base.nix
     ./platform
     ./programs/editor.nix
     ./programs/git.nix
-    ./programs/security.nix
     ./programs/shell.nix
     ./programs/terminal.nix
   ];

@@ -31,23 +31,33 @@ and preserve it before retrying:
 
 ```console
 diff -u /etc/bashrc.backup-before-nix /etc/bashrc
-sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
+bashrc_backup="/etc/bashrc.before-nix-darwin.$(date +%Y%m%d-%H%M%S)"
+test ! -e "$bashrc_backup"
+sudo mv /etc/bashrc "$bashrc_backup"
+printf 'Preserved the old file at %s\n' "$bashrc_backup"
 just switch-personal-mac
 ```
 
-nix-darwin then owns `/etc/bashrc`; the renamed file remains as the
-pre-activation backup.
+If the original installer backup does not exist, inspect `/etc/bashrc`
+directly instead of skipping review. The timestamped destination is checked
+before the move, so retrying this procedure cannot silently overwrite an older
+backup. nix-darwin then owns `/etc/bashrc`.
 
 A Homebrew Fish installation may also have added `/opt/homebrew/bin/fish` to
 `/etc/shells`. Preserve the old file before letting nix-darwin take ownership:
 
 ```console
-sudo mv /etc/shells /etc/shells.before-nix-darwin
+sed -n '1,240p' /etc/shells
+shells_backup="/etc/shells.before-nix-darwin.$(date +%Y%m%d-%H%M%S)"
+test ! -e "$shells_backup"
+sudo mv /etc/shells "$shells_backup"
+printf 'Preserved the old file at %s\n' "$shells_backup"
 just switch-personal-mac
 ```
 
-The declarative version preserves the standard macOS shells and adds the
-Nix-managed Fish path.
+Review any nonstandard shell entries before the move and add entries that must
+survive to the declarative host configuration. The current declarative version
+preserves the standard macOS shells and adds the Nix-managed Fish path.
 
 ## 3. Change the existing account's login shell
 

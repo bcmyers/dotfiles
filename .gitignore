@@ -1,3 +1,17 @@
 .DS_Store
 result
 result-*
+
+# Never commit decrypted credentials or private identity files.
+**/.env
+**/.env.*
+!**/.env.example
+**/secret.fish
+**/keys.txt
+**/*.agekey
+**/id_dsa
+**/id_ecdsa
+**/id_ed25519
+**/id_rsa
+secrets/*.decrypted.*
+secrets/*.plaintext.*

@@ -7,7 +7,7 @@ build-work-mac:
     ./scripts/nix-flake.sh build '.#homeConfigurations."brian.myers@work-mac".activationPackage'
 
 build-work-devbox:
-    ./scripts/nix-flake.sh build '.#homeConfigurations."root@work-devbox".activationPackage'
+    ./scripts/build-work-devbox.sh
 
 build-personal-mac:
     ./scripts/nix-flake.sh build '.#darwinConfigurations.personal-mac.system'
@@ -18,8 +18,14 @@ build-vm:
 test-disko:
     ./scripts/nix-flake.sh build '.#disko-test' --print-build-logs
 
-check:
+check: check-secrets
     ./scripts/nix-flake.sh flake check --all-systems --no-build --print-build-logs
+
+check-secrets:
+    ./scripts/check-secrets.sh
+
+install-hooks:
+    git config core.hooksPath .githooks
 
 edit-secrets:
     ./scripts/nix-flake.sh run .#sops -- secrets/personal.yaml

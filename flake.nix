@@ -53,12 +53,13 @@
       ...
     }:
     let
-      linuxSystem = "x86_64-linux";
-      macSystem = "aarch64-darwin";
-      formatterSystems = [
-        linuxSystem
-        macSystem
+      thinkpadSystem = "x86_64-linux";
+      linuxSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
       ];
+      macSystem = "aarch64-darwin";
+      supportedSystems = linuxSystems ++ [ macSystem ];
       mkPkgs =
         nixpkgsInput: system:
         import nixpkgsInput {
@@ -77,6 +78,20 @@
         (mkPkgs nixpkgs-unstable system).callPackage ./pkgs/prompt {
           src = inputs.prompt-src;
         };
+      mkSecretScan =
+        system:
+        let
+          pkgs = mkPkgs nixpkgs-unstable system;
+        in
+        pkgs.runCommand "dotfiles-secret-scan"
+          {
+            nativeBuildInputs = [ pkgs.gitleaks ];
+            source = ./.;
+          }
+          ''
+            gitleaks --no-banner --redact dir "$source"
+            touch "$out"
+          '';
       mkHomeConfiguration =
         {
           homeManager,
@@ -95,15 +110,18 @@
         nixpkgsInput = nixpkgs-unstable;
         system = macSystem;
       };
-      workDevboxHomeConfiguration = mkHomeConfiguration {
-        homeManager = home-manager-unstable;
-        homeModule = ./hosts/work-devbox/home.nix;
-        nixpkgsInput = nixpkgs-unstable;
-        system = linuxSystem;
-      };
+      workDevboxHomeConfigurations = nixpkgs.lib.genAttrs linuxSystems (
+        system:
+        mkHomeConfiguration {
+          homeManager = home-manager-unstable;
+          homeModule = ./hosts/work-devbox/home.nix;
+          nixpkgsInput = nixpkgs-unstable;
+          inherit system;
+        }
+      );
       nixosConfiguration = nixpkgs.lib.nixosSystem {
-        system = linuxSystem;
-        specialArgs = (mkHomeSpecialArgs linuxSystem) // {
+        system = thinkpadSystem;
+        specialArgs = (mkHomeSpecialArgs thinkpadSystem) // {
           nixpkgsRegistry = inputs.nixpkgs;
         };
         modules = [
@@ -128,41 +146,50 @@
     {
       homeConfigurations = {
         "brian.myers@work-mac" = workMacHomeConfiguration;
-        "root@work-devbox" = workDevboxHomeConfiguration;
+        "root@work-devbox-aarch64-linux" = workDevboxHomeConfigurations.aarch64-linux;
+        "root@work-devbox-x86_64-linux" = workDevboxHomeConfigurations.x86_64-linux;
       };
       darwinConfigurations.personal-mac = personalMacConfiguration;
       nixosConfigurations.thinkpad = nixosConfiguration;
 
-      checks.${linuxSystem} = {
+      checks.${thinkpadSystem} = {
         disko-test = nixosConfiguration.config.system.build.installTest;
-        prompt = mkPrompt linuxSystem;
+        prompt = mkPrompt thinkpadSystem;
+        secrets = mkSecretScan thinkpadSystem;
         thinkpad = nixosConfiguration.config.system.build.toplevel;
         vm = nixosConfiguration.config.system.build.vm;
-        work-devbox = workDevboxHomeConfiguration.activationPackage;
+        work-devbox = workDevboxHomeConfigurations.x86_64-linux.activationPackage;
+      };
+      checks.aarch64-linux = {
+        prompt = mkPrompt "aarch64-linux";
+        secrets = mkSecretScan "aarch64-linux";
+        work-devbox = workDevboxHomeConfigurations.aarch64-linux.activationPackage;
       };
       checks.${macSystem} = {
         personal-mac = personalMacConfiguration.system;
         prompt = mkPrompt macSystem;
+        secrets = mkSecretScan macSystem;
         work-mac = workMacHomeConfiguration.activationPackage;
       };
 
-      formatter = nixpkgs.lib.genAttrs formatterSystems (
+      formatter = nixpkgs.lib.genAttrs supportedSystems (
         formatterSystem: nixpkgs.legacyPackages.${formatterSystem}.nixfmt-tree
       );
 
-      packages.${linuxSystem} = {
+      packages.${thinkpadSystem} = {
         default = nixosConfiguration.config.system.build.toplevel;
-        disko = disko.packages.${linuxSystem}.disko;
+        disko = disko.packages.${thinkpadSystem}.disko;
         disko-test = nixosConfiguration.config.system.build.installTest;
-        prompt = mkPrompt linuxSystem;
+        prompt = mkPrompt thinkpadSystem;
         vm = nixosConfiguration.config.system.build.vm;
       };
+      packages.aarch64-linux.prompt = mkPrompt "aarch64-linux";
       packages.${macSystem} = {
         default = personalMacConfiguration.system;
         prompt = mkPrompt macSystem;
       };
 
-      apps = nixpkgs.lib.genAttrs formatterSystems (
+      apps = nixpkgs.lib.genAttrs supportedSystems (
         system:
         {
           age-keygen = {
@@ -175,13 +202,18 @@
             program = "${home-manager-unstable.packages.${system}.home-manager}/bin/home-manager";
             meta.description = "Run Home Manager using this flake's pinned version";
           };
+          gitleaks = {
+            type = "app";
+            program = "${(mkPkgs nixpkgs-unstable system).gitleaks}/bin/gitleaks";
+            meta.description = "Scan the repository with the Gitleaks version pinned by this flake";
+          };
           sops = {
             type = "app";
             program = "${(mkPkgs nixpkgs-unstable system).sops}/bin/sops";
             meta.description = "Run the SOPS version pinned by this flake";
           };
         }
-        // nixpkgs.lib.optionalAttrs (system == linuxSystem) {
+        // nixpkgs.lib.optionalAttrs (system == thinkpadSystem) {
           nixos-install = {
             type = "app";
             program = "${nixosConfiguration.config.system.build.nixos-install}/bin/nixos-install";

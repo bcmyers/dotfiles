@@ -1,6 +1,6 @@
 {
   imports = [
-    ../../modules/home
+    ../../profiles/home/workstation.nix
     ./aws.nix
     ./identity.nix
     ./neovim.nix

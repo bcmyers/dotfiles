@@ -1,7 +1,7 @@
 {
   imports = [
-    ../../modules/home
-    ./identity.nix
+    ../../profiles/home/identities/openai.nix
+    ../../profiles/home/workstation.nix
   ];
 
   home = {

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+git diff --cached --binary --no-ext-diff | \
+  ./scripts/nix-flake.sh run .#gitleaks -- --no-banner --redact stdin

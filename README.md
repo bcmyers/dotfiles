@@ -3,7 +3,7 @@
 This repository declaratively manages Brian's Lenovo ThinkPad with NixOS and
 Home Manager, his personal Apple Silicon Mac with nix-darwin and Home Manager,
 his work Apple Silicon Mac with standalone Home Manager, and root shells on
-x86_64 Linux work devboxes with standalone Home Manager.
+x86_64 and ARM Linux work devboxes with standalone Home Manager.
 
 ## Repository layout
 
@@ -13,10 +13,13 @@ x86_64 Linux work devboxes with standalone Home Manager.
   the work Mac and work devbox own standalone Home Manager entry points.
 - `modules/system/` contains system-level wiring shared by NixOS and
   nix-darwin.
-- `modules/home/` is the shared Home Manager profile. Platform-specific
+- `modules/home/` contains reusable Home Manager modules. Platform-specific
   differences are isolated under `platform/`, and program configuration is
   grouped by concern under `programs/`. Host-selected GUI applications are
   under `apps/`, so headless hosts do not inherit them.
+- `profiles/home/` composes those modules into a full workstation or a narrow
+  work-devbox capability set. Account-independent identity policy lives under
+  `profiles/home/identities/`.
 - `users/` supplies account identity and policy around the shared profile.
   Git signing, GPG-agent SSH keys, AWS defaults, hosted editor integrations,
   and personal SOPS secrets belong only to `bcmyers`; `brian.myers` is the
@@ -167,16 +170,18 @@ conflicts, application permissions, and the Homebrew Fish handoff.
 
 ## Work devboxes
 
-The `root@work-devbox` target manages a headless CLI environment under `/root`
-on `x86_64-linux`. It assumes the Nix package manager is already installed and
-uses Home Manager only as a Nix-driven user-environment activator. It does not
+The `root@work-devbox-x86_64-linux` and
+`root@work-devbox-aarch64-linux` targets manage a headless CLI environment
+under `/root`. They assume the Nix package manager is already installed and
+use Home Manager only as a Nix-driven user-environment activator. They do not
 install or configure Nix, use NixOS, modify `/etc`, manage services, or change
 root's login shell.
 
-The target shares the neutral work Git identity and command-line tools with the
-work Mac, but omits Alacritty, fonts, desktop clipboard packages, Caffeine, and
-Thaw. Like the work Mac, it has no personal SOPS access, signing key, GPG SSH
-agent, AWS profile, or Windsurf integration.
+The targets share the neutral OpenAI Git identity and core development tools
+with the work Mac, but use a deliberately smaller capability profile. They
+omit Alacritty, fonts, desktop clipboard packages, Caffeine, Thaw, GPG,
+Password Store, SOPS, age, AWS and cloud deployment tools, workstation network
+administration tools, and Windsurf integration.
 
 Build and activate it as root:
 
@@ -203,8 +208,10 @@ on work devboxes.
 ## Commands
 
 ```console
-just check       # Evaluate all flake outputs
-just show        # Display every flake output for both systems
+just check       # Scan for secrets and evaluate all flake outputs
+just check-secrets # Scan Git history and the working tree for secrets
+just install-hooks # Enable the tracked staged-secret pre-commit hook
+just show        # Display every flake output for all supported systems
 just build-thinkpad    # Build the complete NixOS system
 just build-personal-mac # Build the complete nix-darwin system
 just build-work-mac   # Build standalone work Mac Home Manager

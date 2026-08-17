@@ -1,16 +1,16 @@
 # Install Home Manager on a work devbox
 
-This target manages only root's files and Nix profile under `/root` on an
-`x86_64-linux` devbox. The Nix package manager must already work as root. The
-target does not install or configure Nix, use NixOS, modify `/etc`, manage
-services, or change the login shell.
+These targets manage only root's files and Nix profile under `/root` on
+`x86_64-linux` and `aarch64-linux` devboxes. The Nix package manager must
+already work as root. They do not install or configure Nix, use NixOS, modify
+`/etc`, manage services, or change the login shell.
 
 Start the SSH connection from the Nix-managed Alacritty configuration on a Mac
 or the ThinkPad. Alacritty allows OSC 52 clipboard writes but deliberately
 blocks remote clipboard reads.
 
-Stop if `id -u` is not `0`, `HOME` is not `/root`, or `uname -m` is not
-`x86_64`. A separate flake target is required for ARM Linux devboxes.
+Stop if `id -u` is not `0`, `HOME` is not `/root`, or `uname -m` is neither
+`x86_64` nor `aarch64`/`arm64`.
 
 ## 1. Verify the existing Nix installation
 
@@ -22,6 +22,18 @@ nix --version
 git --version
 nix --extra-experimental-features 'nix-command flakes' flake metadata \
   'github:NixOS/nixpkgs/nixpkgs-unstable'
+```
+
+Select the architecture-qualified flake output once for the rest of the
+installation:
+
+```console
+case "$(uname -m)" in
+  x86_64) DEVBOX_SYSTEM=x86_64-linux ;;
+  aarch64|arm64) DEVBOX_SYSTEM=aarch64-linux ;;
+  *) printf 'unsupported architecture: %s\n' "$(uname -m)" >&2; exit 1 ;;
+esac
+export DEVBOX_TARGET="root@work-devbox-${DEVBOX_SYSTEM}"
 ```
 
 The last command is only a capability check. This configuration uses its own
@@ -58,7 +70,7 @@ activation package first:
 ```console
 nix --extra-experimental-features 'nix-command flakes' build \
   --no-link \
-  '.#homeConfigurations."root@work-devbox".activationPackage'
+  ".#homeConfigurations.\"${DEVBOX_TARGET}\".activationPackage"
 ```
 
 Then run the Home Manager executable and configuration from the same local
@@ -68,7 +80,7 @@ flake. Activate without `sudo`—the shell is already root:
 nix --extra-experimental-features 'nix-command flakes' run \
   '.#home-manager' -- \
   switch \
-  --flake '.#"root@work-devbox"' \
+  --flake ".#\"${DEVBOX_TARGET}\"" \
   -b home-manager-backup
 ```
 
@@ -91,7 +103,8 @@ just build-work-devbox
 just switch-work-devbox
 ```
 
-The guarded switch script refuses to run unless the host is Linux and the
+The build and switch scripts automatically select the x86_64 or ARM target.
+The guarded switch script also refuses to run unless the host is Linux and the
 effective user and home directory are `root` and `/root`.
 
 ## 5. Shell behavior
@@ -110,7 +123,7 @@ Start or attach to tmux with `tmux new -As main`, then run these checks inside
 that session:
 
 ```console
-type -a fish fzf pass prompt nvim tmux aws
+type -a fish fzf prompt nvim tmux
 git config --global user.email
 git config --global commit.gpgsign
 printf '%s\n' "${SSH_AUTH_SOCK-}"
@@ -120,9 +133,9 @@ tmux info | grep 'Ms:'
 
 The Git email should be `brianmyers@openai.com`; commit signing should be
 unset. Home Manager does not start a GPG SSH agent or replace `SSH_AUTH_SOCK`,
-and it does not manage `~/.aws/config`. It installs the GPG, Password Store,
-and AWS command-line tools without copying personal keys, password entries, or
-account credentials.
+and it does not manage `~/.aws/config`. The deliberately narrow devbox profile
+also omits GPG, Password Store, SOPS, age, AWS, cloud deployment tools, and
+workstation network-administration tools.
 
 Alacritty, desktop fonts, Wayland clipboard utilities, Caffeine, and Thaw are
 intentionally absent. Run Neovim inside tmux on a devbox. Tmux uses its native
