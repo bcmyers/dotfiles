@@ -20,7 +20,7 @@ Stop if any of those facts differ. Never infer the target disk from device order
 4. From an x86_64 Linux machine with KVM, build and review the flake and both VM tests:
 
    ```console
-   ./nix-flake.sh flake check --all-systems --no-build --print-build-logs
+   ./scripts/nix-flake.sh flake check --all-systems --no-build --print-build-logs
    just build
    just build-vm
    just test-disko
@@ -53,7 +53,7 @@ mkdir -p ~/lib
 git clone https://github.com/bcmyers/dotfiles.git ~/lib/dotfiles
 cd ~/lib/dotfiles
 git switch master
-./nix-flake.sh flake check --all-systems --no-build --print-build-logs
+./scripts/nix-flake.sh flake check --all-systems --no-build --print-build-logs
 ```
 
 If the NixOS work is still in a pull request, fetch and switch to its exact reviewed commit instead of `master`.
@@ -188,7 +188,7 @@ From the repository on the installed ThinkPad:
 
 ```console
 git pull --ff-only
-./nix-flake.sh flake update
+./scripts/nix-flake.sh flake update
 just check
 just build
 just switch

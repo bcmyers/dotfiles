@@ -15,7 +15,7 @@ Linux: ~/.config/sops/age/keys.txt
 Edit the encrypted file from the repository root with:
 
 ```sh
-./nix-flake.sh run .#sops -- secrets/shared.yaml
+./scripts/nix-flake.sh run .#sops -- secrets/shared.yaml
 ```
 
 The dedicated ThinkPad identity is staged on the Mac at
@@ -28,8 +28,8 @@ To add or replace a machine identity, generate it through the pinned flake app,
 add only its public recipient to `.sops.yaml`, and update the recipients:
 
 ```sh
-./nix-flake.sh run .#age-keygen -- -o /secure/path/to/keys.txt
-./nix-flake.sh run .#sops -- updatekeys --yes secrets/shared.yaml
+./scripts/nix-flake.sh run .#age-keygen -- -o /secure/path/to/keys.txt
+./scripts/nix-flake.sh run .#sops -- updatekeys --yes secrets/shared.yaml
 ```
 
 Only encrypted SOPS documents belong in this directory. Never commit an age

@@ -83,7 +83,7 @@
         };
       mkPrompt =
         system:
-        (mkPkgs nixpkgs-unstable system).callPackage ./packages/prompt.nix {
+        (mkPkgs nixpkgs-unstable system).callPackage ./pkgs/prompt {
           src = inputs.prompt-src;
         };
       mkHomeConfiguration =
@@ -100,7 +100,7 @@
             isDarwin = system == macSystem;
             isSystemManaged = false;
           };
-          modules = [ ./home.nix ];
+          modules = [ ./modules/home ];
         };
       linuxHomeConfiguration = mkHomeConfiguration {
         homeManager = home-manager;
@@ -130,7 +130,7 @@
           disko.nixosModules.disko
           nixos-hardware.nixosModules.lenovo-thinkpad-x1-extreme
           home-manager.nixosModules.home-manager
-          ./modules/system
+          ./modules/common
           ./hosts/thinkpad
         ];
       };
@@ -147,7 +147,7 @@
           };
         modules = [
           home-manager-unstable.darwinModules.home-manager
-          ./modules/system
+          ./modules/common
           ./hosts/mac
         ];
       };

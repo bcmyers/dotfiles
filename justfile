@@ -1,45 +1,45 @@
 default: check
 
 build:
-    ./nix-flake.sh build '.#nixosConfigurations.thinkpad.config.system.build.toplevel'
+    ./scripts/nix-flake.sh build '.#nixosConfigurations.thinkpad.config.system.build.toplevel'
 
 build-home: build-home-linux
 
 build-home-linux:
-    ./nix-flake.sh build '.#homeConfigurations."bcmyers@linux".activationPackage'
+    ./scripts/nix-flake.sh build '.#homeConfigurations."bcmyers@linux".activationPackage'
 
 build-home-mac:
-    ./nix-flake.sh build '.#homeConfigurations."bcmyers@mac".activationPackage'
+    ./scripts/nix-flake.sh build '.#homeConfigurations."bcmyers@mac".activationPackage'
 
 build-mac:
-    ./nix-flake.sh build '.#darwinConfigurations.mac.system'
+    ./scripts/nix-flake.sh build '.#darwinConfigurations.mac.system'
 
 build-vm:
-    ./nix-flake.sh build '.#vm' --out-link result-vm
+    ./scripts/nix-flake.sh build '.#vm' --out-link result-vm
 
 test-disko:
-    ./nix-flake.sh build '.#disko-test' --print-build-logs
+    ./scripts/nix-flake.sh build '.#disko-test' --print-build-logs
 
 check:
-    ./nix-flake.sh flake check --all-systems --no-build --print-build-logs
+    ./scripts/nix-flake.sh flake check --all-systems --no-build --print-build-logs
 
 edit-secrets:
-    ./nix-flake.sh run .#sops -- secrets/shared.yaml
+    ./scripts/nix-flake.sh run .#sops -- secrets/shared.yaml
 
 format:
-    ./nix-flake.sh fmt
+    ./scripts/nix-flake.sh fmt
 
 show:
-    ./nix-flake.sh flake show --all-systems
+    ./scripts/nix-flake.sh flake show --all-systems
 
 gc:
-    ./nix-garbage-collections.sh
+    ./scripts/gc.sh
 
 switch:
-    ./nix-switch.sh
+    ./scripts/switch-linux.sh
 
 switch-mac:
-    ./nix-switch-mac.sh
+    ./scripts/switch-mac.sh
 
 rust-update:
     rustup update stable
@@ -50,4 +50,4 @@ vm: build-vm
     ./result-vm/bin/run-thinkpad-vm-vm
 
 update:
-    ./nix-flake.sh flake update
+    ./scripts/nix-flake.sh flake update

@@ -2,6 +2,30 @@
 
 This repository declaratively manages Brian's complete Lenovo ThinkPad X1 Extreme installation with NixOS and Home Manager, plus his Apple Silicon Mac with nix-darwin and Home Manager.
 
+## Repository layout
+
+- `hosts/` contains machine-specific system configuration. The ThinkPad is
+  split by boot, hardware, networking, storage, desktop, users, and VM test
+  concerns; the smaller Mac configuration remains a single module.
+- `modules/common/` contains system-level wiring shared by NixOS and
+  nix-darwin.
+- `modules/home/` is the shared Home Manager profile. Platform-specific
+  differences are isolated under `platform/`, and program configuration is
+  grouped by concern under `programs/`.
+- `files/` contains raw files installed by Home Manager, currently Neovim
+  configuration and the tmux clipboard helper.
+- `pkgs/` contains locally defined Nix packages.
+- `scripts/` contains bootstrap and activation helpers; `justfile` is the
+  normal command interface.
+- `docs/` and `secrets/` contain the installation runbook and SOPS material.
+- `infrastructure/web-server/` preserves an old, non-deployed nginx/Certbot
+  configuration as explicit migration input rather than mixing it with the
+  workstation modules.
+
+The standalone Home Manager outputs remain available as migration and
+evaluation targets, but the deployed machines use the complete NixOS and
+nix-darwin configurations.
+
 ## Machine
 
 - Host: `thinkpad`
@@ -47,19 +71,19 @@ Rust itself is managed by Rustup rather than Nix so that stable Rust can be upda
 
 ## Flake workflow
 
-The repository does not depend on Nix channels or an ambient `<nixpkgs>`. Every Nix input, package, rebuild tool, and formatter is resolved through `flake.nix` and `flake.lock`. `nix-flake.sh` explicitly enables `nix-command` and `flakes`, which also makes the bootstrap commands work before Home Manager, NixOS, or nix-darwin has written the permanent Nix settings.
+The repository does not depend on Nix channels or an ambient `<nixpkgs>`. Every Nix input, package, rebuild tool, and formatter is resolved through `flake.nix` and `flake.lock`. `scripts/nix-flake.sh` explicitly enables `nix-command` and `flakes`, which also makes the bootstrap commands work before Home Manager, NixOS, or nix-darwin has written the permanent Nix settings.
 
 Useful flake entry points include:
 
 ```console
-./nix-flake.sh flake show --all-systems
-./nix-flake.sh flake check --all-systems --no-build
-./nix-flake.sh build .#prompt
-./nix-flake.sh run .#age-keygen -- --help
-./nix-flake.sh run .#sops -- --version
-./nix-flake.sh run .#nixos-install -- --help  # x86_64 Linux
-./nix-flake.sh run .#nixos-rebuild -- --help  # x86_64 Linux
-./nix-flake.sh run .#darwin-rebuild -- --help # Apple Silicon macOS
+./scripts/nix-flake.sh flake show --all-systems
+./scripts/nix-flake.sh flake check --all-systems --no-build
+./scripts/nix-flake.sh build .#prompt
+./scripts/nix-flake.sh run .#age-keygen -- --help
+./scripts/nix-flake.sh run .#sops -- --version
+./scripts/nix-flake.sh run .#nixos-install -- --help  # x86_64 Linux
+./scripts/nix-flake.sh run .#nixos-rebuild -- --help  # x86_64 Linux
+./scripts/nix-flake.sh run .#darwin-rebuild -- --help # Apple Silicon macOS
 ```
 
 The non-flake `prompt-src` input is intentional: it imports the source archive of the separate prompt repository into this flake, and its exact revision and content hash are still locked.
