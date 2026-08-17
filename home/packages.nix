@@ -88,7 +88,7 @@ in
       with unstablePkgs;
       [
         caffeine
-        ice-bar
+        thaw
       ]
     )
     ++ [ prompt ];
