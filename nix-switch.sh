@@ -2,9 +2,4 @@
 
 set -euo pipefail
 
-exec nix \
-  --extra-experimental-features "nix-command flakes" \
-  run . -- \
-  switch \
-  --flake ".#bcmyers@linux" \
-  "$@"
+exec sudo nixos-rebuild switch --flake ".#thinkpad" "$@"

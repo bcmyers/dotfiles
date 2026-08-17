@@ -1,10 +1,15 @@
 {
+  isNixOS,
+  lib,
+  ...
+}:
+{
   imports = [
     ./home/core.nix
-    ./home/nix.nix
     ./home/packages.nix
     ./home/programs.nix
-  ];
+  ]
+  ++ lib.optional (!isNixOS) ./home/nix.nix;
 
   home = {
     username = "bcmyers";

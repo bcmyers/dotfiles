@@ -1,13 +1,22 @@
 default: check
 
 build:
-    nix --extra-experimental-features "nix-command flakes" build '.#homeConfigurations."bcmyers@linux".activationPackage'
+    nix build '.#nixosConfigurations.thinkpad.config.system.build.toplevel'
+
+build-home:
+    nix build '.#homeConfigurations."bcmyers@linux".activationPackage'
+
+build-vm:
+    nix build '.#vm' --out-link result-vm
+
+test-disko:
+    nix build '.#disko-test' --print-build-logs
 
 check:
-    nix --extra-experimental-features "nix-command flakes" flake check --all-systems --no-build --print-build-logs
+    nix flake check --all-systems --no-build --print-build-logs
 
 format:
-    nix --extra-experimental-features "nix-command flakes" fmt
+    nix fmt
 
 gc:
     ./nix-garbage-collections.sh
@@ -15,5 +24,8 @@ gc:
 switch:
     ./nix-switch.sh
 
+vm: build-vm
+    ./result-vm/bin/run-thinkpad-vm-vm
+
 update:
-    nix --extra-experimental-features "nix-command flakes" flake update
+    nix flake update

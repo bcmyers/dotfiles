@@ -2,20 +2,14 @@
 
 set -euo pipefail
 
-if ! command -v nix >/dev/null 2>&1; then
+if [[ ! -e /etc/NIXOS ]]; then
   cat >&2 <<'EOF'
-Nix is required but was not found.
+This repository now manages the complete ThinkPad NixOS installation.
 
-Install Nix using the official instructions at:
-https://nixos.org/download/
+For a fresh installation, follow docs/install-thinkpad.md from a NixOS USB.
+This helper only switches an already-installed NixOS system.
 EOF
   exit 1
 fi
 
-exec nix \
-  --extra-experimental-features "nix-command flakes" \
-  run . -- \
-  switch \
-  -b home-manager-backup \
-  --flake ".#bcmyers@linux" \
-  "$@"
+exec ./nix-switch.sh "$@"
