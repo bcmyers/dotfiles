@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
@@ -46,23 +45,6 @@
     };
   };
 
-  home-manager = {
-    backupFileExtension = "home-manager-backup";
-    extraSpecialArgs = {
-      homeDirectory = "/home/bcmyers";
-      inherit inputs;
-      isDarwin = false;
-      isSystemManaged = true;
-      unstablePkgs = import inputs.nixpkgs-unstable {
-        system = "x86_64-linux";
-        config.allowUnfree = false;
-      };
-    };
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    users.bcmyers = import ../../home.nix;
-  };
-
   networking = {
     hostName = "thinkpad";
     networkmanager.enable = true;
@@ -72,22 +54,10 @@
     };
   };
 
-  nix = {
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 30d";
-    };
-    optimise.automatic = true;
-    registry.nixpkgs.flake = inputs.nixpkgs;
-    settings = {
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-      keep-derivations = true;
-      keep-outputs = true;
-    };
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
   };
 
   nixpkgs.config.allowUnfreePredicate =
@@ -98,10 +68,7 @@
       "nvidia-x11"
     ];
 
-  programs = {
-    fish.enable = true;
-    virt-manager.enable = true;
-  };
+  programs.virt-manager.enable = true;
 
   security = {
     polkit.enable = true;

@@ -1,18 +1,16 @@
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  isDarwin,
+  pkgs,
+  ...
+}:
 {
   nix = {
     package = pkgs.nix;
 
-    registry.nixpkgs.flake = inputs.nixpkgs;
+    registry.nixpkgs.flake = if isDarwin then inputs.nixpkgs-unstable else inputs.nixpkgs;
 
-    settings = {
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-      keep-derivations = true;
-      keep-outputs = true;
-    };
+    settings = import ../lib/nix-settings.nix;
 
     gc = {
       automatic = true;

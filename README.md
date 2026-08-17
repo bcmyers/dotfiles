@@ -68,7 +68,7 @@ The non-flake `prompt-src` input is intentional: it imports the source archive o
 
 The `mac` nix-darwin target shares command-line tools, Fish configuration and abbreviations, the custom `prompt` executable, Git/GPG configuration, Neovim, tmux, Alacritty, and other user preferences with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
 
-nix-darwin owns the system Nix settings and login shell; Home Manager owns the user profile, GPG/SSH agent, Fish, Ollama service, and dotfiles. SOPS decrypts the Fish API credentials at activation time using the age key at `~/Library/Application Support/sops/age/keys.txt`. The private key is never committed.
+nix-darwin owns the system Nix settings and login shell; Home Manager owns the user profile, Password Store, GPG/SSH agent, Fish, and dotfiles. SOPS decrypts the Fish API credentials at activation time using the age key at `~/Library/Application Support/sops/age/keys.txt`. The private key is never committed.
 
 The Mac and ThinkPad consume the same encrypted `secrets/shared.yaml` document,
 but each machine has its own private age identity. Linux reads
@@ -82,9 +82,9 @@ just build-mac
 just switch-mac
 ```
 
-`just switch-mac` authenticates with sudo before stopping the Homebrew Ollama service, then activates nix-darwin. If activation fails after Ollama stops, restore the old service with `brew services start ollama`. The first activation uses the `home-manager-backup` extension for files that would otherwise conflict. Inspect any resulting backup files before removing them.
+`just switch-mac` activates nix-darwin and Home Manager. The first activation uses the `home-manager-backup` extension for files that would otherwise conflict. Inspect any resulting backup files before removing them.
 
-After the first successful activation, open a fresh Fish shell and verify that `prompt`, the Fish abbreviations, GPG signing, SSH through the GPG agent, and Ollama all work. Confirm the three SOPS-provided environment variables are set without printing their values, then remove the obsolete plaintext `~/.config/fish/secret.fish`. Rotate the Anthropic and Twilio credentials because that legacy file was previously readable by other local users.
+After the first successful activation, open a fresh Fish shell and verify that `prompt`, the Fish abbreviations, Password Store, GPG signing, and SSH through the GPG agent all work. Confirm the three SOPS-provided environment variables are set without printing their values, then remove the obsolete plaintext `~/.config/fish/secret.fish`. Rotate the Anthropic and Twilio credentials because that legacy file was previously readable by other local users.
 
 ## Commands
 

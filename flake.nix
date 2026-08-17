@@ -65,6 +65,22 @@
           inherit system;
           config.allowUnfree = false;
         };
+      mkHomeSpecialArgs =
+        {
+          homeDirectory,
+          isDarwin,
+          isSystemManaged,
+          system,
+        }:
+        {
+          inherit
+            homeDirectory
+            inputs
+            isDarwin
+            isSystemManaged
+            ;
+          unstablePkgs = mkPkgs nixpkgs-unstable system;
+        };
       mkPrompt =
         system:
         (mkPkgs nixpkgs-unstable system).callPackage ./packages/prompt.nix {
@@ -79,12 +95,10 @@
         }:
         homeManager.lib.homeManagerConfiguration {
           pkgs = mkPkgs nixpkgsInput system;
-          extraSpecialArgs = {
-            inherit homeDirectory;
-            inherit inputs;
+          extraSpecialArgs = mkHomeSpecialArgs {
+            inherit homeDirectory system;
             isDarwin = system == macSystem;
             isSystemManaged = false;
-            unstablePkgs = mkPkgs nixpkgs-unstable system;
           };
           modules = [ ./home.nix ];
         };
@@ -102,18 +116,38 @@
       };
       nixosConfiguration = nixpkgs.lib.nixosSystem {
         system = linuxSystem;
-        specialArgs = { inherit inputs; };
+        specialArgs =
+          (mkHomeSpecialArgs {
+            homeDirectory = "/home/bcmyers";
+            isDarwin = false;
+            isSystemManaged = true;
+            system = linuxSystem;
+          })
+          // {
+            nixpkgsRegistry = inputs.nixpkgs;
+          };
         modules = [
           disko.nixosModules.disko
           nixos-hardware.nixosModules.lenovo-thinkpad-x1-extreme
           home-manager.nixosModules.home-manager
+          ./modules/system
           ./hosts/thinkpad
         ];
       };
       darwinConfiguration = nix-darwin.lib.darwinSystem {
-        specialArgs = { inherit inputs; };
+        specialArgs =
+          (mkHomeSpecialArgs {
+            homeDirectory = "/Users/bcmyers";
+            isDarwin = true;
+            isSystemManaged = true;
+            system = macSystem;
+          })
+          // {
+            nixpkgsRegistry = inputs.nixpkgs-unstable;
+          };
         modules = [
           home-manager-unstable.darwinModules.home-manager
+          ./modules/system
           ./hosts/mac
         ];
       };

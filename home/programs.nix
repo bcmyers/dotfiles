@@ -178,6 +178,11 @@ in
       withPython3 = true;
     };
 
+    password-store = {
+      enable = true;
+      package = unstablePkgs.pass.withExtensions (extensions: [ extensions.pass-otp ]);
+    };
+
     readline = {
       enable = true;
       variables = {
