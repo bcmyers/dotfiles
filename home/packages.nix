@@ -1,5 +1,7 @@
 {
   inputs,
+  isDarwin,
+  lib,
   pkgs,
   unstablePkgs,
   ...
@@ -82,5 +84,12 @@ in
       trunk
       uv
     ])
+    ++ lib.optionals isDarwin (
+      with unstablePkgs;
+      [
+        caffeine
+        ice-bar
+      ]
+    )
     ++ [ prompt ];
 }
