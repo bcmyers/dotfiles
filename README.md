@@ -237,6 +237,10 @@ just format      # Format Nix files
 revision in `flake.lock` without evaluating this repository as a flake. The
 hook then invokes that immutable binary directly, so a rejected staged secret
 is not first copied into the Nix store as part of the candidate source tree.
+The installer does not change Git's filesystem-monitor settings. If a broken
+global filesystem monitor prevents the staged scan from reading the index,
+disable it only in the affected clone with
+`git config --local core.fsmonitor false` after confirming the failure.
 
 The regular VM variant disables Disko and NVIDIA, uses a disposable QEMU disk,
 exposes key-only guest SSH at `127.0.0.1:2222`, and automatically logs in as

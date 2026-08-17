@@ -8,6 +8,5 @@ cd "$repo_root"
 gitleaks_bin="$(./scripts/ensure-gitleaks.sh)"
 git config --local dotfiles.gitleaks-path "$gitleaks_bin"
 git config --local core.hooksPath .githooks
-git config --local core.fsmonitor false
 
 printf 'Installed the secret-scanning hook with %s\n' "$gitleaks_bin"
