@@ -1,6 +1,7 @@
 {
   homeDirectory,
-  isNixOS,
+  isDarwin,
+  isSystemManaged,
   lib,
   ...
 }:
@@ -10,7 +11,8 @@
     ./home/packages.nix
     ./home/programs.nix
   ]
-  ++ lib.optional (!isNixOS) ./home/nix.nix;
+  ++ lib.optional isDarwin ./home/darwin.nix
+  ++ lib.optional (!isSystemManaged) ./home/nix.nix;
 
   home = {
     username = "bcmyers";

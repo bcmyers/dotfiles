@@ -1,9 +1,16 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
+  unstablePkgs,
   ...
 }:
+let
+  prompt = unstablePkgs.callPackage ../packages/prompt.nix {
+    src = inputs.prompt-src;
+  };
+in
 {
   fonts.fontconfig.enable = true;
 
@@ -60,6 +67,12 @@
 
     bat.enable = true;
 
+    awscli = {
+      enable = true;
+      package = pkgs.awscli2;
+      settings."profile brian.myers".region = "us-east-1";
+    };
+
     direnv = {
       enable = true;
       nix-direnv.enable = true;
@@ -76,19 +89,19 @@
     fish = {
       enable = true;
       generateCompletions = true;
+      package = unstablePkgs.fish;
+      functions.fish_prompt = ''
+        set -l prompt_output (${lib.getExe prompt})
+        echo -e "$prompt_output\n\$ "
+      '';
       shellAbbrs = {
         c = "clear";
-        cc = "cargo clippy --all-targets --all-features";
-        gf = "git log --decorate=short --date=short --graph --pretty=format:'%C(bold blue)%ad%C(reset) %C(bold yellow)%h%C(reset) %<(5)%al %<(20)%s' --max-count=100";
-        gl = "git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+        cc = "cargo clippy";
+        ls = "eza -al";
       };
       interactiveShellInit = ''
         set -g fish_greeting
         fish_vi_key_bindings
-
-        if test -f "${config.xdg.configHome}/fish/secret.fish"
-          source "${config.xdg.configHome}/fish/secret.fish"
-        end
       '';
     };
 
@@ -134,6 +147,7 @@
 
     gpg = {
       enable = true;
+      package = unstablePkgs.gnupg;
       settings = {
         display-charset = "utf-8";
         keyid-format = "long";
@@ -149,9 +163,13 @@
 
     less.enable = true;
 
+    man.generateCaches = pkgs.stdenv.hostPlatform.isLinux;
+
     neovim = {
       enable = true;
       defaultEditor = true;
+      initLua = builtins.readFile ../nvim/.config/nvim/init.lua;
+      package = unstablePkgs.neovim-unwrapped;
       viAlias = true;
       vimAlias = true;
       withNodeJs = true;
@@ -167,22 +185,6 @@
         editing-mode = "vi";
         show-all-if-ambiguous = true;
         show-mode-in-prompt = true;
-      };
-    };
-
-    starship = {
-      enable = true;
-      enableBashIntegration = true;
-      enableFishIntegration = true;
-      presets = [ "nerd-font-symbols" ];
-      settings = {
-        add_newline = true;
-        command_timeout = 1000;
-        character = {
-          success_symbol = "[❯](bold blue)";
-          error_symbol = "[❯](bold red)";
-          vimcmd_symbol = "[❮](bold green)";
-        };
       };
     };
 
@@ -220,15 +222,9 @@
         bind Down resize-pane -D 2
       '';
     };
-
-    zoxide = {
-      enable = true;
-      enableBashIntegration = true;
-      enableFishIntegration = true;
-    };
   };
 
-  services.gpg-agent = lib.mkIf pkgs.stdenv.isLinux {
+  services.gpg-agent = {
     enable = true;
     defaultCacheTtl = 7200;
     defaultCacheTtlSsh = 7200;
@@ -237,8 +233,12 @@
     enableSshSupport = true;
     maxCacheTtl = 7200;
     maxCacheTtlSsh = 7200;
-    pinentry.package = pkgs.pinentry-curses;
+    pinentry.package =
+      if pkgs.stdenv.hostPlatform.isDarwin then unstablePkgs.pinentry_mac else pkgs.pinentry-curses;
   };
 
-  xdg.configFile."nvim".source = ../nvim/.config/nvim;
+  xdg.configFile = {
+    "nvim/after".source = ../nvim/.config/nvim/after;
+    "nvim/nvim-pack-lock.json".source = ../nvim/.config/nvim/nvim-pack-lock.json;
+  };
 }

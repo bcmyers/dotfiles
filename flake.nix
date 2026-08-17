@@ -3,10 +3,31 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    home-manager-unstable = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    prompt-src = {
+      url = "github:bcmyers/prompt/v0.1.0";
+      flake = false;
     };
 
     disko = {
@@ -24,8 +45,12 @@
     inputs@{
       disko,
       home-manager,
+      home-manager-unstable,
+      nix-darwin,
       nixos-hardware,
       nixpkgs,
+      nixpkgs-unstable,
+      sops-nix,
       ...
     }:
     let
@@ -36,31 +61,41 @@
         macSystem
       ];
       mkPkgs =
-        system:
-        import nixpkgs {
+        nixpkgsInput: system:
+        import nixpkgsInput {
           inherit system;
           config.allowUnfree = false;
         };
       mkHomeConfiguration =
         {
+          homeManager,
           homeDirectory,
+          modules ? [ ],
+          nixpkgsInput,
           system,
         }:
-        home-manager.lib.homeManagerConfiguration {
-          pkgs = mkPkgs system;
+        homeManager.lib.homeManagerConfiguration {
+          pkgs = mkPkgs nixpkgsInput system;
           extraSpecialArgs = {
             inherit homeDirectory;
             inherit inputs;
-            isNixOS = false;
+            isDarwin = system == macSystem;
+            isSystemManaged = false;
+            unstablePkgs = mkPkgs nixpkgs-unstable system;
           };
-          modules = [ ./home.nix ];
+          modules = [ ./home.nix ] ++ modules;
         };
       linuxHomeConfiguration = mkHomeConfiguration {
+        homeManager = home-manager;
         homeDirectory = "/home/bcmyers";
+        nixpkgsInput = nixpkgs;
         system = linuxSystem;
       };
       macHomeConfiguration = mkHomeConfiguration {
+        homeManager = home-manager-unstable;
         homeDirectory = "/Users/bcmyers";
+        modules = [ sops-nix.homeManagerModules.sops ];
+        nixpkgsInput = nixpkgs-unstable;
         system = macSystem;
       };
       nixosConfiguration = nixpkgs.lib.nixosSystem {
@@ -73,12 +108,20 @@
           ./hosts/thinkpad
         ];
       };
+      darwinConfiguration = nix-darwin.lib.darwinSystem {
+        specialArgs = { inherit inputs; };
+        modules = [
+          home-manager-unstable.darwinModules.home-manager
+          ./hosts/mac
+        ];
+      };
     in
     {
       homeConfigurations = {
         "bcmyers@linux" = linuxHomeConfiguration;
         "bcmyers@mac" = macHomeConfiguration;
       };
+      darwinConfigurations.mac = darwinConfiguration;
       nixosConfigurations.thinkpad = nixosConfiguration;
 
       checks.${linuxSystem} = {
@@ -87,7 +130,10 @@
         nixos = nixosConfiguration.config.system.build.toplevel;
         vm = nixosConfiguration.config.system.build.vm;
       };
-      checks.${macSystem}.home = macHomeConfiguration.activationPackage;
+      checks.${macSystem} = {
+        darwin = darwinConfiguration.system;
+        home = macHomeConfiguration.activationPackage;
+      };
 
       formatter = nixpkgs.lib.genAttrs formatterSystems (
         formatterSystem: nixpkgs.legacyPackages.${formatterSystem}.nixfmt-tree
@@ -100,14 +146,32 @@
         home-manager = home-manager.packages.${linuxSystem}.home-manager;
         vm = nixosConfiguration.config.system.build.vm;
       };
-      packages.${macSystem}.home-manager = home-manager.packages.${macSystem}.home-manager;
+      packages.${macSystem} = {
+        default = darwinConfiguration.system;
+        home-manager = home-manager-unstable.packages.${macSystem}.home-manager;
+      };
 
-      apps = nixpkgs.lib.genAttrs formatterSystems (system: {
-        default = {
-          type = "app";
-          program = "${home-manager.packages.${system}.home-manager}/bin/home-manager";
-          meta.description = "Run Home Manager using this flake's pinned version";
-        };
-      });
+      apps = nixpkgs.lib.genAttrs formatterSystems (
+        system:
+        {
+          default = {
+            type = "app";
+            program = "${
+              if system == macSystem then
+                home-manager-unstable.packages.${system}.home-manager
+              else
+                home-manager.packages.${system}.home-manager
+            }/bin/home-manager";
+            meta.description = "Run Home Manager using this flake's pinned version";
+          };
+        }
+        // nixpkgs.lib.optionalAttrs (system == macSystem) {
+          darwin-rebuild = {
+            type = "app";
+            program = "${nix-darwin.packages.${macSystem}.darwin-rebuild}/bin/darwin-rebuild";
+            meta.description = "Build and activate this flake's nix-darwin configuration";
+          };
+        }
+      );
     };
 }

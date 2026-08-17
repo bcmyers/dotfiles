@@ -51,7 +51,12 @@
     extraSpecialArgs = {
       homeDirectory = "/home/bcmyers";
       inherit inputs;
-      isNixOS = true;
+      isDarwin = false;
+      isSystemManaged = true;
+      unstablePkgs = import inputs.nixpkgs-unstable {
+        system = "x86_64-linux";
+        config.allowUnfree = false;
+      };
     };
     useGlobalPkgs = true;
     useUserPackages = true;

@@ -49,8 +49,9 @@ Test Wi-Fi or Ethernet, keyboard, TrackPoint, touchpad, audio, brightness, and s
 Connect to the network and clone the reviewed revision:
 
 ```console
-git clone https://github.com/bcmyers/dotfiles.git
-cd dotfiles
+mkdir -p ~/lib
+git clone https://github.com/bcmyers/dotfiles.git ~/lib/dotfiles
+cd ~/lib/dotfiles
 git switch master
 nix flake check --all-systems --no-build --print-build-logs
 ```
@@ -122,6 +123,23 @@ sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 ```
 
 Only after matching the fingerprint should the obsolete `known_hosts` entry be removed and the new one accepted.
+
+Clone the reviewed configuration into the newly installed user's home directory:
+
+```console
+mkdir -p ~/lib
+git clone https://github.com/bcmyers/dotfiles.git ~/lib/dotfiles
+cd ~/lib/dotfiles
+```
+
+Install the current stable Rust toolchain through the Nix-managed Rustup client:
+
+```console
+cd ~/lib/dotfiles
+just rust-update
+```
+
+Rustup owns Rust itself so the compiler can move to a new stable release without waiting for either NixOS stable or nixpkgs-unstable. The Rustup client and the rest of the selected development tools remain pinned by this flake.
 
 ## 8. Validate the installation
 

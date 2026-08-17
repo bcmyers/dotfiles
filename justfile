@@ -11,6 +11,9 @@ build-home-linux:
 build-home-mac:
     nix build '.#homeConfigurations."bcmyers@mac".activationPackage'
 
+build-mac:
+    nix build '.#darwinConfigurations.mac.system'
+
 build-vm:
     nix build '.#vm' --out-link result-vm
 
@@ -30,7 +33,12 @@ switch:
     ./nix-switch.sh
 
 switch-mac:
-    nix run . -- switch -b home-manager-backup --flake '.#bcmyers@mac'
+    ./nix-switch-mac.sh
+
+rust-update:
+    rustup update stable
+    rustup default stable
+    rustup component add clippy rust-analyzer rustfmt
 
 vm: build-vm
     ./result-vm/bin/run-thinkpad-vm-vm

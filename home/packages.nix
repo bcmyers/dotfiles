@@ -1,65 +1,86 @@
-{ pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    age
-    autoconf
-    automake
-    awscli2
-    bazel-buildtools
-    bazelisk
-    btop
-    bzip2
-    cargo
-    clang-tools
-    clippy
-    cmake
-    coreutils
-    curl
-    diffutils
-    fd
-    gcc
-    gettext
-    gnumake
-    go
-    gopls
-    graphviz
-    htop
-    hyperfine
-    jq
-    just
-    lua-language-server
-    moreutils
-    nerd-fonts.inconsolata
-    ninja
-    nixd
-    nixfmt
-    nmap
-    nodejs
-    openssl
-    opentofu
-    pandoc
-    patchutils
-    pkg-config
-    pulumi
-    python3
-    qrencode
-    ripgrep
-    rsync
-    rust-analyzer
-    rustc
-    rustfmt
-    shellcheck
-    shfmt
-    stow
-    tofu-ls
-    tree
-    tree-sitter
-    unzip
-    uv
-    wget
-    xz
-    yarn
-    yq-go
-    zip
-  ];
+  inputs,
+  pkgs,
+  unstablePkgs,
+  ...
+}:
+let
+  prompt = unstablePkgs.callPackage ../packages/prompt.nix {
+    src = inputs.prompt-src;
+  };
+in
+{
+  home.packages =
+    (with pkgs; [
+      age
+      arp-scan
+      autoconf
+      automake
+      bazel-buildtools
+      bazelisk
+      btop
+      bzip2
+      clang-tools
+      coreutils
+      curl
+      diffutils
+      doctl
+      fd
+      gcc
+      gettext
+      gh
+      gnumake
+      graphviz
+      htop
+      hyperfine
+      jq
+      just
+      luarocks
+      moreutils
+      nerd-fonts.inconsolata
+      ninja
+      nmap
+      openssl
+      pandoc
+      patchutils
+      pkg-config
+      qrencode
+      restic
+      ripgrep
+      rsync
+      shellcheck
+      shfmt
+      skopeo
+      stow
+      tree
+      tree-sitter
+      unzip
+      wget
+      xz
+      yarn
+      yq-go
+      zip
+    ])
+    ++ (with unstablePkgs; [
+      cargo-update
+      cmake
+      go
+      gopls
+      jujutsu
+      lua-language-server
+      nixd
+      nixfmt
+      nodejs_26
+      opentofu
+      pi-coding-agent
+      pulumi
+      python3
+      rustup
+      sops
+      sqlx-cli
+      tofu-ls
+      trunk
+      uv
+    ])
+    ++ [ prompt ];
 }

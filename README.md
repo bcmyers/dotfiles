@@ -1,13 +1,14 @@
 # NixOS and macOS dotfiles
 
-This repository declaratively manages Brian's complete Lenovo ThinkPad X1 Extreme installation with NixOS and Home Manager, plus a standalone Home Manager environment for his Apple Silicon Mac.
+This repository declaratively manages Brian's complete Lenovo ThinkPad X1 Extreme installation with NixOS and Home Manager, plus his Apple Silicon Mac with nix-darwin and Home Manager.
 
 ## Machine
 
 - Host: `thinkpad`
 - Platform: `x86_64-linux`
 - User: `bcmyers` at `/home/bcmyers`
-- NixOS and Home Manager: release 26.05
+- NixOS and system packages: release 26.05
+- Selected user tools: nixpkgs-unstable
 - Desktop: COSMIC
 - Graphics: NVIDIA GTX 1050 Ti using the legacy 580 driver
 - Remote access: Tailscale and key-only OpenSSH
@@ -35,18 +36,30 @@ There is no LVM or separate `/home` partition. See [the installation runbook](do
 - Fish, Git/GPG, Neovim, tmux, Alacritty, and development toolchains through Home Manager
 - Weekly Nix garbage collection for objects older than 30 days
 
-## Mac Home Manager
+## Package channels
 
-The `bcmyers@mac` Home Manager target shares the command-line tools, shells, Git/GPG configuration, Neovim, tmux, Alacritty, and other user preferences with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
+The ThinkPad deliberately keeps its operating system on the stable NixOS 26.05 branch. Home Manager receives a second, pinned `nixpkgs-unstable` package set for tools where current releases matter: Fish, Neovim, GnuPG, Go, Node.js, Python, Rustup, Nix language tooling, OpenTofu, Pulumi, `uv`, and related development tools. Core system services, the kernel, NVIDIA driver, boot stack, and disk configuration remain stable.
 
-This is intentionally not a nix-darwin configuration: it does not manage macOS system settings, Homebrew, the Nix daemon, or applications outside the Home Manager profile. The existing Nix installation is sufficient to build and activate it:
+The Mac uses nixpkgs-unstable throughout because it is a workstation user environment rather than the recovery-sensitive laptop operating system. Both channels are locked in `flake.lock`, so "unstable" means deliberately updated, reviewed revisions rather than an unrepeatable moving target.
+
+Rust itself is managed by Rustup rather than Nix so that stable Rust can be updated immediately without waiting for Nixpkgs. After the first activation on a new machine, run `just rust-update`.
+
+## Mac nix-darwin
+
+The `mac` nix-darwin target shares command-line tools, Fish configuration and abbreviations, the custom `prompt` executable, Git/GPG configuration, Neovim, tmux, Alacritty, and other user preferences with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
+
+nix-darwin owns the system Nix settings and login shell; Home Manager owns the user profile, GPG/SSH agent, Fish, Ollama service, and dotfiles. SOPS decrypts the Fish API credentials at activation time using the age key at `~/Library/Application Support/sops/age/keys.txt`. The private key is never committed.
+
+Build and activate it with:
 
 ```console
-just build-home-mac
+just build-mac
 just switch-mac
 ```
 
-The first activation uses the `home-manager-backup` extension for files that would otherwise conflict. Inspect any resulting backup files before removing them.
+`just switch-mac` authenticates with sudo before stopping the Homebrew Ollama service, then activates nix-darwin. If activation fails after Ollama stops, restore the old service with `brew services start ollama`. The first activation uses the `home-manager-backup` extension for files that would otherwise conflict. Inspect any resulting backup files before removing them.
+
+After the first successful activation, open a fresh Fish shell and verify that `prompt`, the Fish abbreviations, GPG signing, SSH through the GPG agent, and Ollama all work. Confirm the three SOPS-provided environment variables are set without printing their values, then remove the obsolete plaintext `~/.config/fish/secret.fish`. Rotate the Anthropic and Twilio credentials because that legacy file was previously readable by other local users.
 
 ## Commands
 
@@ -55,11 +68,13 @@ just check       # Evaluate all flake outputs
 just build       # Build the complete NixOS system
 just build-home-linux # Build standalone Linux Home Manager
 just build-home-mac   # Build standalone Mac Home Manager
+just build-mac        # Build the complete nix-darwin system
 just build-vm    # Build the safe headless VM variant
 just test-disko  # Install and boot the encrypted layout in an isolated VM
 just vm          # Build and run the VM
 just switch      # Build and activate NixOS on the installed ThinkPad
-just switch-mac  # Build and activate Home Manager on this Mac
+just switch-mac  # Build and activate nix-darwin and Home Manager on this Mac
+just rust-update # Update stable Rust and standard developer components
 just update      # Update all locked inputs
 just format      # Format Nix files
 ```

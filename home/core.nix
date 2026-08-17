@@ -10,6 +10,7 @@
     ];
 
     sessionVariables = {
+      AWS_DEFAULT_PROFILE = "brian.myers";
       EDITOR = "nvim";
       LESS = "-FRX";
       PAGER = "less";
@@ -19,7 +20,6 @@
     shellAliases = {
       cat = "bat";
       grep = "rg";
-      ls = "eza --all --group-directories-first --icons=auto --long";
     };
   };
 
