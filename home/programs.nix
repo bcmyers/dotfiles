@@ -88,7 +88,9 @@ in
 
     fish = {
       enable = true;
-      generateCompletions = true;
+      # Home Manager 26.05 expects a generator removed by newer Fish releases.
+      # Packages' native Fish completions remain available.
+      generateCompletions = false;
       package = unstablePkgs.fish;
       functions.fish_prompt = ''
         set -l prompt_output (${lib.getExe prompt})
