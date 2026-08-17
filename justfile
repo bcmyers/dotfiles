@@ -53,6 +53,10 @@ rust-update:
     rustup default stable
     rustup component add clippy rust-analyzer rustfmt
 
+upgrade-homebrew-casks:
+    brew update
+    brew upgrade --cask
+
 vm: build-vm
     ./result-vm/bin/run-thinkpad-vm-vm
 

@@ -19,11 +19,15 @@ Then activate nix-darwin and Home Manager:
 just switch-personal-mac
 ```
 
-Activation also updates the declared Homebrew casks. Casks absent from the
-declarative list are uninstalled with ordinary Homebrew cleanup; application
-support data is preserved because activation does not use `--zap`. Add a cask
-to `hosts/personal-mac/default.nix` before installing it when it should remain
-on the machine.
+Activation installs missing declared Homebrew casks and uninstalls undeclared
+ones with ordinary Homebrew cleanup. It deliberately does not upgrade existing
+casks, so an unavailable vendor download cannot block the rest of the system
+activation. Most declared GUI apps update themselves; run
+`just upgrade-homebrew-casks` when you explicitly want Homebrew to update its
+metadata and upgrade the remaining casks. Application support data is
+preserved because activation does not use `--zap`. Add a cask to
+`hosts/personal-mac/default.nix` before installing it when it should remain on
+the machine.
 
 The first activation uses the `home-manager-backup` extension for files that
 would otherwise conflict. Inspect any resulting backup files before removing
