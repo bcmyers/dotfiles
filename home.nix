@@ -1,4 +1,5 @@
 {
+  homeDirectory,
   isNixOS,
   lib,
   ...
@@ -13,7 +14,7 @@
 
   home = {
     username = "bcmyers";
-    homeDirectory = "/home/bcmyers";
+    inherit homeDirectory;
 
     # This controls compatibility defaults, not the versions of installed
     # packages. Do not bump it without reading the Home Manager release notes.

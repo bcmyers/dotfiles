@@ -1,6 +1,6 @@
-# ThinkPad NixOS configuration
+# NixOS and macOS dotfiles
 
-This repository declaratively manages Brian's complete Lenovo ThinkPad X1 Extreme installation with NixOS and Home Manager.
+This repository declaratively manages Brian's complete Lenovo ThinkPad X1 Extreme installation with NixOS and Home Manager, plus a standalone Home Manager environment for his Apple Silicon Mac.
 
 ## Machine
 
@@ -35,16 +35,31 @@ There is no LVM or separate `/home` partition. See [the installation runbook](do
 - Fish, Git/GPG, Neovim, tmux, Alacritty, and development toolchains through Home Manager
 - Weekly Nix garbage collection for objects older than 30 days
 
+## Mac Home Manager
+
+The `bcmyers@mac` Home Manager target shares the command-line tools, shells, Git/GPG configuration, Neovim, tmux, Alacritty, and other user preferences with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
+
+This is intentionally not a nix-darwin configuration: it does not manage macOS system settings, Homebrew, the Nix daemon, or applications outside the Home Manager profile. The existing Nix installation is sufficient to build and activate it:
+
+```console
+just build-home-mac
+just switch-mac
+```
+
+The first activation uses the `home-manager-backup` extension for files that would otherwise conflict. Inspect any resulting backup files before removing them.
+
 ## Commands
 
 ```console
 just check       # Evaluate all flake outputs
 just build       # Build the complete NixOS system
-just build-home  # Build standalone Home Manager
+just build-home-linux # Build standalone Linux Home Manager
+just build-home-mac   # Build standalone Mac Home Manager
 just build-vm    # Build the safe headless VM variant
 just test-disko  # Install and boot the encrypted layout in an isolated VM
 just vm          # Build and run the VM
 just switch      # Build and activate NixOS on the installed ThinkPad
+just switch-mac  # Build and activate Home Manager on this Mac
 just update      # Update all locked inputs
 just format      # Format Nix files
 ```
@@ -53,4 +68,4 @@ The regular VM variant disables Disko and NVIDIA, uses a disposable QEMU disk, e
 
 ## State versions
 
-Both `system.stateVersion` and `home.stateVersion` are `26.05`. These values control compatibility defaults and should not be changed merely when inputs are updated.
+The ThinkPad's `system.stateVersion` and both Home Manager targets' `home.stateVersion` are `26.05`. These values control compatibility defaults and should not be changed merely when inputs are updated.

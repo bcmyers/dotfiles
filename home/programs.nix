@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   fonts.fontconfig.enable = true;
 
@@ -223,7 +228,7 @@
     };
   };
 
-  services.gpg-agent = {
+  services.gpg-agent = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
     defaultCacheTtl = 7200;
     defaultCacheTtlSsh = 7200;

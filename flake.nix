@@ -29,25 +29,42 @@
       ...
     }:
     let
-      system = "x86_64-linux";
+      linuxSystem = "x86_64-linux";
+      macSystem = "aarch64-darwin";
       formatterSystems = [
-        system
-        "aarch64-darwin"
+        linuxSystem
+        macSystem
       ];
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = false;
-      };
-      homeConfiguration = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        extraSpecialArgs = {
-          inherit inputs;
-          isNixOS = false;
+      mkPkgs =
+        system:
+        import nixpkgs {
+          inherit system;
+          config.allowUnfree = false;
         };
-        modules = [ ./home.nix ];
+      mkHomeConfiguration =
+        {
+          homeDirectory,
+          system,
+        }:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = mkPkgs system;
+          extraSpecialArgs = {
+            inherit homeDirectory;
+            inherit inputs;
+            isNixOS = false;
+          };
+          modules = [ ./home.nix ];
+        };
+      linuxHomeConfiguration = mkHomeConfiguration {
+        homeDirectory = "/home/bcmyers";
+        system = linuxSystem;
+      };
+      macHomeConfiguration = mkHomeConfiguration {
+        homeDirectory = "/Users/bcmyers";
+        system = macSystem;
       };
       nixosConfiguration = nixpkgs.lib.nixosSystem {
-        inherit system;
+        system = linuxSystem;
         specialArgs = { inherit inputs; };
         modules = [
           disko.nixosModules.disko
@@ -58,32 +75,39 @@
       };
     in
     {
-      homeConfigurations."bcmyers@linux" = homeConfiguration;
+      homeConfigurations = {
+        "bcmyers@linux" = linuxHomeConfiguration;
+        "bcmyers@mac" = macHomeConfiguration;
+      };
       nixosConfigurations.thinkpad = nixosConfiguration;
 
-      checks.${system} = {
+      checks.${linuxSystem} = {
         disko-install = nixosConfiguration.config.system.build.installTest;
-        home = homeConfiguration.activationPackage;
+        home = linuxHomeConfiguration.activationPackage;
         nixos = nixosConfiguration.config.system.build.toplevel;
         vm = nixosConfiguration.config.system.build.vm;
       };
+      checks.${macSystem}.home = macHomeConfiguration.activationPackage;
 
       formatter = nixpkgs.lib.genAttrs formatterSystems (
         formatterSystem: nixpkgs.legacyPackages.${formatterSystem}.nixfmt-tree
       );
 
-      packages.${system} = {
+      packages.${linuxSystem} = {
         default = nixosConfiguration.config.system.build.toplevel;
-        disko = disko.packages.${system}.disko;
+        disko = disko.packages.${linuxSystem}.disko;
         disko-test = nixosConfiguration.config.system.build.installTest;
-        home-manager = home-manager.packages.${system}.home-manager;
+        home-manager = home-manager.packages.${linuxSystem}.home-manager;
         vm = nixosConfiguration.config.system.build.vm;
       };
+      packages.${macSystem}.home-manager = home-manager.packages.${macSystem}.home-manager;
 
-      apps.${system}.default = {
-        type = "app";
-        program = "${home-manager.packages.${system}.home-manager}/bin/home-manager";
-        meta.description = "Run Home Manager using this flake's pinned version";
-      };
+      apps = nixpkgs.lib.genAttrs formatterSystems (system: {
+        default = {
+          type = "app";
+          program = "${home-manager.packages.${system}.home-manager}/bin/home-manager";
+          meta.description = "Run Home Manager using this flake's pinned version";
+        };
+      });
     };
 }

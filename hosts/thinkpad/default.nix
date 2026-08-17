@@ -49,6 +49,7 @@
   home-manager = {
     backupFileExtension = "home-manager-backup";
     extraSpecialArgs = {
+      homeDirectory = "/home/bcmyers";
       inherit inputs;
       isNixOS = true;
     };
