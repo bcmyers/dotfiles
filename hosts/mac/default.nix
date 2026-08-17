@@ -1,10 +1,17 @@
 {
+  lib,
   pkgs,
   ...
 }:
 {
   nixpkgs.hostPlatform = "aarch64-darwin";
 
+  # Keep Homebrew available during the migration, but after every Nix profile
+  # so Nix-managed executables always take precedence.
+  environment.systemPath = lib.mkAfter [
+    "/opt/homebrew/bin"
+    "/opt/homebrew/sbin"
+  ];
   environment.shells = [ pkgs.fish ];
 
   users.users.bcmyers.home = "/Users/bcmyers";
