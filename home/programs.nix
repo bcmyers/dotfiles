@@ -92,6 +92,11 @@ in
       # Packages' native Fish completions remain available.
       generateCompletions = false;
       package = unstablePkgs.fish;
+      # GUI terminals can retain a pre-activation PATH until the next login.
+      # Make the pinned fzf visible before its Fish integration initializes.
+      shellInit = ''
+        fish_add_path --global --prepend --move ${lib.getBin unstablePkgs.fzf}/bin
+      '';
       functions.fish_prompt = ''
         set -l prompt_output (${lib.getExe prompt})
         echo -e "$prompt_output\n\$ "
@@ -111,6 +116,7 @@ in
       enable = true;
       enableBashIntegration = true;
       enableFishIntegration = true;
+      package = unstablePkgs.fzf;
     };
 
     git = {
