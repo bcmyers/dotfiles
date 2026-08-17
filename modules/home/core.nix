@@ -10,7 +10,6 @@
     ];
 
     sessionVariables = {
-      AWS_DEFAULT_PROFILE = "brian.myers";
       EDITOR = "nvim";
       LESS = "-FRX";
       PAGER = "less";

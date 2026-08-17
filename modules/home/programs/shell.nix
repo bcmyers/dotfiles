@@ -10,12 +10,6 @@
   programs = {
     man.generateCaches = pkgs.stdenv.hostPlatform.isLinux;
 
-    awscli = {
-      enable = true;
-      package = pkgs.awscli2;
-      settings."profile brian.myers".region = "us-east-1";
-    };
-
     bash = {
       enable = true;
       enableCompletion = true;
@@ -49,11 +43,6 @@
       generateCompletions = false;
       package = unstablePkgs.fish;
       shellInit = ''
-        # Retire path entries persisted by the legacy, imperative Fish config.
-        # Home Manager's sessionPath and nix-darwin now own PATH instead.
-        set --erase --universal fish_user_paths
-        set --erase --global fish_user_paths
-
         # GUI terminals can retain a pre-activation PATH until the next login.
         # Make the pinned fzf visible before its Fish integration initializes.
         set --prepend --global --export PATH ${lib.getBin unstablePkgs.fzf}/bin

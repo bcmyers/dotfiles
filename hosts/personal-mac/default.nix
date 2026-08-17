@@ -14,6 +14,14 @@
   ];
   environment.shells = [ pkgs.fish ];
 
+  home-manager.users.bcmyers = {
+    imports = [
+      ../../modules/home/apps/darwin.nix
+      ../../users/bcmyers
+    ];
+    home.homeDirectory = "/Users/bcmyers";
+  };
+
   users.users.bcmyers.home = "/Users/bcmyers";
 
   nix.gc = {

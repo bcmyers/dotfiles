@@ -65,19 +65,13 @@
           inherit system;
           config.allowUnfree = false;
         };
-      mkHomeSpecialArgs =
-        {
-          homeDirectory,
-          system,
-        }:
-        {
-          inherit
-            homeDirectory
-            inputs
-            ;
-          unstablePkgs = mkPkgs nixpkgs-unstable system;
-          promptPackage = mkPrompt system;
-        };
+      mkHomeSpecialArgs = system: {
+        inherit
+          inputs
+          ;
+        unstablePkgs = mkPkgs nixpkgs-unstable system;
+        promptPackage = mkPrompt system;
+      };
       mkPrompt =
         system:
         (mkPkgs nixpkgs-unstable system).callPackage ./pkgs/prompt {
@@ -86,97 +80,62 @@
       mkHomeConfiguration =
         {
           homeManager,
-          homeDirectory,
           homeModule,
           nixpkgsInput,
           system,
         }:
         homeManager.lib.homeManagerConfiguration {
           pkgs = mkPkgs nixpkgsInput system;
-          extraSpecialArgs = mkHomeSpecialArgs {
-            inherit homeDirectory system;
-          };
-          modules = [
-            homeModule
-            ./modules/home/standalone-nix.nix
-          ];
+          extraSpecialArgs = mkHomeSpecialArgs system;
+          modules = [ homeModule ];
         };
-      linuxHomeConfiguration = mkHomeConfiguration {
-        homeManager = home-manager;
-        homeDirectory = "/home/bcmyers";
-        homeModule = ./users/bcmyers;
-        nixpkgsInput = nixpkgs;
-        system = linuxSystem;
-      };
-      macHomeConfiguration = mkHomeConfiguration {
-        homeManager = home-manager-unstable;
-        homeDirectory = "/Users/bcmyers";
-        homeModule = ./users/bcmyers;
-        nixpkgsInput = nixpkgs-unstable;
-        system = macSystem;
-      };
       workMacHomeConfiguration = mkHomeConfiguration {
         homeManager = home-manager-unstable;
-        homeDirectory = "/Users/brian.myers";
-        homeModule = ./users/brian.myers;
+        homeModule = ./hosts/work-mac/home.nix;
         nixpkgsInput = nixpkgs-unstable;
         system = macSystem;
       };
       nixosConfiguration = nixpkgs.lib.nixosSystem {
         system = linuxSystem;
-        specialArgs =
-          (mkHomeSpecialArgs {
-            homeDirectory = "/home/bcmyers";
-            system = linuxSystem;
-          })
-          // {
-            nixpkgsRegistry = inputs.nixpkgs;
-          };
+        specialArgs = (mkHomeSpecialArgs linuxSystem) // {
+          nixpkgsRegistry = inputs.nixpkgs;
+        };
         modules = [
           disko.nixosModules.disko
           nixos-hardware.nixosModules.lenovo-thinkpad-x1-extreme
           home-manager.nixosModules.home-manager
-          ./modules/common
+          ./modules/system
           ./hosts/thinkpad
         ];
       };
-      darwinConfiguration = nix-darwin.lib.darwinSystem {
-        specialArgs =
-          (mkHomeSpecialArgs {
-            homeDirectory = "/Users/bcmyers";
-            system = macSystem;
-          })
-          // {
-            nixpkgsRegistry = inputs.nixpkgs-unstable;
-          };
+      personalMacConfiguration = nix-darwin.lib.darwinSystem {
+        specialArgs = (mkHomeSpecialArgs macSystem) // {
+          nixpkgsRegistry = inputs.nixpkgs-unstable;
+        };
         modules = [
           home-manager-unstable.darwinModules.home-manager
-          ./modules/common
-          ./hosts/mac
+          ./modules/system
+          ./hosts/personal-mac
         ];
       };
     in
     {
       homeConfigurations = {
-        "bcmyers@linux" = linuxHomeConfiguration;
-        "bcmyers@mac" = macHomeConfiguration;
         "brian.myers@work-mac" = workMacHomeConfiguration;
       };
-      darwinConfigurations.mac = darwinConfiguration;
+      darwinConfigurations.personal-mac = personalMacConfiguration;
       nixosConfigurations.thinkpad = nixosConfiguration;
 
       checks.${linuxSystem} = {
-        disko-install = nixosConfiguration.config.system.build.installTest;
-        home = linuxHomeConfiguration.activationPackage;
-        nixos = nixosConfiguration.config.system.build.toplevel;
+        disko-test = nixosConfiguration.config.system.build.installTest;
         prompt = mkPrompt linuxSystem;
+        thinkpad = nixosConfiguration.config.system.build.toplevel;
         vm = nixosConfiguration.config.system.build.vm;
       };
       checks.${macSystem} = {
-        darwin = darwinConfiguration.system;
-        home = macHomeConfiguration.activationPackage;
-        work-home = workMacHomeConfiguration.activationPackage;
+        personal-mac = personalMacConfiguration.system;
         prompt = mkPrompt macSystem;
+        work-mac = workMacHomeConfiguration.activationPackage;
       };
 
       formatter = nixpkgs.lib.genAttrs formatterSystems (
@@ -191,7 +150,7 @@
         vm = nixosConfiguration.config.system.build.vm;
       };
       packages.${macSystem} = {
-        default = darwinConfiguration.system;
+        default = personalMacConfiguration.system;
         prompt = mkPrompt macSystem;
       };
 

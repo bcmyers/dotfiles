@@ -1,14 +1,9 @@
 {
   lib,
-  unstablePkgs,
+  pkgs,
   ...
 }:
-lib.mkIf unstablePkgs.stdenv.hostPlatform.isDarwin {
-  home.packages = with unstablePkgs; [
-    caffeine
-    thaw
-  ];
-
+lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
   programs.fish.shellInit = lib.mkAfter ''
     # Keep Homebrew as a deduplicated, lowest-priority macOS fallback even
     # when Terminal inherited the old Homebrew-first environment.

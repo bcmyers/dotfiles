@@ -2,7 +2,7 @@
 
 This runbook covers the first nix-darwin and Home Manager activation on Brian's
 personal Apple Silicon Mac. Routine updates require only `git pull --ff-only`, `just
-check`, `just build-mac`, and `just switch-mac`.
+check`, `just build-personal-mac`, and `just switch-personal-mac`.
 
 ## 1. Build before activating
 
@@ -10,13 +10,13 @@ From the repository:
 
 ```console
 just check
-just build-mac
+just build-personal-mac
 ```
 
 Then activate nix-darwin and Home Manager:
 
 ```console
-just switch-mac
+just switch-personal-mac
 ```
 
 The first activation uses the `home-manager-backup` extension for files that
@@ -32,7 +32,7 @@ and preserve it before retrying:
 ```console
 diff -u /etc/bashrc.backup-before-nix /etc/bashrc
 sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
-just switch-mac
+just switch-personal-mac
 ```
 
 nix-darwin then owns `/etc/bashrc`; the renamed file remains as the
@@ -43,7 +43,7 @@ A Homebrew Fish installation may also have added `/opt/homebrew/bin/fish` to
 
 ```console
 sudo mv /etc/shells /etc/shells.before-nix-darwin
-just switch-mac
+just switch-personal-mac
 ```
 
 The declarative version preserves the standard macOS shells and adds the
@@ -62,6 +62,18 @@ dscacheutil -q user -a name bcmyers
 
 Only after the account record reports `/run/current-system/sw/bin/fish` should
 the old Homebrew `fish`, `pass`, and `pass-otp` packages be removed.
+
+If `type -a fish` still shows Homebrew ahead of Nix, inspect legacy universal
+path state before changing it:
+
+```console
+set --show fish_user_paths
+```
+
+Only when every listed entry is an obsolete remnant of the old imperative
+configuration, remove it once with `set --erase --universal fish_user_paths`.
+The managed Fish startup intentionally does not erase universal or global
+paths, because installers and work tooling can legitimately use them.
 
 ## 4. Verify the migrated environment
 

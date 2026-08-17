@@ -39,16 +39,16 @@ The current configuration and Disko test implement only the first policy.
 
    ```console
    ./scripts/nix-flake.sh flake check --all-systems --no-build --print-build-logs
-   just build
+   just build-thinkpad
    just build-vm
    just test-disko
    ```
 
    `just test-disko` formats only a disposable virtual disk. It installs and boots the encrypted layout with a VM-only dummy key.
 5. Verify that the GPG identities and Password Store expected by the new
-   configuration have a tested restore source. On the Mac, confirm that
+   configuration have a tested restore source. On the personal Mac, confirm that
    `gpg --list-secret-keys --with-keygrip` includes the signing and SSH keys
-   referenced by `modules/home/programs/security.nix`, and that
+   referenced by `users/bcmyers/security.nix`, and that
    `git -C ~/.password-store remote -v` names a reachable private remote. Stop
    if either check fails; the declarative configuration does not contain those
    private keys or encrypted password entries.
@@ -143,7 +143,7 @@ tailscale status
 sudo systemctl status sshd --no-pager
 ```
 
-The new installation has new SSH host keys and a new Tailscale identity. On the Mac, verify the new ED25519 host-key fingerprint against this local command:
+The new installation has new SSH host keys and a new Tailscale identity. On the personal Mac, verify the new ED25519 host-key fingerprint against this local command:
 
 ```console
 sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
@@ -155,7 +155,7 @@ The first Home Manager activation is expected to fail because it cannot decrypt
 the shared Fish credentials until the dedicated ThinkPad age identity is
 installed. The base NixOS system, local login, Tailscale, and the static SSH
 authorized key remain available. After accepting the verified SSH host key,
-run these commands on the Mac:
+run these commands on the personal Mac:
 
 ```console
 ssh thinkpad 'install -d -m 700 ~/.config/sops/age'
@@ -178,7 +178,7 @@ their values. Never copy either age identity into the repository.
 
 Restore the GPG material from its verified source before expecting signed Git
 commits or GPG-backed SSH authentication to work. When the working source is
-the Mac, an authenticated SSH stream avoids writing an unencrypted export to
+the personal Mac, an authenticated SSH stream avoids writing an unencrypted export to
 disk:
 
 ```console
@@ -188,7 +188,8 @@ gpg --export-ownertrust | ssh thinkpad 'gpg --import-ownertrust'
 ```
 
 Review the keys being exported first; these commands intentionally transfer the
-Mac's complete GPG keyring. On the ThinkPad, compare `gpg
+personal Mac's complete GPG keyring. Never use the work Mac as the source. On
+the ThinkPad, compare `gpg
 --list-secret-keys --with-keygrip` with the declarative `sshKeys` list and prune
 obsolete keygrips rather than copying unexplained entries forward.
 
@@ -226,12 +227,12 @@ Before relying on the machine, test:
 
 - COSMIC login and logout
 - NVIDIA driver loading with `nvidia-smi`
-- Wi-Fi, Ethernet, Tailscale, and SSH from the Mac
+- Wi-Fi, Ethernet, Tailscale, and SSH from the personal Mac
 - Audio, Bluetooth, printing, keyboard, TrackPoint, touchpad, and brightness
 - Suspend and resume several times
 - Fish, Git/GPG signing, Neovim, tmux, Alacritty, and direnv
 - SOPS-provided Fish variables exist without printing their values
-- `just check`, `just build`, and `just switch`
+- `just check`, `just build-thinkpad`, and `just switch-thinkpad`
 - A previous NixOS generation from the systemd-boot menu
 
 Hibernation is intentionally not configured. The 8 GiB swapfile is for memory pressure and can be resized declaratively later.
@@ -244,8 +245,8 @@ From the repository on the installed ThinkPad:
 git pull --ff-only
 ./scripts/nix-flake.sh flake update
 just check
-just build
-just switch
+just build-thinkpad
+just switch-thinkpad
 ```
 
 Review and commit `flake.lock` updates from a branch rather than updating the running machine from an uncommitted lock file.

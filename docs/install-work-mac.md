@@ -2,7 +2,9 @@
 
 This target manages only `/Users/brian.myers`. It does not use nix-darwin,
 modify `/etc`, change macOS defaults, or take ownership of corporate-managed
-services. Nix and Homebrew must already be installed before starting.
+services. It also leaves the existing Nix installation, registry, settings,
+and garbage collection under system or company management. Nix and Homebrew
+must already be installed before starting.
 
 ## 1. Clone and build
 
@@ -11,7 +13,7 @@ mkdir -p ~/lib
 git clone https://github.com/bcmyers/dotfiles.git ~/lib/dotfiles
 cd ~/lib/dotfiles
 git switch master
-just build-home-work-mac
+just build-work-mac
 ```
 
 Review the build before activating it. The target is
@@ -55,9 +57,25 @@ git config --global user.email
 ```
 
 The Git email should be `brianmyers@openai.com`. Also verify the `c`, `cc`,
-and `ls` Fish abbreviations, a GPG-signed test commit, GPG-agent SSH access,
+and `ls` Fish abbreviations, an unsigned test commit, the existing SSH agent,
 Neovim, tmux, Alacritty, and any work-specific tools.
 
+The work profile deliberately does not select a Git signing key, start a GPG
+SSH agent, replace `SSH_AUTH_SOCK`, or manage `~/.aws/config`. Add work-specific
+signing, SSH-agent, or AWS policy under `users/brian.myers` only after choosing
+the company-approved identities and authentication mechanisms. The shared GPG,
+Password Store, and AWS command-line tools do not provide access to personal
+keys, password entries, or accounts by themselves.
+
 The work profile intentionally does not define the personal Anthropic or
-Twilio environment variables. Do not copy the personal age identity or
-`secrets/personal.yaml` access to the work machine.
+Twilio environment variables or load the personal Windsurf editor integration.
+Do not copy the personal age identity, GPG private keys, Password Store data,
+or `secrets/personal.yaml` access to the work machine.
+
+## One-time Fish migration, if needed
+
+The managed Fish configuration never deletes universal or global
+`fish_user_paths`. If old personal configuration was copied onto this machine,
+inspect it first with `set --show fish_user_paths`. Remove entries only after
+confirming they are obsolete; corporate installers may intentionally store
+paths there.

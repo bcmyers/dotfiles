@@ -1,20 +1,17 @@
 {
-  homeDirectory,
-  ...
-}:
-{
   imports = [
     ../../modules/home
+    ./aws.nix
+    ./identity.nix
+    ./neovim.nix
     ./secrets.nix
+    ./security.nix
   ];
 
   home = {
     username = "bcmyers";
-    inherit homeDirectory;
 
     # This controls compatibility defaults, not installed package versions.
     stateVersion = "26.05";
   };
-
-  programs.git.settings.user.email = "brian.carl.myers@gmail.com";
 }

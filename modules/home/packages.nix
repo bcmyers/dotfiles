@@ -12,6 +12,7 @@
       arp-scan
       autoconf
       automake
+      awscli2
       bazel-buildtools
       bazelisk
       btop

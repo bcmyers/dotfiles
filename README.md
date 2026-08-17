@@ -7,15 +7,18 @@ and his work Apple Silicon Mac with standalone Home Manager.
 ## Repository layout
 
 - `hosts/` contains machine-specific system configuration. The ThinkPad is
-  split by boot, hardware, networking, storage, desktop, users, and VM test
-  concerns; the smaller Mac configuration remains a single module.
-- `modules/common/` contains system-level wiring shared by NixOS and
+  split by boot, hardware, networking, Disko storage, desktop, users, and
+  virtualization concerns. The personal Mac owns its nix-darwin integration;
+  the work Mac owns its standalone Home Manager entry point.
+- `modules/system/` contains system-level wiring shared by NixOS and
   nix-darwin.
 - `modules/home/` is the shared Home Manager profile. Platform-specific
   differences are isolated under `platform/`, and program configuration is
-  grouped by concern under `programs/`.
+  grouped by concern under `programs/`. Host-selected GUI applications are
+  under `apps/`.
 - `users/` supplies account identity and policy around the shared profile.
-  Personal SOPS secrets belong only to `bcmyers`; `brian.myers` is the
+  Git signing, GPG-agent SSH keys, AWS defaults, hosted editor integrations,
+  and personal SOPS secrets belong only to `bcmyers`; `brian.myers` is the
   secret-free work profile.
 - `files/` contains raw files installed by Home Manager, currently Neovim
   configuration and the tmux clipboard helper.
@@ -105,7 +108,10 @@ The non-flake `prompt-src` input is intentional: it imports the source archive o
 
 ## Personal Mac
 
-The `mac` nix-darwin target shares command-line tools, Fish configuration and abbreviations, the custom `prompt` executable, Git/GPG configuration, Neovim, tmux, Alacritty, and other user preferences with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
+The `personal-mac` nix-darwin target shares command-line tools, Fish
+configuration and abbreviations, the custom `prompt` executable, personal
+Git/GPG configuration, Neovim, tmux, Alacritty, and other user preferences
+with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
 
 nix-darwin owns the system Nix settings and the list of permitted login shells;
 Home Manager owns the user profile, Password Store, GPG/SSH agent, Fish, and
@@ -124,30 +130,33 @@ but each machine has its own private age identity. Linux reads
 Build and activate it with:
 
 ```console
-just build-mac
-just switch-mac
+just build-personal-mac
+just switch-personal-mac
 ```
 
-See [the Mac installation and migration runbook](docs/install-mac.md) for the
-first activation, `/etc` ownership conflicts, the one-time login-shell change,
-and post-migration verification.
+See [the personal Mac installation and migration
+runbook](docs/install-personal-mac.md) for the first activation, `/etc`
+ownership conflicts, the one-time login-shell change, and post-migration
+verification.
 
 ## Work Mac
 
 The `brian.myers@work-mac` target applies the shared Apple Silicon Home Manager
 profile to `/Users/brian.myers`. It uses the work Git identity
-`brianmyers@openai.com`, but otherwise shares Fish, the custom prompt,
-Git/GPG, Neovim, tmux, Alacritty, development packages, Caffeine, and Thaw with
+`brianmyers@openai.com` and shares neutral Fish, Git, GPG, Password Store,
+Neovim, tmux, Alacritty, development packages, Caffeine, and Thaw tooling with
 the personal Mac.
 
 It does not configure nix-darwin, `/etc`, the account's login shell, system
-defaults, or corporate-managed macOS services. It also does not import
-`secrets/personal.yaml` or require an age identity.
+defaults, the Nix installation, or corporate-managed macOS services. It also
+does not import `secrets/personal.yaml`, require an age identity, take over
+`SSH_AUTH_SOCK`, configure a signing key or AWS profile, or load the personal
+Windsurf integration.
 
 Build and activate it without `sudo`:
 
 ```console
-just build-home-work-mac
+just build-work-mac
 just switch-work-mac
 ```
 
@@ -159,16 +168,14 @@ conflicts, application permissions, and the Homebrew Fish handoff.
 ```console
 just check       # Evaluate all flake outputs
 just show        # Display every flake output for both systems
-just build       # Build the complete NixOS system
-just build-home-linux # Build standalone Linux Home Manager
-just build-home-mac   # Build standalone Mac Home Manager
-just build-home-work-mac # Build work Mac Home Manager
-just build-mac        # Build the complete nix-darwin system
+just build-thinkpad    # Build the complete NixOS system
+just build-personal-mac # Build the complete nix-darwin system
+just build-work-mac   # Build standalone work Mac Home Manager
 just build-vm    # Build the safe headless VM variant
 just test-disko  # Install and boot the encrypted layout in an isolated VM
 just vm          # Build and run the VM
-just switch      # Build and activate NixOS on the installed ThinkPad
-just switch-mac  # Build and activate nix-darwin and Home Manager on this Mac
+just switch-thinkpad # Build and activate NixOS on the installed ThinkPad
+just switch-personal-mac # Activate nix-darwin and Home Manager on the personal Mac
 just switch-work-mac # Activate Home Manager only on the work Mac
 just edit-secrets # Edit the personal encrypted SOPS document
 just rust-update # Update stable Rust and standard developer components
@@ -180,6 +187,6 @@ The regular VM variant disables Disko and NVIDIA, uses a disposable QEMU disk, e
 
 ## State versions
 
-The ThinkPad's `system.stateVersion` and all three Home Manager targets'
-`home.stateVersion` are `26.05`. These values control compatibility defaults
-and should not be changed merely when inputs are updated.
+The ThinkPad's `system.stateVersion`, the personal Mac's nix-darwin state
+version, and all three Home Manager profiles have explicit compatibility state
+versions. These values should not be changed merely when inputs are updated.

@@ -4,7 +4,6 @@
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
-vim.g.codeium_disable_bindings = 1
 
 --------------------------------------------------------------------------------
 -- Section 1: Bootstrap
@@ -52,10 +51,6 @@ vim.pack.add({
 		src = "https://github.com/echasnovski/mini.icons",
 		version = "68c178e0958d95b3977a771f3445429b1bded985",
 	}, -- 2026-02-13
-	{
-		src = "https://github.com/Exafunction/windsurf.vim",
-		version = "3c0a4f8a7be75113a6e19be13b7cc37210d6e26a",
-	}, -- 2026-01-22
 	{
 		src = "https://github.com/folke/snacks.nvim",
 		version = "9912042fc8bca2209105526ac7534e9a0c2071b2",
@@ -531,14 +526,6 @@ map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Diagnostic float" })
 map({ "n", "v" }, "<leader>cf", function()
 	require("conform").format({ async = true, lsp_format = "fallback" })
 end, { desc = "Format" })
-
--- Windsurf (AI completion)
-map("i", "<C-u>", function()
-	return vim.fn["codeium#Accept"]()
-end, { expr = true, silent = true, desc = "Accept AI suggestion" })
-map("i", "<C-]>", function()
-	return vim.fn["codeium#CycleCompletions"](1)
-end, { expr = true, silent = true, desc = "Cycle AI suggestions" })
 
 --------------------------------------------------------------------------------
 -- Section 7: Autocommands

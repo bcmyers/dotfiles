@@ -3,11 +3,6 @@
   programs.git = {
     enable = true;
     package = pkgs.gitFull;
-    signing = {
-      format = "openpgp";
-      key = "B86678B99457460F";
-      signByDefault = true;
-    };
     settings = {
       core = {
         editor = "nvim";
@@ -26,9 +21,6 @@
         default = "simple";
       };
       rebase.autoStash = true;
-      user = {
-        name = "Brian Myers";
-      };
     };
   };
 }

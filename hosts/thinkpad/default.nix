@@ -10,6 +10,11 @@
     ./virtualization.nix
   ];
 
+  home-manager.users.bcmyers = {
+    imports = [ ../../users/bcmyers ];
+    home.homeDirectory = "/home/bcmyers";
+  };
+
   console.keyMap = "us";
 
   environment.systemPackages = with pkgs; [

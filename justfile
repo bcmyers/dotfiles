@@ -1,21 +1,13 @@
 default: check
 
-build:
+build-thinkpad:
     ./scripts/nix-flake.sh build '.#nixosConfigurations.thinkpad.config.system.build.toplevel'
 
-build-home: build-home-linux
-
-build-home-linux:
-    ./scripts/nix-flake.sh build '.#homeConfigurations."bcmyers@linux".activationPackage'
-
-build-home-mac:
-    ./scripts/nix-flake.sh build '.#homeConfigurations."bcmyers@mac".activationPackage'
-
-build-home-work-mac:
+build-work-mac:
     ./scripts/nix-flake.sh build '.#homeConfigurations."brian.myers@work-mac".activationPackage'
 
-build-mac:
-    ./scripts/nix-flake.sh build '.#darwinConfigurations.mac.system'
+build-personal-mac:
+    ./scripts/nix-flake.sh build '.#darwinConfigurations.personal-mac.system'
 
 build-vm:
     ./scripts/nix-flake.sh build '.#vm' --out-link result-vm
@@ -35,14 +27,14 @@ format:
 show:
     ./scripts/nix-flake.sh flake show --all-systems
 
-switch:
-    ./scripts/switch-linux.sh
+switch-thinkpad:
+    ./scripts/switch-thinkpad.sh
 
-switch-mac:
-    ./scripts/switch-mac.sh
+switch-personal-mac:
+    ./scripts/switch-personal-mac.sh
 
 switch-work-mac:
-    ./scripts/nix-flake.sh run .#home-manager -- -b home-manager-backup --flake '.#"brian.myers@work-mac"' switch
+    ./scripts/switch-work-mac.sh
 
 rust-update:
     rustup update stable
