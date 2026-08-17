@@ -5,10 +5,9 @@
 {
   nixpkgs.hostPlatform = "aarch64-darwin";
 
-  users.users.bcmyers = {
-    home = "/Users/bcmyers";
-    shell = pkgs.fish;
-  };
+  environment.shells = [ pkgs.fish ];
+
+  users.users.bcmyers.home = "/Users/bcmyers";
 
   nix.gc = {
     automatic = true;

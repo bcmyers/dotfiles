@@ -97,6 +97,17 @@ just switch-mac
 nix-darwin then owns `/etc/bashrc`; the renamed file remains available as the
 pre-activation backup.
 
+nix-darwin does not change the login shell of an existing macOS account. After
+the first activation has added Nix Fish to `/etc/shells`, make the one-time
+macOS account change and open a new terminal:
+
+```console
+sudo chsh -s /run/current-system/sw/bin/fish bcmyers
+```
+
+Only after `dscacheutil -q user -a name bcmyers` reports the Nix Fish path
+should the old Homebrew packages be removed with `brew uninstall fish pass`.
+
 After the first successful activation, open a fresh Fish shell and verify that `prompt`, the Fish abbreviations, Password Store, GPG signing, and SSH through the GPG agent all work. Confirm the three SOPS-provided environment variables are set without printing their values, then remove the obsolete plaintext `~/.config/fish/secret.fish`. Rotate the Anthropic and Twilio credentials because that legacy file was previously readable by other local users.
 
 ## Commands
