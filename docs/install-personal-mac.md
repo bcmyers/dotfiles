@@ -19,6 +19,12 @@ Then activate nix-darwin and Home Manager:
 just switch-personal-mac
 ```
 
+Activation also updates the declared Homebrew casks. Casks absent from the
+declarative list are uninstalled with ordinary Homebrew cleanup; application
+support data is preserved because activation does not use `--zap`. Add a cask
+to `hosts/personal-mac/default.nix` before installing it when it should remain
+on the machine.
+
 The first activation uses the `home-manager-backup` extension for files that
 would otherwise conflict. Inspect any resulting backup files before removing
 them.

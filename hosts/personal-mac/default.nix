@@ -14,6 +14,30 @@
   ];
   environment.shells = [ pkgs.fish ];
 
+  # Homebrew remains the delivery mechanism for self-updating macOS apps that
+  # are intentionally outside the Nix store. Undeclared casks are uninstalled
+  # on activation, but their application support data is preserved.
+  homebrew = {
+    enable = true;
+    casks = [
+      "codex"
+      "discord"
+      "dropbox"
+      "firefox"
+      "notion"
+      "obsidian"
+      "opensuperwhisper"
+      "signal"
+      "slack"
+      "whatsapp"
+    ];
+    onActivation = {
+      autoUpdate = true;
+      cleanup = "uninstall";
+      upgrade = true;
+    };
+  };
+
   home-manager.users.bcmyers = {
     imports = [
       ../../modules/home/apps/alacritty.nix
