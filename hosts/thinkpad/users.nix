@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, ... }:
 {
   users = {
     mutableUsers = true;
@@ -10,10 +10,10 @@
         "networkmanager"
         "wheel"
       ];
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKA36iCRBr68DR9FP6UrVHPbhfKpxBOz9vvimZsm8CCl brian.myers@post.harvard.edu"
+      openssh.authorizedKeys.keyFiles = [
+        ../../files/ssh/macbook.pub
       ];
-      shell = pkgs.fish;
+      shell = config.programs.fish.package;
     };
   };
 }

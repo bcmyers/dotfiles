@@ -36,9 +36,9 @@
   disko.devices.disk.main = {
     type = "disk";
 
-    # This is the only internal drive in the ThinkPad. The installation
-    # runbook requires verifying its model and size immediately before Disko.
-    device = "/dev/nvme0n1";
+    # Match the physical disk even if another drive changes device numbering.
+    # Verify its model, serial, and size before invoking Disko.
+    device = "/dev/disk/by-id/nvme-WDC_PC_SN720_SDAQNTW-512G-1001_184521422453";
 
     content = {
       type = "gpt";

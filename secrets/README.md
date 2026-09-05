@@ -17,6 +17,25 @@ macOS: ~/Library/Application Support/sops/age/keys.txt
 Linux: ~/.config/sops/age/keys.txt
 ```
 
+Credentials are decrypted into the user's SOPS runtime files. They are not
+exported by shell startup. Use these wrappers from any shell:
+
+```console
+with-anthropic COMMAND ARGUMENTS
+with-twilio COMMAND ARGUMENTS
+```
+
+`with-anthropic` supplies only `ANTHROPIC_API_KEY`; `with-twilio` supplies
+`TWILIO_SID` and `TWILIO_CLIENT_SECRET`. They fail before starting the command
+when a required secret is missing or empty. `with-anthropic true` and
+`with-twilio true` check availability without printing values. Log out and back
+in after migrating from the old shell configuration to discard inherited
+credentials in existing processes.
+
+This limits accidental environment inheritance. Programs running as `bcmyers`
+can still read that user's decrypted files; the wrappers are not an access
+control boundary. Codex runs as `bcmyers` with its normal sandbox.
+
 Edit the encrypted file from the repository root with:
 
 ```sh

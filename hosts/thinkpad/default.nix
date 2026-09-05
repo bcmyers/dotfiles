@@ -1,7 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, unstablePkgs, ... }:
 {
   imports = [
     ./boot.nix
+    ./codex.nix
     ./desktop.nix
     ./disko.nix
     ./hardware.nix
@@ -20,6 +21,12 @@
   };
 
   console.keyMap = "us";
+
+  programs.fish = {
+    package = unstablePkgs.fish;
+    # Stable NixOS still expects the generator removed in newer Fish.
+    generateCompletions = false;
+  };
 
   environment.systemPackages = with pkgs; [
     cryptsetup

@@ -6,22 +6,47 @@
   ...
 }:
 let
-  secretPath = name: config.sops.secrets.${name}.path;
+  # Pass credentials to one explicit command, not every shell and descendant.
+  withSecrets =
+    name: bindings:
+    pkgs.writeShellApplication {
+      inherit name;
+      text = ''
+        if (( $# == 0 )); then
+          echo "Usage: ${name} COMMAND [ARG...]" >&2
+          exit 2
+        fi
+      ''
+      + lib.concatStringsSep "\n" (
+        lib.mapAttrsToList (variable: secret: ''
+          if [[ ! -r ${lib.escapeShellArg config.sops.secrets.${secret}.path} ]]; then
+            echo "${name}: ${secret} is unavailable; check sops-nix." >&2
+            exit 1
+          fi
+          secret_value="$(< ${lib.escapeShellArg config.sops.secrets.${secret}.path})"
+          if [[ -z "$secret_value" ]]; then
+            echo "${name}: ${secret} is empty." >&2
+            exit 1
+          fi
+          export ${variable}="$secret_value"
+          unset secret_value
+        '') bindings
+      )
+      + ''
+        exec "$@"
+      '';
+    };
 in
 {
   imports = [ inputs.sops-nix.homeManagerModules.sops ];
 
-  programs.fish.interactiveShellInit = lib.mkAfter ''
-    if test -r "${secretPath "anthropic_api_key"}"
-      set -gx ANTHROPIC_API_KEY (string collect < "${secretPath "anthropic_api_key"}")
-    end
-    if test -r "${secretPath "twilio_sid"}"
-      set -gx TWILIO_SID (string collect < "${secretPath "twilio_sid"}")
-    end
-    if test -r "${secretPath "twilio_client_secret"}"
-      set -gx TWILIO_CLIENT_SECRET (string collect < "${secretPath "twilio_client_secret"}")
-    end
-  '';
+  home.packages = [
+    (withSecrets "with-anthropic" { ANTHROPIC_API_KEY = "anthropic_api_key"; })
+    (withSecrets "with-twilio" {
+      TWILIO_SID = "twilio_sid";
+      TWILIO_CLIENT_SECRET = "twilio_client_secret";
+    })
+  ];
 
   sops = {
     age.keyFile =

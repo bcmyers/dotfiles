@@ -24,8 +24,7 @@ x86_64 and ARM Linux work devboxes with standalone Home Manager.
   Git signing, GPG-agent SSH keys, AWS defaults, hosted editor integrations,
   and personal SOPS secrets belong only to `bcmyers`; `brian.myers` is the
   secret-free work profile.
-- `files/` contains raw files installed by Home Manager, currently the Neovim
-  configuration.
+- `files/` contains the Neovim configuration and public SSH trust material.
 - `pkgs/` contains locally defined Nix packages.
 - `scripts/` contains flake and activation helpers; `justfile` is the
   normal command interface.
@@ -78,12 +77,18 @@ or an unencrypted root. The current configuration implements manual unlock.
 - COSMIC, audio, Bluetooth, printing, power management, firmware updates, and virtualization
 - NetworkManager, Tailscale, firewall policy, and OpenSSH
 - Fish, Git/GPG, Neovim, tmux, Alacritty, and development toolchains through Home Manager
-- Personal Fish API credentials decrypted by SOPS with a dedicated ThinkPad age identity
+- Codex CLI and its system defaults, with updates pinned by the Nix flake
+- Personal API credentials decrypted by SOPS and supplied to explicit commands
+- Firefox and Google Chrome, updated with the pinned NixOS packages
 - Weekly Nix garbage collection for objects older than 30 days
 
 ## Package channels
 
 The ThinkPad deliberately keeps its operating system on the stable NixOS 26.05 branch. Home Manager receives a second, pinned `nixpkgs-unstable` package set for tools where current releases matter: Fish, Neovim, GnuPG, Go, Node.js, Python, Rustup, Nix language tooling, OpenTofu, Pulumi, `uv`, and related development tools. Core system services, the kernel, NVIDIA driver, boot stack, and disk configuration remain stable.
+
+The Nix package manager itself uses `nixVersions.latest` from the pinned
+unstable input, selecting its latest released version rather than a development
+snapshot. This applies to the NixOS and nix-darwin systems.
 
 Both Mac profiles use nixpkgs-unstable throughout because they are workstation
 user environments rather than the recovery-sensitive laptop operating system.
@@ -91,6 +96,12 @@ Both channels are locked in `flake.lock`, so "unstable" means deliberately
 updated, reviewed revisions rather than an unrepeatable moving target.
 
 Rust itself is managed by Rustup rather than Nix so that stable Rust can be updated immediately without waiting for Nixpkgs. After the first activation on a new machine, run `just rust-update`.
+
+See [Codex on the ThinkPad](docs/codex.md) for sign-in, configuration, and updates.
+
+See [SSH and GitHub credentials](docs/ssh.md) for device keys, agent ownership,
+and first-login steps. Nix manages configuration and public keys; private
+keys and login tokens remain local.
 
 ## Flake workflow
 
@@ -121,7 +132,7 @@ with the ThinkPad. It targets `aarch64-darwin` and `/Users/bcmyers`.
 nix-darwin owns the system Nix settings and the list of permitted login shells;
 Home Manager owns the user profile, Password Store, GPG/SSH agent, Fish, and
 dotfiles. Changing an existing macOS account to use Nix-managed Fish remains a
-one-time account operation. SOPS decrypts the Fish API credentials at
+one-time account operation. SOPS decrypts the personal API credentials at
 activation time using the age key at
 `~/Library/Application Support/sops/age/keys.txt`. The private key is never
 committed.
@@ -235,7 +246,8 @@ just format      # Format Nix files
 
 `just install-hooks` materializes Gitleaks from the exact nixpkgs-unstable
 revision in `flake.lock` without evaluating this repository as a flake. The
-hook then invokes that immutable binary directly, so a rejected staged secret
+hook refreshes the scanner when the locked revision changes, then invokes that
+immutable binary directly, so a rejected staged secret
 is not first copied into the Nix store as part of the candidate source tree.
 The installer does not change Git's filesystem-monitor settings. If a broken
 global filesystem monitor prevents the staged scan from reading the index,

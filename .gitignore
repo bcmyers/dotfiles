@@ -13,5 +13,8 @@ result-*
 **/id_ecdsa
 **/id_ed25519
 **/id_rsa
+**/id_ed25519_*
+!**/*.pub
+**/.codex/auth.json
 secrets/*.decrypted.*
 secrets/*.plaintext.*

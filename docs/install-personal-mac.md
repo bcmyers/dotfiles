@@ -116,11 +116,11 @@ Open a fresh Fish shell and verify:
 - Password Store decryption
 - a GPG-signed Git commit
 - SSH authentication through the GPG agent
-- `set -q ANTHROPIC_API_KEY TWILIO_SID TWILIO_CLIENT_SECRET` succeeds without
-  printing the values
+- `with-anthropic true` and `with-twilio true` succeed without printing values;
+  log out and back in to discard credentials inherited from old shells
 
 Remove the obsolete plaintext `~/.config/fish/secret.fish` only after the SOPS
-variables work. Rotate the Anthropic and Twilio credentials because that legacy
+wrappers work. Rotate the Anthropic and Twilio credentials because that legacy
 file stored them as persistent plaintext and may still exist in backups.
 
 ## 5. Recover or roll back

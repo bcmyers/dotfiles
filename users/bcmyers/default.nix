@@ -6,6 +6,7 @@
     ./neovim.nix
     ./secrets.nix
     ./security.nix
+    ./ssh.nix
   ];
 
   home = {

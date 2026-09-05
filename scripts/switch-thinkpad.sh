@@ -7,6 +7,11 @@ if [[ "$(uname -s)" != "Linux" ]]; then
   exit 1
 fi
 
+if [[ ! -e /etc/NIXOS ]]; then
+  echo "switch-thinkpad requires an installed NixOS system; use the installer runbook from Pop!_OS" >&2
+  exit 1
+fi
+
 if [[ "$(id -un)" != "bcmyers" ]]; then
   echo "switch-thinkpad must run as bcmyers" >&2
   exit 1

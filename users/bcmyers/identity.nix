@@ -1,4 +1,11 @@
 {
+  programs.gh = {
+    enable = true;
+    # Git uses this device's SSH key; gh authentication stays local.
+    gitCredentialHelper.enable = false;
+    settings.git_protocol = "ssh";
+  };
+
   programs.git = {
     signing = {
       format = "openpgp";

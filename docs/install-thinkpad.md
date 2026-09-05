@@ -2,10 +2,14 @@
 
 This runbook replaces Pop!_OS and every partition on the ThinkPad's only internal drive. Nothing on the existing installation is retained.
 
+Commands in this runbook assume Bash; run `bash` first when starting from Fish.
+
 ## Expected machine
 
 - Lenovo ThinkPad X1 Extreme, model `20MF000CUS`
 - Internal drive: `/dev/nvme0n1`
+- Stable installation target: `/dev/disk/by-id/nvme-WDC_PC_SN720_SDAQNTW-512G-1001_184521422453`
+- Expected serial: `184521422453`
 - Expected size: approximately `476.9G`
 - Expected model: `WDC PC SN720 SDAQNTW-512G-1001`
 - UEFI boot with Secure Boot disabled
@@ -45,11 +49,29 @@ The current configuration and Disko test implement only the first policy.
    ```
 
    `just test-disko` formats only a disposable virtual disk. It installs and boots the encrypted layout with a VM-only dummy key.
+
+   On this Pop!_OS installation, `bcmyers` can access KVM but the Nix build
+   users cannot. If the sandboxed test falls back to slow software emulation,
+   build its driver and run it directly as `bcmyers` in a fresh temporary
+   directory:
+
+   ```console
+   ./scripts/nix-flake.sh build '.#nixosConfigurations.thinkpad.config.system.build.installTest.driver' --out-link result-disko-driver
+   test_driver="$(readlink -f result-disko-driver)/bin/nixos-test-driver"
+   test_results="$(mktemp -d -t dotfiles-disko.XXXXXXXX)"
+   (cd "$test_results" && "$test_driver" --no-interactive -o . --junit-xml junit.xml)
+   ```
+
+   This runs the same disposable-disk test without changing `/dev/kvm`
+   permissions or operating on the physical SSD. Test logs and virtual disks
+   remain in `$test_results` for inspection.
 5. Verify that the GPG identities and Password Store expected by the new
    configuration have a tested restore source. On the personal Mac, confirm that
-   `gpg --list-secret-keys --with-keygrip` includes the signing and SSH keys
-   referenced by `users/bcmyers/security.nix`, and that
-   `git -C ~/.password-store remote -v` names a reachable private remote. Stop
+   `gpg --list-secret-keys --with-keygrip` includes the personal encryption
+   key and the signing key referenced by `users/bcmyers/identity.nix`. The
+   ThinkPad uses a separate Ed25519 SSH key; it does not need the Mac's GPG
+   primary secret key for SSH. Also confirm that the Password Store Git
+   repository is available from its private remote or from the Mac itself. Stop
    if either check fails; the declarative configuration does not contain those
    private keys or encrypted password entries.
 6. Download the official NixOS 26.05 x86_64 graphical ISO, verify its published SHA-256 checksum, and write it to a USB drive.
@@ -77,11 +99,17 @@ Connect to the network and clone the reviewed revision:
 mkdir -p ~/lib
 git clone https://github.com/bcmyers/dotfiles.git ~/lib/dotfiles
 cd ~/lib/dotfiles
-git switch master
+read -r -p 'Reviewed full commit SHA: ' reviewed_revision
+[[ "$reviewed_revision" =~ ^[0-9a-f]{40}$ ]] || exit 1
+git fetch origin "$reviewed_revision"
+git switch --detach "$reviewed_revision"
 ./scripts/nix-flake.sh flake check --all-systems --no-build --print-build-logs
 ```
 
-If the NixOS work is still in a pull request, fetch and switch to its exact reviewed commit instead of `master`.
+Use the commit that was actually built and reviewed, including the updated
+lock file. Publish that commit before beginning installation; uncommitted
+changes on the old system will not appear in this clone. The old `master`
+branch does not contain this NixOS configuration.
 
 ## 4. Create the temporary LUKS password file
 
@@ -91,8 +119,15 @@ Disko reads the initial passphrase from a root-only file in the live environment
 sudo install -m 600 /dev/null /tmp/secret.key
 read -r -s -p 'New LUKS passphrase: ' LUKS_PASSWORD
 printf '\n'
+read -r -s -p 'Repeat LUKS passphrase: ' LUKS_CONFIRMATION
+printf '\n'
+if [[ -z "$LUKS_PASSWORD" || "$LUKS_PASSWORD" != "$LUKS_CONFIRMATION" ]]; then
+  unset LUKS_PASSWORD LUKS_CONFIRMATION
+  echo 'Passphrases must match and must not be empty.' >&2
+  exit 1
+fi
 printf '%s' "$LUKS_PASSWORD" | sudo tee /tmp/secret.key >/dev/null
-unset LUKS_PASSWORD
+unset LUKS_PASSWORD LUKS_CONFIRMATION
 ```
 
 This file exists only in live memory and is removed before reboot.
@@ -106,7 +141,13 @@ lsblk -d -o NAME,PATH,SIZE,MODEL,SERIAL
 lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS /dev/nvme0n1
 ```
 
-The next command irreversibly destroys the partition table, Pop!_OS recovery environment, current LUKS container, and all files on `/dev/nvme0n1`:
+Check that the stable target resolves to that same inspected drive:
+
+```console
+readlink -f /dev/disk/by-id/nvme-WDC_PC_SN720_SDAQNTW-512G-1001_184521422453
+```
+
+The next command irreversibly destroys the partition table, Pop!_OS recovery environment, current LUKS container, and all files on that drive:
 
 ```console
 sudo nix --extra-experimental-features "nix-command flakes" run .#disko -- \
@@ -170,46 +211,70 @@ ThinkPad:
 ```console
 sudo systemctl restart home-manager-bcmyers.service
 systemctl status home-manager-bcmyers.service --no-pager
-fish -ic 'set -q ANTHROPIC_API_KEY; and set -q TWILIO_SID; and set -q TWILIO_CLIENT_SECRET'
+with-anthropic true
+with-twilio true
 ```
 
-The final command checks only that all three variables exist; it does not print
-their values. Never copy either age identity into the repository.
+These commands verify that credentials are available without printing them.
+They are supplied only to the named command, not exported into every Fish
+session. See [the secrets guide](../secrets/README.md). Never copy either age
+identity into the repository.
 
 Restore the GPG material from its verified source before expecting signed Git
-commits or GPG-backed SSH authentication to work. When the working source is
+commits or Password Store decryption to work. When the working source is
 the personal Mac, an authenticated SSH stream avoids writing an unencrypted export to
 disk:
 
+Export the personal identity's public key and secret subkeys. Its primary
+secret key stays on the Mac; ThinkPad SSH does not use GPG-agent. The export
+may prompt for the GPG passphrase on the Mac.
+
 ```console
-gpg --export --armor | ssh thinkpad 'gpg --import'
-gpg --export-secret-subkeys --armor | ssh thinkpad 'gpg --import'
-gpg --export-ownertrust | ssh thinkpad 'gpg --import-ownertrust'
+gpg --export --armor 39EE837B09384924CB2A8B96A65C0C4DE57884B8 | ssh thinkpad 'gpg --import'
+gpg --export-secret-subkeys --armor 39EE837B09384924CB2A8B96A65C0C4DE57884B8 | ssh thinkpad 'gpg --import'
 ```
 
-Review the keys being exported first; these commands intentionally transfer the
-personal Mac's complete GPG keyring. Never use the work Mac as the source. On
-the ThinkPad, compare `gpg
---list-secret-keys --with-keygrip` with the declarative `sshKeys` list and prune
-obsolete keygrips rather than copying unexplained entries forward.
+On the ThinkPad, check `gpg --list-secret-keys --with-keygrip`, verify the full
+fingerprint against the Mac, and set ownertrust for your own verified identity
+with `gpg --edit-key 39EE837B09384924CB2A8B96A65C0C4DE57884B8 trust`. Import
+additional identities only if the existing Password Store requires them.
 
-Then restore Password Store from its existing private Git remote:
+Create and register the permanent ThinkPad SSH key using [the SSH
+runbook](ssh.md#provision-the-thinkpad-key). The temporary Pop!_OS key is not
+included in Nix and will be lost when its filesystem is erased. Authorize the
+new public key on the Mac and GitHub, then test it before retiring the old one.
+
+Restore Password Store over the verified SSH connection to the Mac:
 
 ```console
-git clone bcmyers@bcmyers.com:~/.password-store ~/.password-store
+git clone macbook:.password-store ~/.password-store
 pass ls >/dev/null
 ```
 
-Do not wipe the source machine or remove its GPG material until decryption, a
-test signature, GPG-agent SSH authentication, and Password Store all succeed on
-the ThinkPad.
+Once the permanent key is authorized on `bcmyers.com` and its host key is
+independently verified, restore and test the original remote:
 
-Clone the reviewed configuration into the newly installed user's home directory:
+```console
+git -C ~/.password-store remote set-url origin bcmyers@bcmyers.com:~/.password-store
+git -C ~/.password-store ls-remote origin HEAD
+```
+
+Do not remove the source GPG material until decryption, a test signature, and
+SSH authentication succeed on the ThinkPad. `pass ls` alone does not test
+decryption: use `pass show --clip ENTRY` for a known entry in the graphical
+session and verify that it decrypted successfully.
+
+Clone the configuration into the newly installed user's home directory and
+select the same reviewed commit used for installation:
 
 ```console
 mkdir -p ~/lib
 git clone https://github.com/bcmyers/dotfiles.git ~/lib/dotfiles
 cd ~/lib/dotfiles
+read -r -p 'Installed full commit SHA: ' reviewed_revision
+[[ "$reviewed_revision" =~ ^[0-9a-f]{40}$ ]] || exit 1
+git fetch origin "$reviewed_revision"
+git switch --detach "$reviewed_revision"
 ```
 
 Install the current stable Rust toolchain through the Nix-managed Rustup client:
@@ -221,6 +286,11 @@ just rust-update
 
 Rustup owns Rust itself so the compiler can move to a new stable release without waiting for either NixOS stable or nixpkgs-unstable. The Rustup client and the rest of the selected development tools remain pinned by this flake.
 
+Codex CLI is already installed by NixOS. Run `codex login` and complete the
+ChatGPT sign-in, then verify with `codex login status`. See
+[Codex setup and updates](codex.md) for the declarative defaults and update
+workflow.
+
 ## 8. Validate the installation
 
 Before relying on the machine, test:
@@ -231,7 +301,9 @@ Before relying on the machine, test:
 - Audio, Bluetooth, printing, keyboard, TrackPoint, touchpad, and brightness
 - Suspend and resume several times
 - Fish, Git/GPG signing, Neovim, tmux, Alacritty, and direnv
-- SOPS-provided Fish variables exist without printing their values
+- `with-anthropic true` and `with-twilio true` succeed without printing secrets
+- Firefox, Chrome, Codex CLI login, and GitHub SSH authentication
+- `systemctl --user status ssh-agent` and matching SSH behavior in GUI apps and Fish
 - `just check`, `just build-thinkpad`, and `just switch-thinkpad`
 - A previous NixOS generation from the systemd-boot menu
 
@@ -239,11 +311,16 @@ Hibernation is intentionally not configured. The 8 GiB swapfile is for memory pr
 
 ## 9. Consume reviewed updates
 
-Routine activation consumes an already reviewed and committed lock file. From
-the repository on the installed ThinkPad:
+Routine activation consumes an already reviewed and committed lock file. The
+installation starts at a detached commit. Fetch and select the next reviewed
+commit explicitly, or attach to the branch where the changes were merged
+before using `git pull --ff-only`. From the installed ThinkPad:
 
 ```console
-git pull --ff-only
+git fetch origin
+read -r -p 'Reviewed update commit SHA: ' reviewed_revision
+[[ "$reviewed_revision" =~ ^[0-9a-f]{40}$ ]] || exit 1
+git switch --detach "$reviewed_revision"
 just check
 just build-thinkpad
 just switch-thinkpad
