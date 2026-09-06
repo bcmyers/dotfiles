@@ -16,7 +16,7 @@ fi
 disk=/dev/disk/by-id/nvme-WDC_PC_SN720_SDAQNTW-512G-1001_184521422453
 device=/dev/disk/by-partlabel/disk-main-cryptroot
 [[ "$(lsblk -dnro SERIAL "$disk")" == 184521422453 ]] || die 'Internal SSD serial does not match.'
-[[ "$(lsblk -nro PKNAME "$device")" == "$(basename "$(readlink -f "$disk")")" ]] || die 'LUKS partition is on the wrong disk.'
+[[ "$(lsblk -dnro PKNAME "$device")" == "$(basename "$(readlink -f "$disk")")" ]] || die 'LUKS partition is on the wrong disk.'
 [[ "$(readlink -f "$(findmnt -nro SOURCE /)")" == "$(readlink -f /dev/mapper/cryptroot)" ]] || die 'The current root is not cryptroot.'
 mapped_device=$(cryptsetup status cryptroot | awk '$1 == "device:" { print $2 }')
 [[ "$(readlink -f "$device")" == "$(readlink -f "$mapped_device")" ]] || die 'cryptroot is backed by a different partition.'
