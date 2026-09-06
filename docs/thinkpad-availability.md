@@ -1,5 +1,9 @@
 # ThinkPad unattended boot and recovery
 
+For the complete process from the prepared USB onward, follow
+[the installation guide](install-thinkpad.md). This document is the supporting
+reference for boot policy, hardware constraints, and recovery.
+
 The chosen setup keeps LUKS2 encryption and a recovery passphrase. Once the
 physical setup below is complete, the TPM unlocks the root filesystem without
 a PIN, NixOS starts NetworkManager and Tailscale, and SSH becomes available

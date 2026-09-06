@@ -5,6 +5,10 @@ Home Manager, his personal Apple Silicon Mac with nix-darwin and Home Manager,
 his work Apple Silicon Mac with standalone Home Manager, and root shells on
 x86_64 and ARM Linux work devboxes with standalone Home Manager.
 
+Installing the ThinkPad from the prepared USB? Start with the
+[complete step-by-step installation guide](docs/install-thinkpad.md). It covers
+the remaining physical steps, credentials, Secure Boot, and recovery tests.
+
 ## Repository layout
 
 - `hosts/` contains machine-specific system configuration. The ThinkPad is
