@@ -4,6 +4,7 @@
     ./boot.nix
     ./availability.nix
     ./codex.nix
+    ./cosmic-packages.nix
     ./desktop.nix
     ./disko.nix
     ./hardware.nix
@@ -15,7 +16,9 @@
   home-manager.users.bcmyers = {
     imports = [
       ../../modules/home/apps/alacritty.nix
+      ../../modules/home/apps/chatgpt.nix
       ../../modules/home/apps/linux-desktop.nix
+      ../../modules/home/apps/rustdesk.nix
       ../../users/bcmyers
     ];
     home.homeDirectory = "/home/bcmyers";

@@ -75,7 +75,31 @@ vim.pack.add({
 		src = "https://github.com/saecki/crates.nvim",
 		version = "ac9fa498a9edb96dc3056724ff69d5f40b898453",
 	}, -- 2025-08-23
-}, { load = true })
+}, { load = false, confirm = false })
+
+-- Existing plugin checkouts are not moved to changed pins by vim.pack.add.
+-- Synchronize only explicit commit pins, before loading any plugin code.
+local installed_plugins = vim.pack.get(nil, { info = false })
+local changed_pins = {}
+for _, plugin in ipairs(installed_plugins) do
+	local pin = plugin.spec.version
+	if plugin.active and type(pin) == "string" and #pin == 40 and pin:match("^%x+$") then
+		-- vim.pack.get().rev reflects the lockfile, not necessarily Git HEAD.
+		local checkout = vim.system({ "git", "-C", plugin.path, "rev-parse", "HEAD" }, { text = true }):wait()
+		assert(checkout.code == 0, "Cannot inspect plugin " .. plugin.spec.name)
+		if vim.trim(checkout.stdout) ~= pin then
+			table.insert(changed_pins, plugin.spec.name)
+		end
+	end
+end
+if #changed_pins > 0 then
+	vim.pack.update(changed_pins, { target = "version", force = true })
+end
+for _, plugin in ipairs(installed_plugins) do
+	if plugin.active then
+		vim.cmd.packadd(plugin.spec.name)
+	end
+end
 
 --------------------------------------------------------------------------------
 -- Section 2: Options
@@ -190,6 +214,9 @@ vim.cmd.colorscheme("catppuccin")
 
 -- blink.cmp (completion)
 require("blink.cmp").setup({
+	-- Commit-pinned installs do not supply Blink's native fuzzy library.
+	-- Its Lua implementation works immediately on both Linux and macOS.
+	fuzzy = { implementation = "lua" },
 	keymap = { preset = "default" },
 	appearance = {
 		use_nvim_cmp_as_default = false,
@@ -202,7 +229,7 @@ require("blink.cmp").setup({
 })
 
 -- Treesitter (highlight + indent are built-in in 0.12; just ensure parsers)
-require("nvim-treesitter.install").ensure_installed({
+require("nvim-treesitter").install({
 	"bash",
 	"go",
 	"gomod",
@@ -550,12 +577,7 @@ autocmd("LspAttach", {
 		map("n", "K", vim.lsp.buf.hover, opts("Hover"))
 		map("n", "<leader>ca", vim.lsp.buf.code_action, opts("Code action"))
 		map("n", "<leader>rn", vim.lsp.buf.rename, opts("Rename"))
-		map(
-			"n",
-			"<leader>D",
-			vim.lsp.buf.type_definition,
-			opts("Type definition")
-		)
+		map("n", "<leader>D", vim.lsp.buf.type_definition, opts("Type definition"))
 	end,
 })
 

@@ -108,6 +108,12 @@ See [SSH and GitHub credentials](docs/ssh.md) for device keys, agent ownership,
 and first-login steps. Nix manages configuration and public keys; private
 keys and login tokens remain local.
 
+See [workstation checks](docs/workstation-checks.md) for Caps Lock, tmux, and
+the repeatable Neovim startup test after applying a configuration.
+
+See [ChatGPT on Linux](docs/chatgpt-linux.md) for the official desktop preview,
+hourly signed updates, and app rollback.
+
 ## Flake workflow
 
 The repository does not depend on Nix channels or an ambient `<nixpkgs>`. Every Nix input, package, rebuild tool, and formatter is resolved through `flake.nix` and `flake.lock`. `scripts/nix-flake.sh` explicitly enables `nix-command` and `flakes`, which also makes the bootstrap commands work before Home Manager, NixOS, or nix-darwin has written the permanent Nix settings.
@@ -224,6 +230,9 @@ direction instead of allowing a remote process to read the local clipboard.
 
 The supported remote path is Alacritty to SSH to tmux. Run Neovim inside tmux
 on work devboxes.
+
+For the ThinkPad GUI, see the [COSMIC remote desktop procedure](docs/cosmic-remote-desktop.md)
+for the COSMIC 1.7 package pin, portal smoke test, and private RustDesk trial.
 
 ## Commands
 

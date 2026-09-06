@@ -5,6 +5,10 @@ You will replace Pop!_OS, install the reviewed NixOS system, restore your
 credentials, and test encrypted unattended boot. The supporting documents
 explain the design; you do not need to follow them separately.
 
+For a later installation, also read the
+[lessons and reusable helpers from the completed setup](thinkpad-install-lessons.md),
+especially the interactive GPG restore method that replaces the old pipeline.
+
 Quick navigation: [prepare](#1-keep-these-instructions-and-recovery-information-on-the-mac),
 [boot the USB](#2-prepare-the-thinkpad-and-boot-the-existing-usb),
 [install](#3-confirm-hardware-and-internet-access),
@@ -526,8 +530,8 @@ Do not revoke unrelated historical keys.
 
 ```bash
 set -o pipefail
-gpg --export --armor 39EE837B09384924CB2A8B96A65C0C4DE57884B8 | tp_ssh 'gpg --import'
-gpg --export-secret-subkeys --armor 39EE837B09384924CB2A8B96A65C0C4DE57884B8 | tp_ssh 'gpg --import'
+cd ~/lib/dotfiles
+THINKPAD_HOST="$THINKPAD_IP" bash scripts/restore-thinkpad-gpg.sh
 ```
 
 The export may prompt for the GPG passphrase on the Mac. The primary secret

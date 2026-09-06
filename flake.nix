@@ -5,6 +5,13 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
+    # COSMIC 1.7 supplies the RemoteDesktop portal missing from 26.05's 1.2.
+    # Temporary package-only pin: https://github.com/NixOS/nixpkgs/pull/556651
+    nixpkgs-cosmic = {
+      url = "github:NixOS/nixpkgs/3aaa60d7ee8dfdf219b7ea93077b17af119868bb";
+      flake = false;
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -146,6 +153,10 @@
       nixosConfigurations.thinkpad = nixosConfiguration;
 
       checks.${thinkpadSystem} = {
+        cosmic-remote-desktop = import ./tests/cosmic-remote-desktop.nix {
+          inherit inputs;
+          pkgs = mkPkgs nixpkgs thinkpadSystem;
+        };
         thinkpad-boot = import ./tests/thinkpad-boot.nix {
           inherit inputs;
           pkgs = mkPkgs nixpkgs thinkpadSystem;

@@ -27,6 +27,7 @@
       "notion"
       "obsidian"
       "opensuperwhisper"
+      "rustdesk"
       "signal"
       "slack"
       "whatsapp"
@@ -40,6 +41,7 @@
     imports = [
       ../../modules/home/apps/alacritty.nix
       ../../modules/home/apps/darwin.nix
+      ../../modules/home/apps/rustdesk.nix
       ../../users/bcmyers
     ];
     home.homeDirectory = "/Users/bcmyers";

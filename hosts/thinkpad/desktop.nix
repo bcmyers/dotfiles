@@ -3,10 +3,11 @@
   programs.firefox.enable = true;
   environment.systemPackages = [ pkgs.google-chrome ];
 
-  # This laptop needs the proprietary Pascal driver and the user's Chrome.
+  # Explicit proprietary applications requested for this laptop.
   nixpkgs.config.allowUnfreePredicate =
     pkg:
     builtins.elem (lib.getName pkg) [
+      "chatgpt"
       "google-chrome"
       "nvidia-kernel-modules"
       "nvidia-settings"
@@ -20,6 +21,16 @@
   };
 
   services = {
+    # Apply Caps Lock as Control before COSMIC or a console handles the key.
+    # This also covers the login screen and attached physical keyboards.
+    keyd = {
+      enable = true;
+      keyboards.default = {
+        ids = [ "*" ];
+        settings.main.capslock = "layer(control)";
+      };
+    };
+
     # Home Manager owns the OpenSSH agent. Keep GNOME Keyring for desktop
     # credentials without starting a competing SSH agent in COSMIC.
     gnome.gcr-ssh-agent.enable = false;

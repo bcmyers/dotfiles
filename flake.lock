@@ -195,6 +195,23 @@
         "type": "github"
       }
     },
+    "nixpkgs-cosmic": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787742243,
+        "narHash": "sha256-6kEj+YQCtWEXsX5cffxTjWiqm/DRfTVCkGUqiEd6Mwk=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "3aaa60d7ee8dfdf219b7ea93077b17af119868bb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "3aaa60d7ee8dfdf219b7ea93077b17af119868bb",
+        "type": "github"
+      }
+    },
     "nixpkgs-unstable": {
       "locked": {
         "lastModified": 1788431191,
@@ -260,6 +277,7 @@
         "nix-darwin": "nix-darwin",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-cosmic": "nixpkgs-cosmic",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "prompt-src": "prompt-src",
         "sops-nix": "sops-nix"

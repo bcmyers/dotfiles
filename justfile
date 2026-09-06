@@ -21,11 +21,26 @@ test-disko:
 test-thinkpad-boot:
     ./scripts/nix-flake.sh build '.#thinkpad-boot-test' --print-build-logs
 
+test-cosmic-remote-desktop:
+    ./scripts/nix-flake.sh build '.#checks.x86_64-linux.cosmic-remote-desktop' --print-build-logs
+
+connect-thinkpad-desktop:
+    bash ./scripts/connect-thinkpad-desktop.sh
+
 check: check-secrets
     ./scripts/nix-flake.sh flake check --all-systems --no-build --print-build-logs
 
 check-secrets:
     ./scripts/check-secrets.sh
+
+test-nvim:
+    bash ./scripts/check-nvim.sh
+
+test-chatgpt-updater:
+    python3 ./tests/chatgpt-updater.py
+
+restore-thinkpad-gpg:
+    bash ./scripts/restore-thinkpad-gpg.sh
 
 install-hooks:
     ./scripts/install-git-hooks.sh
