@@ -27,7 +27,7 @@ echo "Building the ThinkPad and testing COSMIC's remote-desktop portal."
 ./scripts/nix-flake.sh build \
   .#nixosConfigurations.thinkpad.config.system.build.toplevel \
   .#checks.x86_64-linux.cosmic-remote-desktop \
-  --no-link --cores 3 --max-jobs 2
+  --no-link --cores 2 --max-jobs 1
 
 echo "Installing the new configuration for the next boot."
 echo "Enter your ThinkPad login password when sudo asks."

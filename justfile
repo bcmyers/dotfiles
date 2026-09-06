@@ -22,7 +22,7 @@ test-thinkpad-boot:
     ./scripts/nix-flake.sh build '.#thinkpad-boot-test' --print-build-logs
 
 test-cosmic-remote-desktop:
-    ./scripts/nix-flake.sh build '.#checks.x86_64-linux.cosmic-remote-desktop' --print-build-logs
+    ./scripts/nix-flake.sh build '.#checks.x86_64-linux.cosmic-remote-desktop' --print-build-logs --cores 2 --max-jobs 1
 
 connect-thinkpad-desktop:
     bash ./scripts/connect-thinkpad-desktop.sh

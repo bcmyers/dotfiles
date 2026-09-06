@@ -25,8 +25,15 @@ On the ThinkPad, from this repository:
 ./scripts/nix-flake.sh build \
   .#nixosConfigurations.thinkpad.config.system.build.toplevel \
   .#checks.x86_64-linux.cosmic-remote-desktop \
-  --no-link --cores 3 --max-jobs 2
+  --no-link --cores 2 --max-jobs 1
 ```
+
+Use one build invocation at a time on this 16 GB ThinkPad. The compositor's
+release compilation exhausted memory while other COSMIC builds were running
+and was killed by the kernel. These limits build one package at a time with
+two compiler jobs; `--max-jobs` applies to each Nix invocation, so starting
+additional builds can exceed that limit in aggregate. Completed packages
+remain cached if a later package fails.
 
 The VM smoke test boots a disposable COSMIC session and checks remote-input
 capabilities, the panel, and the screen-capture portal. It does not establish
