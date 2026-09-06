@@ -35,6 +35,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.1.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -46,6 +51,7 @@
       disko,
       home-manager,
       home-manager-unstable,
+      lanzaboote,
       nix-darwin,
       nixos-hardware,
       nixpkgs,
@@ -112,6 +118,7 @@
         };
         modules = [
           disko.nixosModules.disko
+          lanzaboote.nixosModules.lanzaboote
           nixos-hardware.nixosModules.lenovo-thinkpad-x1-extreme
           home-manager.nixosModules.home-manager
           ./modules/system
@@ -139,6 +146,10 @@
       nixosConfigurations.thinkpad = nixosConfiguration;
 
       checks.${thinkpadSystem} = {
+        thinkpad-boot = import ./tests/thinkpad-boot.nix {
+          inherit inputs;
+          pkgs = mkPkgs nixpkgs thinkpadSystem;
+        };
         disko-test = nixosConfiguration.config.system.build.installTest;
         prompt = mkPrompt thinkpadSystem;
         thinkpad = nixosConfiguration.config.system.build.toplevel;
@@ -163,6 +174,7 @@
         default = nixosConfiguration.config.system.build.toplevel;
         disko = disko.packages.${thinkpadSystem}.disko;
         disko-test = nixosConfiguration.config.system.build.installTest;
+        thinkpad-boot-test = inputs.self.checks.${thinkpadSystem}.thinkpad-boot;
         prompt = mkPrompt thinkpadSystem;
         vm = nixosConfiguration.config.system.build.vm;
       };
@@ -192,6 +204,11 @@
           };
         }
         // nixpkgs.lib.optionalAttrs (system == thinkpadSystem) {
+          sbctl = {
+            type = "app";
+            program = "${nixosConfiguration.pkgs.sbctl}/bin/sbctl";
+            meta.description = "Provision local Secure Boot signing keys";
+          };
           nixos-install = {
             type = "app";
             program = "${nixosConfiguration.config.system.build.nixos-install}/bin/nixos-install";

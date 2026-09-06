@@ -18,6 +18,9 @@ build-vm:
 test-disko:
     ./scripts/nix-flake.sh build '.#disko-test' --print-build-logs
 
+test-thinkpad-boot:
+    ./scripts/nix-flake.sh build '.#thinkpad-boot-test' --print-build-logs
+
 check: check-secrets
     ./scripts/nix-flake.sh flake check --all-systems --no-build --print-build-logs
 

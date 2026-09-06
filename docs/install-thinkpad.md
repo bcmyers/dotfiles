@@ -16,23 +16,19 @@ Commands in this runbook assume Bash; run `bash` first when starting from Fish.
 
 Stop if any of those facts differ. Never infer the target disk from device ordering alone when another internal disk is present.
 
-## Availability decision before installation
+## Chosen boot and availability policy
 
-The checked-in layout encrypts the complete root filesystem with a manually
-entered LUKS passphrase. Lenovo firmware can power the laptop back on after an
-outage, but the machine will wait at the unlock prompt and will not return to
-Tailscale or SSH by itself.
+Keep LUKS2 encryption, retain a recovery passphrase, and unlock automatically
+with the TPM after Secure Boot is configured. Initial boots still require the
+passphrase: formatting and installing NixOS do not enroll the TPM or firmware.
+Complete [Secure Boot, TPM enrollment, and the recovery tests](thinkpad-availability.md)
+before relying on unattended operation. Keep that guide open on the Mac while
+installing; the current Pop!_OS desktop and this Codex session will not survive
+the replacement.
 
-Do not install this layout while unattended recovery is a requirement. First
-choose and test one of these policies:
-
-- keep the current manual unlock and accept that someone must be physically
-  present after a full power loss;
-- design a separately protected TPM2, FIDO2, or network-bound unlock path with
-  a recovery key; or
-- remove root encryption after explicitly accepting the data-at-rest risk.
-
-The current configuration and Disko test implement only the first policy.
+The old Pop!_OS encryption is erased. Choose a new recovery passphrase for the
+new LUKS filesystem and store it somewhere accessible without this ThinkPad.
+It is separate from the `bcmyers` login password. Never put it in Git or Nix.
 
 ## 1. Prepare while Pop!_OS still boots
 
@@ -46,6 +42,7 @@ The current configuration and Disko test implement only the first policy.
    just build-thinkpad
    just build-vm
    just test-disko
+   just test-thinkpad-boot
    ```
 
    `just test-disko` formats only a disposable virtual disk. It installs and boots the encrypted layout with a VM-only dummy key.
@@ -59,12 +56,14 @@ The current configuration and Disko test implement only the first policy.
    ./scripts/nix-flake.sh build '.#nixosConfigurations.thinkpad.config.system.build.installTest.driver' --out-link result-disko-driver
    test_driver="$(readlink -f result-disko-driver)/bin/nixos-test-driver"
    test_results="$(mktemp -d -t dotfiles-disko.XXXXXXXX)"
-   (cd "$test_results" && "$test_driver" --no-interactive -o . --junit-xml junit.xml)
+   (cd "$test_results" && XDG_RUNTIME_DIR="$test_results" "$test_driver" --no-interactive -o . --junit-xml junit.xml)
    ```
 
    This runs the same disposable-disk test without changing `/dev/kvm`
    permissions or operating on the physical SSD. Test logs and virtual disks
-   remain in `$test_results` for inspection.
+   remain in `$test_results` for inspection. The isolated runtime directory
+   also prevents network-socket collisions between concurrent test runs.
+   The same driver approach works for `.#thinkpad-boot-test.driver`.
 5. Verify that the GPG identities and Password Store expected by the new
    configuration have a tested restore source. On the personal Mac, confirm that
    `gpg --list-secret-keys --with-keygrip` includes the personal encryption
@@ -89,7 +88,8 @@ test -d /sys/firmware/efi && echo UEFI || echo BIOS
 
 The product name must be `20MF000CUS`, the product version must be `ThinkPad X1 Extreme`, and `/dev/nvme0n1` must be the approximately 477 GiB Western Digital internal drive.
 
-Test Wi-Fi or Ethernet, keyboard, TrackPoint, touchpad, audio, brightness, and suspend before erasing the disk.
+Test Wi-Fi or Ethernet, keyboard, TrackPoint, touchpad, audio, and brightness
+before erasing the disk. The installed always-on profile disables sleep.
 
 ## 3. Get the configuration
 
@@ -162,7 +162,24 @@ findmnt --real --output TARGET,SOURCE,FSTYPE,OPTIONS | grep '^/mnt'
 lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS /dev/nvme0n1
 ```
 
-## 6. Install and set the local password
+## 6. Create signing keys, install, and set the local password
+
+Lanzaboote refuses to install unsigned boot files. Create this machine's signing
+keys inside the mounted encrypted root before running `nixos-install`. These
+commands create keys on the SSD; they do not enroll firmware keys or enable
+Secure Boot. Use only after the `/mnt` checks above succeed.
+
+```console
+sudo install -d -m 700 /mnt/var/lib/sbctl
+printf '%s\n' \
+  'keydir: /mnt/var/lib/sbctl/keys' \
+  'guid: /mnt/var/lib/sbctl/GUID' | sudo tee /tmp/sbctl-installer.conf >/dev/null
+sudo nix --extra-experimental-features "nix-command flakes" run .#sbctl -- \
+  --config /tmp/sbctl-installer.conf create-keys
+sudo rm /tmp/sbctl-installer.conf
+```
+
+Now install the signed system and choose the local login password:
 
 ```console
 sudo nix --extra-experimental-features "nix-command flakes" run .#nixos-install -- \
@@ -291,7 +308,11 @@ ChatGPT sign-in, then verify with `codex login status`. See
 [Codex setup and updates](codex.md) for the declarative defaults and update
 workflow.
 
-## 8. Validate the installation
+## 8. Enable unattended boot and validate the installation
+
+Follow [the Secure Boot and availability guide](thinkpad-availability.md).
+Complete its firmware enrollment, TPM enrollment, recovery verification, and
+power-return tests before considering this an unattended machine.
 
 Before relying on the machine, test:
 
@@ -299,7 +320,10 @@ Before relying on the machine, test:
 - NVIDIA driver loading with `nvidia-smi`
 - Wi-Fi, Ethernet, Tailscale, and SSH from the personal Mac
 - Audio, Bluetooth, printing, keyboard, TrackPoint, touchpad, and brightness
-- Suspend and resume several times
+- Lid closure and desktop idle do not suspend the installed machine
+- Battery policy selects a clean power-off at 5%, with UPower running before login
+- A cold boot reaches Tailscale and SSH without a disk prompt or local login
+- The recovery passphrase still unlocks the disk when TPM unlocking is unavailable
 - Fish, Git/GPG signing, Neovim, tmux, Alacritty, and direnv
 - `with-anthropic true` and `with-twilio true` succeed without printing secrets
 - Firefox, Chrome, Codex CLI login, and GitHub SSH authentication

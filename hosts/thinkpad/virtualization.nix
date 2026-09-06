@@ -6,6 +6,7 @@
   # `nix build .#vm` uses this safe, headless variant. Disko is disabled and
   # QEMU supplies a disposable virtual disk; the production disk is untouched.
   virtualisation.vmVariant = {
+    boot.lanzaboote.enable = lib.mkForce false;
     disko.enableConfig = lib.mkForce false;
     hardware.nvidia.powerManagement.enable = lib.mkForce false;
     networking = {

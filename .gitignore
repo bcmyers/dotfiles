@@ -18,3 +18,8 @@ result-*
 **/.codex/auth.json
 secrets/*.decrypted.*
 secrets/*.plaintext.*
+
+# Secure Boot private material and LUKS recovery exports stay off-repository.
+**/sbctl/
+**/secret.key
+**/*.luks-header

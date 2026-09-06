@@ -2,6 +2,7 @@
 {
   imports = [
     ./boot.nix
+    ./availability.nix
     ./codex.nix
     ./desktop.nix
     ./disko.nix

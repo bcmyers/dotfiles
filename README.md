@@ -64,15 +64,15 @@ GPT
 
 There is no LVM or separate `/home` partition. See [the installation runbook](docs/install-thinkpad.md) before running Disko.
 
-This passphrase-based layout does **not** boot unattended. Firmware can power
-the laptop back on after an outage, but NixOS stops at the LUKS prompt until
-someone enters the passphrase. Before installation, explicitly choose either
-manual unlock, a separately designed and tested unattended unlock mechanism,
-or an unencrypted root. The current configuration implements manual unlock.
+The disk keeps a recovery passphrase and supports TPM automatic unlocking.
+Initial boots need the passphrase until Secure Boot and the TPM are enrolled
+on the installed ThinkPad. Follow [the availability and recovery guide](docs/thinkpad-availability.md)
+before relying on unattended restarts. Routine OS updates retain the signing
+authority; firmware or Secure Boot policy changes may require recovery.
 
 ## What NixOS manages
 
-- UEFI boot with systemd-boot and eight retained boot generations
+- Signed UEFI boot with Lanzaboote 1.1.0 and eight retained boot generations
 - LUKS2 encrypted root, ext4, swapfile, and weekly SSD trimming
 - COSMIC, audio, Bluetooth, printing, power management, firmware updates, and virtualization
 - NetworkManager, Tailscale, firewall policy, and OpenSSH
@@ -81,6 +81,7 @@ or an unencrypted root. The current configuration implements manual unlock.
 - Personal API credentials decrypted by SOPS and supplied to explicit commands
 - Firefox and Google Chrome, updated with the pinned NixOS packages
 - Weekly Nix garbage collection for objects older than 30 days
+- Sleep disabled, clean shutdown at 5% battery, and user services started before login
 
 ## Package channels
 

@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ inputs, lib, ... }:
 {
   services.fstrim.enable = true;
 
@@ -11,6 +11,7 @@
 
   disko = {
     tests = {
+      efi = true;
       bootCommands = ''
         machine.wait_for_text("[Pp]assphrase for")
         machine.send_chars("secretsecret\n")
@@ -18,12 +19,20 @@
       enableOCR = true;
       # Disko's install-test harness uses a 4 GiB virtual disk, so exercise the
       # same swapfile declaration at 1 GiB while retaining 8 GiB in production.
-      extraConfig.swapDevices = lib.mkForce [
-        {
-          device = "/var/lib/swapfile";
-          size = 1024;
-        }
-      ];
+      extraConfig = {
+        swapDevices = lib.mkForce [
+          {
+            device = "/var/lib/swapfile";
+            size = 1024;
+          }
+        ];
+        # Public upstream test fixtures only; no production signing key enters
+        # the Nix store. This test boots with firmware enforcement disabled.
+        boot.lanzaboote = {
+          publicKeyFile = "${inputs.lanzaboote}/nix/tests/fixtures/uefi-keys/keys/db/db.pem";
+          privateKeyFile = "${inputs.lanzaboote}/nix/tests/fixtures/uefi-keys/keys/db/db.key";
+        };
+      };
       extraChecks = ''
         machine.succeed("cryptsetup isLuks /dev/vda2")
         machine.succeed("test $(findmnt -n -o FSTYPE /) = ext4")
@@ -65,7 +74,13 @@
             # Disko's install test creates a dummy value at this path. The
             # physical installer supplies the real passphrase in live memory.
             passwordFile = "/tmp/secret.key";
-            settings.allowDiscards = true;
+            settings = {
+              allowDiscards = true;
+              crypttabExtraOpts = [
+                "tpm2-device=auto"
+                "token-timeout=10s"
+              ];
+            };
             content = {
               type = "filesystem";
               format = "ext4";
