@@ -170,14 +170,16 @@ sends keyboard and pointer events through the standard portal methods.
 This makes it a reasonable COSMIC trial, not yet a verified replacement.
 
 The optional `thinkpad-vnc-trial` package comes from the existing pinned
-unstable input. It does not change the installed system or enable a service.
+unstable input, with a small fix in `pkgs/krfb-cosmic` for the 26.08 listener
+regression described below. It does not change the installed system or enable
+a service.
 From either checkout, with both machines on this revision:
 
 ```sh
 just prepare-thinkpad-vnc
 ```
 
-The helper downloads the app, retains a GC root, checks its version without
+The helper builds or reuses the app, retains a GC root, checks its version without
 opening a window, and creates a separate private configuration directory.
 It prints the command to launch Krfb when someone is present at the ThinkPad.
 It does not start sharing, rebuild NixOS, or require sudo. Existing trial
@@ -204,10 +206,34 @@ When someone is present:
 3. Test the desktop image, left/right clicks, scrolling, typing, and reconnects.
    Stop the tunnel with Ctrl-C and quit Krfb when finished.
 
-Krfb 26.08.0 was fetched from the binary cache and its command-line startup and
-installed `pw`/`xdp` plugins were checked. Live screen capture and input still
-require the attended test above. The RustDesk trial and its SSH tunnel were
-stopped while awaiting that test.
+Krfb 26.08.0 initially stayed running without opening a VNC listener. The
+normal desktop server never initialized the new `passwordSet` gate, matching
+[KDE bug 524610](https://bugs.kde.org/show_bug.cgi?id=524610). The local package
+sets that gate from the available credentials while retaining VNC password
+authentication. Remove the patch when the pinned release includes the fix.
+The package also flushes the portal restore token immediately; otherwise a
+service stop can discard the buffered grant and require approval again. The
+fresh VM test exercises this without opening or editing Krfb settings.
+Only Krfb needs recompilation; the COSMIC packages are reused.
+
+In an isolated COSMIC 1.7 VM, the fixed package delivered the desktop image
+(pixel comparison against the VM display passed), remote typing, and left/right
+clicks. A wrong password was rejected. COSMIC's saved Always Allow grant was
+reused after restarting the app. These results support the design but do not
+verify the physical NVIDIA display, Mac Screen Sharing, lock/unlock, or reboot.
+No Krfb service or VNC firewall opening was installed on the physical ThinkPad.
+
+Run the repeatable integration check on an x86_64 Linux host with KVM:
+
+```sh
+just test-cosmic-vnc
+```
+
+It boots a disposable COSMIC session, approves the portal through the VM's
+virtual input, checks VNC authentication and framebuffer pixels, then restarts Krfb and tests without approving
+again. The VM uses public test credentials and software rendering; neither
+is applied to the ThinkPad desktop. Screenshots remain in `result-cosmic-vnc`.
+The original portal smoke test remains separately available.
 
 Other options evaluated:
 
@@ -258,3 +284,8 @@ create a local desktop without a login password and needs a deliberate policy
 decision and testing of any immediate-lock arrangement. A dedicated remote
 login desktop or external hardware KVM are other designs if pre-login control
 is essential. Neither is implemented by this trial.
+
+The automated check covers capture, authentication, and permission persistence.
+Typing and left/right clicks passed the separate interactive COSMIC VM trial.
+Launching COSMIC Terminal in the fresh test was unreliable, so GUI input remains
+a manual acceptance check rather than a claimed automated result.

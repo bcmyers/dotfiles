@@ -1,7 +1,14 @@
-{ inputs, pkgs }:
+{
+  inputs,
+  pkgs,
+  krfb ? null,
+  vncClient ? null,
+}:
 pkgs.testers.runNixOSTest {
-  name = "cosmic-remote-desktop-portal";
+  name = if krfb == null then "cosmic-remote-desktop-portal" else "cosmic-vnc";
   globalTimeout = 300;
+  enableOCR = krfb != null;
+  extraPythonPackages = p: pkgs.lib.optionals (krfb != null) [ p.pillow ];
   node.pkgs = pkgs.lib.mkForce (
     pkgs.appendOverlays (
       (import ../hosts/thinkpad/cosmic-packages.nix { inherit inputs; }).nixpkgs.overlays
@@ -42,5 +49,12 @@ pkgs.testers.runNixOSTest {
     with subtest("Panel and screen capture start with the desktop"):
         machine.wait_until_succeeds("pgrep -u alice -f '(^|/)cosmic-panel( |$)'")
         machine.succeed(user_bus + "busctl --user get-property org.freedesktop.portal.Desktop /org/freedesktop/portal/desktop org.freedesktop.portal.ScreenCast AvailableSourceTypes'")
-  '';
+  ''
+  + pkgs.lib.optionalString (krfb != null) (
+    ''
+      krfb = "${krfb}/bin/krfb"
+      vncdo = "${vncClient}/bin/vncdo"
+    ''
+    + builtins.readFile ./cosmic-vnc.py
+  );
 }

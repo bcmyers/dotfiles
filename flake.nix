@@ -153,6 +153,12 @@
       nixosConfigurations.thinkpad = nixosConfiguration;
 
       checks.${thinkpadSystem} = {
+        cosmic-vnc = import ./tests/cosmic-remote-desktop.nix {
+          inherit inputs;
+          pkgs = mkPkgs nixpkgs thinkpadSystem;
+          krfb = inputs.self.packages.${thinkpadSystem}.thinkpad-vnc-trial;
+          vncClient = (mkPkgs nixpkgs-unstable thinkpadSystem).vncdotool;
+        };
         cosmic-remote-desktop = import ./tests/cosmic-remote-desktop.nix {
           inherit inputs;
           pkgs = mkPkgs nixpkgs thinkpadSystem;
@@ -187,7 +193,7 @@
         disko-test = nixosConfiguration.config.system.build.installTest;
         thinkpad-boot-test = inputs.self.checks.${thinkpadSystem}.thinkpad-boot;
         # Optional VNC trial; this does not install a service or change COSMIC.
-        thinkpad-vnc-trial = (mkPkgs nixpkgs-unstable thinkpadSystem).kdePackages.krfb;
+        thinkpad-vnc-trial = (mkPkgs nixpkgs-unstable thinkpadSystem).callPackage ./pkgs/krfb-cosmic { };
         prompt = mkPrompt thinkpadSystem;
         vm = nixosConfiguration.config.system.build.vm;
       };

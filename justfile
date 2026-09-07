@@ -27,6 +27,9 @@ test-thinkpad-swap-resize:
 test-cosmic-remote-desktop:
     ./scripts/nix-flake.sh build '.#checks.x86_64-linux.cosmic-remote-desktop' --out-link result-cosmic-remote-desktop --print-build-logs --cores 3 --max-jobs 2
 
+test-cosmic-vnc:
+    ./scripts/nix-flake.sh build '.#checks.x86_64-linux.cosmic-vnc' --out-link result-cosmic-vnc --print-build-logs --cores 3 --max-jobs 2
+
 connect-thinkpad-desktop:
     bash ./scripts/connect-thinkpad-desktop.sh
 
