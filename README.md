@@ -63,7 +63,7 @@ GPT
 ├── 1 GiB FAT32 EFI System Partition mounted at /boot
 └── remaining space as LUKS2 cryptroot
     └── one ext4 root filesystem
-        └── an 8 GiB encrypted swapfile at /var/lib/swapfile
+        └── a 32 GiB encrypted swapfile at /var/lib/swapfile
 ```
 
 There is no LVM or separate `/home` partition. See [the installation runbook](docs/install-thinkpad.md) before running Disko.

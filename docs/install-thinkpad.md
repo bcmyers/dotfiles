@@ -246,7 +246,7 @@ lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS /dev/nvme0n1
 ```
 
 Expect an ext4 root on `/dev/mapper/cryptroot` at `/mnt` and a vfat EFI
-partition at `/mnt/boot`. The layout also provides an encrypted 8 GiB swapfile.
+partition at `/mnt/boot`. The layout also provides an encrypted 32 GiB swapfile.
 
 If formatting or mounting fails, inspect the error. Do not move on to
 installation without both mounts, and do not rerun this destructive command
@@ -913,3 +913,25 @@ local access available for firmware or Secure Boot trust changes.
 The [NixOS installation manual](https://nixos.org/manual/nixos/stable/#sec-installation-manual)
 is the upstream reference; the commands above apply this repository's specific
 disk layout and tested revision.
+
+### Retaining reviewed builds before installation
+
+Use distinct result links for the system and portal test. `just build-thinkpad`
+keeps `result-thinkpad`; `just test-cosmic-remote-desktop` keeps
+`result-cosmic-remote-desktop`. Keep those links until installation and testing
+are complete. Do not use `--no-link` for a build that must survive an unattended
+handoff: scheduled garbage collection can delete even a freshly compiled
+system if nothing retains it. See the [Nix build reference](https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-build.html) for result-link options.
+
+The interactive `scripts/upgrade-thinkpad-desktop.sh` helper builds a clean,
+committed revision and keeps separate system and test roots under
+`~/.local/state/thinkpad-install/builds/<revision>/`. It retains the successful
+system before starting the portal test and installs that same revision for the
+next boot. It requires the 32 GiB swap file to be active before building and
+limits compilation to one package and two compiler jobs at a time.
+
+On machines installed with the earlier 8 GiB swap file, changing its declared
+size does not immediately resize the active file. Expand and activate it before
+retrying a large build; verify the live size with `swapon --show`. Do not run
+Disko again to make this change. The small Disko test VM continues to use a
+1 GiB swap file.
