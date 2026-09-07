@@ -22,18 +22,20 @@ Upstream references:
 On the ThinkPad, from this repository:
 
 ```sh
-./scripts/nix-flake.sh build \
-  .#nixosConfigurations.thinkpad.config.system.build.toplevel \
-  .#checks.x86_64-linux.cosmic-remote-desktop \
-  --no-link --cores 2 --max-jobs 1
+just build-thinkpad
+just test-cosmic-remote-desktop
 ```
 
-Use one build invocation at a time on this 16 GB ThinkPad. The compositor's
-release compilation exhausted memory while other COSMIC builds were running
-and was killed by the kernel. These limits build one package at a time with
-two compiler jobs; `--max-jobs` applies to each Nix invocation, so starting
-additional builds can exceed that limit in aggregate. Completed packages
-remain cached if a later package fails.
+Run these sequentially. They retain separate GC roots, `result-thinkpad` and
+`result-cosmic-remote-desktop`. Keep those links until installation and testing
+finish. The complete upgrade helper instead retains both results outside the
+checkout under `~/.local/state/thinkpad-install/builds/<revision>/`.
+
+The ThinkPad now has a 64 GiB swap file. Both recipes allow two packages at a
+time, each with three compiler jobs. Use one Nix invocation at a time because
+the job limit applies per invocation. Earlier builds exhausted memory with
+less swap, and an unrooted build was subsequently deleted by garbage collection.
+Do not use `--no-link` for these long-lived build results.
 
 The VM smoke test boots a disposable COSMIC session and checks remote-input
 capabilities, the panel, and the screen-capture portal. It does not establish
@@ -123,5 +125,97 @@ Before treating this as a supported daily workflow, verify:
 5. After reboot, determine whether a local login is required. A portal for
    sharing the current desktop does not itself provide a remote login server.
 
-As of the initial configuration change, the physical-machine client tests
-are pending. Do not infer unattended or pre-login access from the VM test.
+The September 7 system build, portal VM test, and post-boot portal checks
+passed. The physical RustDesk test failed during capture; see the findings
+below. Do not infer unattended or pre-login access from the VM test.
+
+## Physical-machine findings (September 7, 2026)
+
+RustDesk 1.4.5 on the ThinkPad and 1.4.9 on the Mac reached each other over
+the private SSH tunnel. The failure is after transport and approval:
+
+1. One successful portal response contained no selected screen. Explicitly
+   select the monitor thumbnail before allowing the COSMIC request.
+2. A subsequent response contained the 3840×2160 eDP-1 monitor, but PipeWire
+   rejected format negotiation with `no more output formats`. The log showed
+   COSMIC offering RGBA and RustDesk requesting BGRx/RGBx. RustDesk 1.4.5's
+   [capture pipeline](https://github.com/rustdesk/rustdesk/blob/1.4.5/libs/scrap/src/wayland/pipewire.rs)
+   links its source directly to those sink formats without `videoconvert`.
+3. Later retries produced `Failed to get capturer display info` while the host
+   logged duplicate PipeWire initialization. Restarting only the user app
+   clears that process state, but is not a proven fix for format negotiation.
+
+A synthetic GStreamer test on this ThinkPad rejects the direct RGBA-to-RGBx
+link and succeeds with `videoconvert`. This supports testing a conversion fix;
+it does not establish that a patched RustDesk will capture the NVIDIA display.
+The installed PipeWire is 1.6.8 and GStreamer is 1.28.6, so the generic message
+suggesting a PipeWire upgrade is insufficient diagnosis.
+
+Related upstream evidence includes a
+[similar COSMIC format-negotiation report with Sunshine](https://github.com/pop-os/xdg-desktop-portal-cosmic/issues/323)
+and [RustDesk reports of capture failure followed by display-info errors](https://github.com/rustdesk/rustdesk/discussions/13378).
+The COSMIC developers also
+[reported successful RustDesk tests](https://github.com/pop-os/xdg-desktop-portal-cosmic/pull/317),
+so this failure does not establish that COSMIC cannot support remote control.
+
+## Simpler VNC alternative: Krfb trial
+
+[Krfb Desktop Sharing](https://apps.kde.org/krfb/) shares the existing session
+with standard VNC clients. It is a KDE application, not a requirement to switch
+to the Plasma desktop. Its
+[PipeWire backend](https://github.com/KDE/krfb/blob/v26.08.0/framebuffers/pipewire/pw_framebuffer.cpp)
+uses the ScreenCast and RemoteDesktop portals, and its
+[input backend](https://github.com/KDE/krfb/blob/v26.08.0/events/xdp/xdpevents.cpp)
+sends keyboard and pointer events through the standard portal methods.
+This makes it a reasonable COSMIC trial, not yet a verified replacement.
+
+The optional `thinkpad-vnc-trial` package comes from the existing pinned
+unstable input. It does not change the installed system or enable a service.
+From either checkout, with both machines on this revision:
+
+```sh
+just prepare-thinkpad-vnc
+```
+
+The helper downloads the app, retains a GC root, checks its version without
+opening a window, and creates a separate private configuration directory.
+It prints the command to launch Krfb when someone is present at the ThinkPad.
+It does not start sharing, rebuild NixOS, or require sudo. Existing trial
+configuration is preserved; review it if settings were changed during a test.
+The first profile disables service discovery and unattended access. Generated
+passwords are stored only in the private profile, outside the repository and
+Nix store, avoiding an extra KWallet setup for this trial.
+
+Keep TCP 5900 closed in the ThinkPad firewall. Stock Krfb binds all interfaces;
+its settings do not expose a loopback-only bind option. The SSH tunnel connects
+to the host's loopback listener through the already permitted SSH port. Do not
+open a VNC firewall port or add an autostart service for this trial.
+
+When someone is present:
+
+1. Run the launch command from the helper in the ThinkPad's COSMIC terminal.
+   Select the actual monitor in the portal dialog and approve screen/input access.
+2. On the Mac run `just connect-thinkpad-vnc`. In Screen Sharing, connect to
+   `vnc://127.0.0.1:15900`, using the password displayed by Krfb. Accept the
+   incoming connection on the ThinkPad.
+3. Test the desktop image, left/right clicks, scrolling, typing, and reconnects.
+   Stop the tunnel with Ctrl-C and quit Krfb when finished.
+
+Krfb 26.08.0 was fetched from the binary cache and its command-line startup and
+installed `pw`/`xdp` plugins were checked. Live screen capture and input still
+require the attended test above. The RustDesk trial and its SSH tunnel were
+stopped while awaiting that test.
+
+Other options evaluated:
+
+1. **WayVNC:** COSMIC advertises the newer image-copy capture protocol and a
+   virtual keyboard, but not `zwlr_virtual_pointer_manager_v1`. The current
+   [WayVNC implementation](https://github.com/any1/wayvnc/blob/master/src/main.c)
+   requires that pointer protocol unless input is disabled. It is not a complete
+   view-and-control replacement on this session.
+2. **KRDP:** its [portal backend](https://github.com/KDE/krdp/blob/master/src/PortalSession.cpp)
+   is another candidate, but requires an RDP client and TLS configuration.
+   Krfb offers a more direct trial with the Mac's existing VNC viewer.
+3. **Sunshine/Moonlight:** remains an alternative, but an upstream COSMIC
+   capture report shows a similar negotiation failure. Switching applications
+   alone does not prove this capture problem is solved.

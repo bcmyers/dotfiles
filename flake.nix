@@ -186,6 +186,8 @@
         disko = disko.packages.${thinkpadSystem}.disko;
         disko-test = nixosConfiguration.config.system.build.installTest;
         thinkpad-boot-test = inputs.self.checks.${thinkpadSystem}.thinkpad-boot;
+        # Optional VNC trial; this does not install a service or change COSMIC.
+        thinkpad-vnc-trial = (mkPkgs nixpkgs-unstable thinkpadSystem).kdePackages.krfb;
         prompt = mkPrompt thinkpadSystem;
         vm = nixosConfiguration.config.system.build.vm;
       };

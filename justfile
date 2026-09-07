@@ -30,6 +30,12 @@ test-cosmic-remote-desktop:
 connect-thinkpad-desktop:
     bash ./scripts/connect-thinkpad-desktop.sh
 
+prepare-thinkpad-vnc:
+    bash ./scripts/prepare-thinkpad-vnc.sh
+
+connect-thinkpad-vnc:
+    bash ./scripts/connect-thinkpad-vnc.sh
+
 check: check-secrets
     ./scripts/nix-flake.sh flake check --all-systems --no-build --print-build-logs
 
