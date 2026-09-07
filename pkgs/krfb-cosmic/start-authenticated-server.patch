@@ -1,0 +1,13 @@
+--- a/krfb/invitationsrfbserver.cpp
++++ b/krfb/invitationsrfbserver.cpp
+@@ -92,5 +92,10 @@
+ bool InvitationsRfbServer::start()
+ {
++    // Krfb 26.08 added a listener gate for virtual monitors, but omitted the
++    // normal desktop server. Keep authentication required (KDE bug 524610).
++    setPasswordSet(!m_desktopPassword.isEmpty()
++                   || (m_allowUnattendedAccess && !m_unattendedPassword.isEmpty()));
++
+     if (RfbServer::start()) {
+         if (KrfbConfig::publishService()) {
+             m_publicService->publishAsync();

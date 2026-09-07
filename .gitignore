@@ -1,1 +1,25 @@
 .DS_Store
+result
+result-*
+
+# Never commit decrypted credentials or private identity files.
+**/.env
+**/.env.*
+!**/.env.example
+**/secret.fish
+**/keys.txt
+**/*.agekey
+**/id_dsa
+**/id_ecdsa
+**/id_ed25519
+**/id_rsa
+**/id_ed25519_*
+!**/*.pub
+**/.codex/auth.json
+secrets/*.decrypted.*
+secrets/*.plaintext.*
+
+# Secure Boot private material and LUKS recovery exports stay off-repository.
+**/sbctl/
+**/secret.key
+**/*.luks-header

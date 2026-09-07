@@ -1,0 +1,7 @@
+--- a/framebuffers/pipewire/pw_framebuffer.cpp
++++ b/framebuffers/pipewire/pw_framebuffer.cpp
+@@ -343,3 +343,4 @@
+     KConfigGroup stateConfig = KSharedConfig::openStateConfig()->group(QStringLiteral("XdgPortal"));
+     stateConfig.writeEntry(QStringLiteral("RestoreToken"), results[QStringLiteral("restore_token")].toString());
++    stateConfig.sync();
+ }

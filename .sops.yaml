@@ -1,0 +1,10 @@
+keys:
+  - &mac age1ugfgr8dn570484wx46gm7krp2de2mppjfn8frfdcz7hg9vk5qq0sh6rvn0
+  - &thinkpad age1kuh7wrek6sgrdv8srpww05vu3jv3c0ph0fu8y0fshs2rszxv8qysc8ekhu
+
+creation_rules:
+  - path_regex: secrets/personal\.yaml$
+    key_groups:
+      - age:
+          - *mac
+          - *thinkpad

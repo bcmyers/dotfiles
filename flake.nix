@@ -1,217 +1,251 @@
 {
-  description = "Home Manager flake";
+  description = "Brian Myers' NixOS and Home Manager configuration";
 
   inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+
+    # COSMIC 1.7 supplies the RemoteDesktop portal missing from 26.05's 1.2.
+    # Temporary package-only pin: https://github.com/NixOS/nixpkgs/pull/556651
+    nixpkgs-cosmic = {
+      url = "github:NixOS/nixpkgs/3aaa60d7ee8dfdf219b7ea93077b17af119868bb";
+      flake = false;
+    };
+
     home-manager = {
-      url = "github:nix-community/home-manager/77f1c7636a92973be913ec21be5203edba017100";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "github:nixos/nixpkgs/22.05";
+
+    home-manager-unstable = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    prompt-src = {
+      url = "github:bcmyers/prompt/v0.1.0";
+      flake = false;
+    };
+
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.1.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, home-manager, nixpkgs }:
+  outputs =
+    inputs@{
+      disko,
+      home-manager,
+      home-manager-unstable,
+      lanzaboote,
+      nix-darwin,
+      nixos-hardware,
+      nixpkgs,
+      nixpkgs-unstable,
+      ...
+    }:
     let
-      username = "bcmyers";
-    in {
-      nixpkgs.config.allowUnfree = true;
-      homeConfigurations = {
-        "${username}@macbook-intel" =
-          let
-            system = "x86_64-darwin";
-          in
-            home-manager.lib.homeManagerConfiguration {
-              inherit system;
-              inherit username;
-              configuration = { pkgs, ... }: {
-
-                home.packages = with pkgs; [
-                  autoconf automake awscli bash bash-completion
-                  bazel-buildtools bazelisk bzip2 clang-tools coreutils curl
-                  diffoscope diffutils fzf gettext gitAndTools.gitFull gnuplot
-                  gnused htop hyperfine jq moreutils neovim newsboat ninja nmap
-                  pandoc patchutils pinentry pulumi-bin qemu qrencode
-                  rs-git-fsmonitor salt shellcheck shfmt stow
-                  sumneko-lua-language-server terraform-ls tree-sitter tmux
-                  tree vault xz wget yarn yq
-                ];
-
-                home.file.".config/alacritty/alacritty.yml".text = ''
-                  env:
-                    TERM: xterm-256color
-
-                  font:
-                    normal:
-                      family: Inconsolata Nerd Font Mono
-                      style: Regular
-                    bold:
-                      family: Inconsolata Nerd Font Mono
-                      style: Bold
-                    italic:
-                      family: Inconsolata Nerd Font Mono
-                      style: Italic
-                    bold_italic:
-                      family: Inconsolata Nerd Font Mono
-                      style: Bold Italic
-                    size: 16.0
-
-                  live_config_reload: true
-
-                  save_to_clipboard: true
-
-                  window:
-                    opacity: 0.95
-
-                    dimensions:
-                      columns: 400
-                      lines: 100
-
-                    position:
-                      x: 0
-                      y: 0
-
-                    padding:
-                      x: 5
-                      y: 5
-                '';
-
-                home.file.".hushlogin".text = "";
-
-                home.file.".inputrc".text = ''
-                  # Ignore case for autocomplete
-                  set completion-ignore-case on
-
-                  # Show all possibilities for autocomplete
-                  set show-all-if-ambiguous on
-
-                  # Allow UTF-8 input and output, instead of showing stuff like $'\0123\0456'
-                  set input-meta on
-                  set output-meta on
-                  set convert-meta off
-
-                  # colorized completion
-                  set colored-stats on
-
-                  # turn off bell
-                  set bell-style none
-
-                  # vi mode
-                  set editing-mode vi
-                  set show-mode-in-prompt on
-                  # set vi-ins-mode-string "(i)"
-                  # set vi-cmd-mode-string "(c)"
-                  $if term=linux
-                    set vi-ins-mode-string \1\e[?0c\2
-                    set vi-cmd-mode-string \1\e[?8c\2
-                  $else
-                    set vi-ins-mode-string \1\e[6 q\2
-                    set vi-cmd-mode-string \1\e[2 q\2
-                  $endif
-                '';
-
-                home.file.".tmux.conf".text = ''
-                  unbind C-b
-                  set -g prefix C-a
-                  bind C-a send-prefix
-
-                  set -s escape-time 0
-                  set -g history-limit 50000
-                  set -g display-time 4000
-                  set -g focus-events on
-                  setw -g aggressive-resize on
-
-                  bind \\ split-window -h
-                  bind - split-window -v
-                  bind c new-window
-                  bind n next-window
-                  bind p previous-window
-                  bind r source-file ~/.tmux.conf \; display-message "Config reloaded..."
-
-                  # https://thoughtbot.com/blog/seamlessly-navigate-vim-and-tmux-splits
-                  bind -n C-h run "(tmux display-message -p '#{pane_current_command}' | grep -iq vim && tmux send-keys C-h) || tmux select-pane -L"
-                  bind -n C-j run "(tmux display-message -p '#{pane_current_command}' | grep -iq vim && tmux send-keys C-j) || tmux select-pane -D"
-                  bind -n C-k run "(tmux display-message -p '#{pane_current_command}' | grep -iq vim && tmux send-keys C-k) || tmux select-pane -U"
-                  bind -n C-l run "(tmux display-message -p '#{pane_current_command}' | grep -iq vim && tmux send-keys C-l) || tmux select-pane -R"
-
-                  set-window-option -g mode-keys vi
-
-                  bind -T copy-mode-vi v send-keys -X begin-selection
-
-                  # Remap keys which perform copy to pipe copied text to OS clipboard
-                  yank="~/.local/bin/yank.sh"
-                  bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "$yank"
-                  # old --> bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'reattach-to-user-namespace pbcopy'
-
-                  set -s default-terminal screen-256color
-                  set-option -a terminal-overrides ",*256col*:RGB"
-
-                  set -g renumber-windows on
-
-                  set -g mouse on
-                  setw -g alternate-screen on
-
-                  set -g status-interval 1
-                  set-option -g status-position bottom
-                  set -g status-left "#[fg=black,bold] #(whoami)@#h | #(KUBE_TMUX_SYMBOL_USE_IMG=false /bin/bash $HOME/opt/kube-tmux/kube.tmux black black black) | #S | "
-                  set -g status-left-length 200
-                  set -g status-right "#[fg=black,bold]%A %d %B %Y %H:%M:%S %Z "
-                  set -g status-right-length 150
-
-                  set -g status-bg blue
-                  set -g pane-active-border-style "bg=default fg=blue"
-                  set -g status-fg black
-                  set -g pane-border-style fg=black
-
-                  bind Right resize-pane -R 5
-                  bind Left resize-pane -L 5
-                  bind Up resize-pane -U 2
-                  bind Down resize-pane -D 2
-                '';
-
-                programs.home-manager.enable = true;
-
-                programs.git = {
-                  enable = true;
-                  package = pkgs.gitAndTools.gitFull;
-                  signing = {
-                    key = "B86678B99457460F";
-                    signByDefault = true;
-                  };
-                  userEmail = "brian.myers@robinhood.com";
-                  userName ="Brian Myers";
-                  extraConfig = {
-                    alias = {};
-                    core = {
-                      editor = "${pkgs.neovim}/bin/nvim";
-                      fsmonitor = "${pkgs.rs-git-fsmonitor}/bin/rs-git-fsmonitor";
-                      untrackedcache = true;
-                    };
-                    diff = {
-                      algorithm = "patience";
-                    };
-                    init = {
-                      defaultBranch = "main";
-                    };
-                    merge = {
-                      conflictstyle = "diff3";
-                      tool = "${pkgs.neovim}/bin/nvim -d";
-                    };
-                    pull = {
-                      ff = "only";
-                      rebase = true;
-                    };
-                    push = {
-                      default = "simple";
-                    };
-                  };
-                };
-
-                nixpkgs.config.allowUnfree = true;
-              };
-
-              homeDirectory = "/Users/${username}";
-              pkgs = builtins.getAttr system nixpkgs.outputs.legacyPackages;
-              stateVersion = "22.05";
-            };
+      thinkpadSystem = "x86_64-linux";
+      linuxSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+      macSystem = "aarch64-darwin";
+      supportedSystems = linuxSystems ++ [ macSystem ];
+      mkPkgs =
+        nixpkgsInput: system:
+        import nixpkgsInput {
+          inherit system;
+          config.allowUnfree = false;
+        };
+      mkHomeSpecialArgs = system: {
+        inherit
+          inputs
+          ;
+        unstablePkgs = mkPkgs nixpkgs-unstable system;
+        promptPackage = mkPrompt system;
       };
+      mkPrompt =
+        system:
+        (mkPkgs nixpkgs-unstable system).callPackage ./pkgs/prompt {
+          src = inputs.prompt-src;
+        };
+      mkHomeConfiguration =
+        {
+          homeManager,
+          homeModule,
+          nixpkgsInput,
+          system,
+        }:
+        homeManager.lib.homeManagerConfiguration {
+          pkgs = mkPkgs nixpkgsInput system;
+          extraSpecialArgs = mkHomeSpecialArgs system;
+          modules = [ homeModule ];
+        };
+      workMacHomeConfiguration = mkHomeConfiguration {
+        homeManager = home-manager-unstable;
+        homeModule = ./hosts/work-mac/home.nix;
+        nixpkgsInput = nixpkgs-unstable;
+        system = macSystem;
+      };
+      workDevboxHomeConfigurations = nixpkgs.lib.genAttrs linuxSystems (
+        system:
+        mkHomeConfiguration {
+          homeManager = home-manager-unstable;
+          homeModule = ./hosts/work-devbox/home.nix;
+          nixpkgsInput = nixpkgs-unstable;
+          inherit system;
+        }
+      );
+      nixosConfiguration = nixpkgs.lib.nixosSystem {
+        system = thinkpadSystem;
+        specialArgs = (mkHomeSpecialArgs thinkpadSystem) // {
+          nixpkgsRegistry = inputs.nixpkgs;
+        };
+        modules = [
+          disko.nixosModules.disko
+          lanzaboote.nixosModules.lanzaboote
+          nixos-hardware.nixosModules.lenovo-thinkpad-x1-extreme
+          home-manager.nixosModules.home-manager
+          ./modules/system
+          ./hosts/thinkpad
+        ];
+      };
+      personalMacConfiguration = nix-darwin.lib.darwinSystem {
+        specialArgs = (mkHomeSpecialArgs macSystem) // {
+          nixpkgsRegistry = inputs.nixpkgs-unstable;
+        };
+        modules = [
+          home-manager-unstable.darwinModules.home-manager
+          ./modules/system
+          ./hosts/personal-mac
+        ];
+      };
+    in
+    {
+      homeConfigurations = {
+        "brian.myers@work-mac" = workMacHomeConfiguration;
+        "root@work-devbox-aarch64-linux" = workDevboxHomeConfigurations.aarch64-linux;
+        "root@work-devbox-x86_64-linux" = workDevboxHomeConfigurations.x86_64-linux;
+      };
+      darwinConfigurations.personal-mac = personalMacConfiguration;
+      nixosConfigurations.thinkpad = nixosConfiguration;
+
+      checks.${thinkpadSystem} = {
+        cosmic-vnc = import ./tests/cosmic-remote-desktop.nix {
+          inherit inputs;
+          pkgs = mkPkgs nixpkgs thinkpadSystem;
+          krfb = inputs.self.packages.${thinkpadSystem}.thinkpad-vnc-trial;
+          vncClient = (mkPkgs nixpkgs-unstable thinkpadSystem).vncdotool;
+        };
+        cosmic-remote-desktop = import ./tests/cosmic-remote-desktop.nix {
+          inherit inputs;
+          pkgs = mkPkgs nixpkgs thinkpadSystem;
+        };
+        thinkpad-boot = import ./tests/thinkpad-boot.nix {
+          inherit inputs;
+          pkgs = mkPkgs nixpkgs thinkpadSystem;
+        };
+        disko-test = nixosConfiguration.config.system.build.installTest;
+        prompt = mkPrompt thinkpadSystem;
+        thinkpad = nixosConfiguration.config.system.build.toplevel;
+        vm = nixosConfiguration.config.system.build.vm;
+        work-devbox = workDevboxHomeConfigurations.x86_64-linux.activationPackage;
+      };
+      checks.aarch64-linux = {
+        prompt = mkPrompt "aarch64-linux";
+        work-devbox = workDevboxHomeConfigurations.aarch64-linux.activationPackage;
+      };
+      checks.${macSystem} = {
+        personal-mac = personalMacConfiguration.system;
+        prompt = mkPrompt macSystem;
+        work-mac = workMacHomeConfiguration.activationPackage;
+      };
+
+      formatter = nixpkgs.lib.genAttrs supportedSystems (
+        formatterSystem: nixpkgs.legacyPackages.${formatterSystem}.nixfmt-tree
+      );
+
+      packages.${thinkpadSystem} = {
+        default = nixosConfiguration.config.system.build.toplevel;
+        disko = disko.packages.${thinkpadSystem}.disko;
+        disko-test = nixosConfiguration.config.system.build.installTest;
+        thinkpad-boot-test = inputs.self.checks.${thinkpadSystem}.thinkpad-boot;
+        # Optional VNC trial; this does not install a service or change COSMIC.
+        thinkpad-vnc-trial = (mkPkgs nixpkgs-unstable thinkpadSystem).callPackage ./pkgs/krfb-cosmic { };
+        prompt = mkPrompt thinkpadSystem;
+        vm = nixosConfiguration.config.system.build.vm;
+      };
+      packages.aarch64-linux.prompt = mkPrompt "aarch64-linux";
+      packages.${macSystem} = {
+        default = personalMacConfiguration.system;
+        prompt = mkPrompt macSystem;
+      };
+
+      apps = nixpkgs.lib.genAttrs supportedSystems (
+        system:
+        {
+          age-keygen = {
+            type = "app";
+            program = "${(mkPkgs nixpkgs-unstable system).age}/bin/age-keygen";
+            meta.description = "Run the age key generator pinned by this flake";
+          };
+          home-manager = {
+            type = "app";
+            program = "${home-manager-unstable.packages.${system}.home-manager}/bin/home-manager";
+            meta.description = "Run Home Manager using this flake's pinned version";
+          };
+          sops = {
+            type = "app";
+            program = "${(mkPkgs nixpkgs-unstable system).sops}/bin/sops";
+            meta.description = "Run the SOPS version pinned by this flake";
+          };
+        }
+        // nixpkgs.lib.optionalAttrs (system == thinkpadSystem) {
+          sbctl = {
+            type = "app";
+            program = "${nixosConfiguration.pkgs.sbctl}/bin/sbctl";
+            meta.description = "Provision local Secure Boot signing keys";
+          };
+          nixos-install = {
+            type = "app";
+            program = "${nixosConfiguration.config.system.build.nixos-install}/bin/nixos-install";
+            meta.description = "Install the ThinkPad NixOS configuration";
+          };
+          nixos-rebuild = {
+            type = "app";
+            program = "${nixosConfiguration.config.system.build.nixos-rebuild}/bin/nixos-rebuild";
+            meta.description = "Build and activate the ThinkPad NixOS configuration";
+          };
+        }
+        // nixpkgs.lib.optionalAttrs (system == macSystem) {
+          darwin-rebuild = {
+            type = "app";
+            program = "${nix-darwin.packages.${macSystem}.darwin-rebuild}/bin/darwin-rebuild";
+            meta.description = "Build and activate this flake's nix-darwin configuration";
+          };
+        }
+      );
     };
 }
