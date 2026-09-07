@@ -9,7 +9,7 @@ fi
 cat <<'MESSAGE'
 Leave this terminal open while using the ThinkPad desktop.
 In the Mac's Screen Sharing app, connect to: vnc://127.0.0.1:15900
-Use the password displayed by Krfb on the ThinkPad and approve the connection.
+Use the saved Krfb unattended-access password; no per-connection approval is intended.
 The ThinkPad must have a logged-in COSMIC session with Krfb running.
 Press Ctrl-C here to close the SSH tunnel when finished; also quit Krfb.
 MESSAGE

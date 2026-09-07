@@ -182,7 +182,8 @@ opening a window, and creates a separate private configuration directory.
 It prints the command to launch Krfb when someone is present at the ThinkPad.
 It does not start sharing, rebuild NixOS, or require sudo. Existing trial
 configuration is preserved; review it if settings were changed during a test.
-The first profile disables service discovery and unattended access. Generated
+The profile disables service discovery and enables password-authenticated
+unattended access, including when upgrading the earlier trial profile. Generated
 passwords are stored only in the private profile, outside the repository and
 Nix store, avoiding an extra KWallet setup for this trial.
 
@@ -194,10 +195,12 @@ open a VNC firewall port or add an autostart service for this trial.
 When someone is present:
 
 1. Run the launch command from the helper in the ThinkPad's COSMIC terminal.
-   Select the actual monitor in the portal dialog and approve screen/input access.
+   Select the actual monitor in the portal dialog and choose **Always Allow**
+   for screen/input access. Set/save Krfb's separate unattended-access password
+   on the Mac during this initial setup.
 2. On the Mac run `just connect-thinkpad-vnc`. In Screen Sharing, connect to
-   `vnc://127.0.0.1:15900`, using the password displayed by Krfb. Accept the
-   incoming connection on the ThinkPad.
+   `vnc://127.0.0.1:15900`, using the saved **unattended-access** password.
+   The ordinary invitation password follows a different approval path.
 3. Test the desktop image, left/right clicks, scrolling, typing, and reconnects.
    Stop the tunnel with Ctrl-C and quit Krfb when finished.
 
@@ -219,3 +222,39 @@ Other options evaluated:
 3. **Sunshine/Moonlight:** remains an alternative, but an upstream COSMIC
    capture report shows a similar negotiation failure. Switching applications
    alone does not prove this capture problem is solved.
+
+## Unattended access requirement
+
+The desired workflow is to connect from the trusted Mac without anyone
+clicking approval on the ThinkPad. There are two independent permissions:
+
+1. **Krfb connection approval:** its
+   [unattended mode](https://docs.kde.org/trunk_kf6/en/krfb/krfb/using-krfb.html)
+   authenticates the unattended password without an acceptance dialog.
+   The trial helper now enables that mode. Krfb generates passwords on first
+   launch; keep them outside Nix and Git and save the unattended password on
+   the Mac during initial setup.
+2. **COSMIC screen/input permission:** the
+   [1.7 dialog](https://github.com/pop-os/xdg-desktop-portal-cosmic/blob/epoch-1.7.0/src/remote_desktop_dialog.rs)
+   offers **Always Allow** when the app requests persistent access. Krfb requests
+   `persist_mode=2`, saves the returned restore token, and supplies it on its
+   next launch. COSMIC's
+   [restore path](https://github.com/pop-os/xdg-desktop-portal-cosmic/blob/epoch-1.7.0/src/remote_desktop.rs)
+   skips the prompt when the saved devices and capture sources still match.
+   Keep Krfb's state file and the portal permission store; a revoked permission
+   or changed/missing source can require approval again.
+
+This supports a one-time approval followed by authenticated unattended
+connections to an existing desktop. It is not yet an end-to-end result on
+this ThinkPad. Test reconnecting, quitting/restarting Krfb, locking/unlocking,
+and a reboot before claiming those states work. Once display/input works,
+add a graphical-session user service with restart-on-failure for availability.
+
+**Cold boot is a separate requirement.** The current configuration waits for
+a local graphical login; Krfb does not provide a login server. A service tied
+to the graphical session can start only after that session exists. Do not
+silently replace the login policy with automatic login. Automatic login would
+create a local desktop without a login password and needs a deliberate policy
+decision and testing of any immediate-lock arrangement. A dedicated remote
+login desktop or external hardware KVM are other designs if pre-login control
+is essential. Neither is implemented by this trial.
