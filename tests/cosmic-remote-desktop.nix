@@ -28,7 +28,8 @@ pkgs.testers.runNixOSTest {
 
   testScript = ''
     machine.wait_for_unit("graphical.target")
-    machine.wait_until_succeeds("pgrep -u alice -x cosmic-comp")
+    # Nix wrappers change the kernel process name; match the preserved command line.
+    machine.wait_until_succeeds("pgrep -u alice -f '(^|/)cosmic-comp( |$)'")
     user_bus = "su - alice -c 'XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus "
     with subtest("COSMIC exposes remote keyboard and pointer control"):
         devices_command = user_bus + "busctl --user get-property org.freedesktop.portal.Desktop /org/freedesktop/portal/desktop org.freedesktop.portal.RemoteDesktop AvailableDeviceTypes'"
@@ -39,7 +40,7 @@ pkgs.testers.runNixOSTest {
         for method in ["CreateSession", "SelectDevices", "ConnectToEIS", "NotifyPointerMotionAbsolute", "NotifyKeyboardKeycode"]:
             assert method in interface, interface
     with subtest("Panel and screen capture start with the desktop"):
-        machine.wait_until_succeeds("pgrep -u alice -x cosmic-panel")
+        machine.wait_until_succeeds("pgrep -u alice -f '(^|/)cosmic-panel( |$)'")
         machine.succeed(user_bus + "busctl --user get-property org.freedesktop.portal.Desktop /org/freedesktop/portal/desktop org.freedesktop.portal.ScreenCast AvailableSourceTypes'")
   '';
 }
