@@ -246,7 +246,7 @@ lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS /dev/nvme0n1
 ```
 
 Expect an ext4 root on `/dev/mapper/cryptroot` at `/mnt` and a vfat EFI
-partition at `/mnt/boot`. The layout also provides an encrypted 32 GiB swapfile.
+partition at `/mnt/boot`. The layout also provides an encrypted 64 GiB swapfile.
 
 If formatting or mounting fails, inspect the error. Do not move on to
 installation without both mounts, and do not rerun this destructive command
@@ -927,11 +927,28 @@ The interactive `scripts/upgrade-thinkpad-desktop.sh` helper builds a clean,
 committed revision and keeps separate system and test roots under
 `~/.local/state/thinkpad-install/builds/<revision>/`. It retains the successful
 system before starting the portal test and installs that same revision for the
-next boot. It requires the 32 GiB swap file to be active before building and
-limits compilation to one package and two compiler jobs at a time.
+next boot. It requires the 64 GiB swap file to be active before building and
+permits two packages at a time, with three compiler threads per package.
 
 On machines installed with the earlier 8 GiB swap file, changing its declared
 size does not immediately resize the active file. Expand and activate it before
 retrying a large build; verify the live size with `swapon --show`. Do not run
 Disko again to make this change. The small Disko test VM continues to use a
 1 GiB swap file.
+
+To resize the existing ThinkPad swap file from the Mac, with the reviewed
+checkout synchronized on both machines, run:
+
+```bash
+bash ~/lib/dotfiles/scripts/resize-thinkpad-swap.sh
+```
+
+The helper prompts for the ThinkPad sudo password, checks that the target is
+the existing root-owned swap file on encrypted ext4, and requires an idle
+compiler, available RAM, and free disk space. It activates an 8 GiB temporary
+swap file before resizing the original to 64 GiB, verifies the larger file is
+active, then removes the temporary file. If a step fails, it retains active
+temporary swap for recovery. It neither compiles nor installs a configuration.
+Install the new NixOS generation before rebooting: the old generation can
+recreate its old 8 GiB file at startup. Allocation and activation follow the
+[util-linux swap-file guidance](https://github.com/util-linux/util-linux/blob/master/sys-utils/swapon.8.adoc).

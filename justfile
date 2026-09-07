@@ -1,7 +1,7 @@
 default: check
 
 build-thinkpad:
-    ./scripts/nix-flake.sh build '.#nixosConfigurations.thinkpad.config.system.build.toplevel' --out-link result-thinkpad --cores 2 --max-jobs 1
+    ./scripts/nix-flake.sh build '.#nixosConfigurations.thinkpad.config.system.build.toplevel' --out-link result-thinkpad --cores 3 --max-jobs 2
 
 build-work-mac:
     ./scripts/nix-flake.sh build '.#homeConfigurations."brian.myers@work-mac".activationPackage'
@@ -21,8 +21,11 @@ test-disko:
 test-thinkpad-boot:
     ./scripts/nix-flake.sh build '.#thinkpad-boot-test' --print-build-logs
 
+test-thinkpad-swap-resize:
+    python3 ./tests/thinkpad-swap-resize.py
+
 test-cosmic-remote-desktop:
-    ./scripts/nix-flake.sh build '.#checks.x86_64-linux.cosmic-remote-desktop' --out-link result-cosmic-remote-desktop --print-build-logs --cores 2 --max-jobs 1
+    ./scripts/nix-flake.sh build '.#checks.x86_64-linux.cosmic-remote-desktop' --out-link result-cosmic-remote-desktop --print-build-logs --cores 3 --max-jobs 2
 
 connect-thinkpad-desktop:
     bash ./scripts/connect-thinkpad-desktop.sh

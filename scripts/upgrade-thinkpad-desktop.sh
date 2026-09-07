@@ -23,14 +23,14 @@ fi
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-# The active swap size excludes its header page. Require the requested 32 GiB
+# The active swap size excludes its header page. Require the requested 64 GiB
 # file before another source build; changing the Nix declaration is not enough.
-minimum_swap_kib=$((32 * 1024 * 1024 - $(getconf PAGESIZE) / 1024))
+minimum_swap_kib=$((64 * 1024 * 1024 - $(getconf PAGESIZE) / 1024))
 if ! awk -v minimum="$minimum_swap_kib" '
   $1 == "/var/lib/swapfile" && $2 == "file" && $3 >= minimum { found = 1 }
   END { exit !found }
 ' /proc/swaps; then
-  echo "Stop: /var/lib/swapfile must have at least 32 GiB active before building." >&2
+  echo "Stop: /var/lib/swapfile must have at least 64 GiB active before building." >&2
   echo "Expand and activate the swap file first; this script has not started a build." >&2
   exit 1
 fi
@@ -49,12 +49,12 @@ echo "Building reviewed ThinkPad revision $revision."
 # the VM test, so a test failure cannot discard a successful system build.
 ./scripts/nix-flake.sh build \
   "$flake#nixosConfigurations.thinkpad.config.system.build.toplevel" \
-  --out-link "$build_roots/system" --cores 2 --max-jobs 1
+  --out-link "$build_roots/system" --cores 3 --max-jobs 2
 
 echo "Testing COSMIC's remote-desktop portal."
 ./scripts/nix-flake.sh build \
   "$flake#checks.x86_64-linux.cosmic-remote-desktop" \
-  --out-link "$build_roots/portal-test" --cores 2 --max-jobs 1
+  --out-link "$build_roots/portal-test" --cores 3 --max-jobs 2
 
 echo "Installing the new configuration for the next boot."
 echo "Enter your ThinkPad login password when sudo asks."

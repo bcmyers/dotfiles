@@ -5,7 +5,7 @@
   swapDevices = [
     {
       device = "/var/lib/swapfile";
-      size = 32 * 1024;
+      size = 64 * 1024;
     }
   ];
 
@@ -18,7 +18,7 @@
       '';
       enableOCR = true;
       # Disko's install-test harness uses a 4 GiB virtual disk, so exercise the
-      # same swapfile declaration at 1 GiB while retaining 32 GiB in production.
+      # same swapfile declaration at 1 GiB while retaining 64 GiB in production.
       extraConfig = {
         swapDevices = lib.mkForce [
           {
